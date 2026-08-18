@@ -20,8 +20,8 @@ export default function RegisterSection() {
           Build ahead. Bring your team.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">
-          Open to all WSU students: undergraduate, graduate, and doctoral.
-          Teams of one to four, locked at registration. You choose your track
+          Open to all WSU students. Teams of one to four, locked at
+          registration. You choose your track
           later, once the prompts are out. Registration runs August 24 to
           September 10, prompts release September 14, and the finale is
           September 19.

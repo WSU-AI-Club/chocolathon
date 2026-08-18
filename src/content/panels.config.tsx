@@ -107,7 +107,7 @@ const PANELS: Panel[] = [
               The finale
             </p>
             <ul className="mt-2 space-y-1 text-sm leading-relaxed text-ink/60">
-              <li>Two live workshops</li>
+              <li>Two live sessions</li>
               <li>Project submissions</li>
               <li>Final presentations on stage</li>
               <li>Winners announced</li>
@@ -168,7 +168,7 @@ const PANELS: Panel[] = [
           </div>
         </dl>
         <p className="ml-auto mt-4 max-w-[240px] font-mono text-xs uppercase tracking-[0.12em] text-gold">
-          Refreshments, lunch and two workshops for everyone
+          Refreshments, lunch and two live sessions for everyone
         </p>
       </div>
     ),
@@ -185,9 +185,9 @@ const PANELS: Panel[] = [
           Every major. No code required.
         </h2>
         <p className="mt-4 text-base leading-relaxed text-ink/80">
-          Open to all WSU students: undergraduate, graduate, and doctoral. You
-          build with Lovable, an AI platform that turns ideas into working
-          software, and every participant gets free build credits.
+          Open to all WSU students. You can build with our sponsor Lovable,
+          an AI platform that turns ideas into working software, and every
+          participant gets free credits.
         </p>
       </div>
     ),
@@ -209,8 +209,8 @@ const PANELS: Panel[] = [
           <img src="/chocolathon/sponsors/jimmyjohns.webp" alt="Jimmy John's Sandwiches" className="h-14 w-auto" />
         </div>
         <p className="mt-5 text-sm leading-relaxed text-ink/70">
-          Chocolate and judging by Cocoa Dolce. AI build credits from Lovable.
-          Lunch by Jimmy John&rsquo;s.
+          Morning refreshments and chocolates from Cocoa Dolce. AI build
+          credits from Lovable. Lunch by Jimmy John&rsquo;s.
         </p>
       </div>
     ),

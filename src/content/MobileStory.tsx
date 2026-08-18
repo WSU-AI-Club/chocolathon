@@ -123,11 +123,12 @@ export default function MobileStory() {
         <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink/70">
           Cocoa Dolce provides morning refreshments, coffee and chocolates.
           Jimmy John's provides lunch. You are fed all day, you get two
-          workshops, and you get a room of people to show your work to.
+          live sessions, and you get a room of people to show your work to.
         </p>
         <p className="mx-auto mt-8 max-w-md text-base leading-relaxed text-ink/80">
-          Open to all WSU students: every major, no coding background needed.
-          You build with Lovable and every participant gets free AI build
+          Open to all WSU students, every major, no coding background needed.
+          You can build with our sponsor Lovable, an AI platform that turns
+          ideas into working software, and every participant gets free
           credits. Local AI industry judges advance the top teams, and the
           Cocoa Dolce leadership picks the winners live.
         </p>
