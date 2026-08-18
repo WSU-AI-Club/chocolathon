@@ -72,7 +72,7 @@ export default function MobileStory() {
           Build ahead. Compete live.
         </h2>
         <ol className="mx-auto mt-5 max-w-md space-y-2 text-left text-base leading-relaxed text-ink/80">
-          <li><strong className="text-ink">1.</strong> Register solo or with a team of up to four, and pick your track.</li>
+          <li><strong className="text-ink">1.</strong> Register solo or with a team of up to four.</li>
           <li><strong className="text-ink">2.</strong> Prompts release September 14. Build on your own time, at your own pace.</li>
           <li><strong className="text-ink">3.</strong> Submit at the finale, September 19, at Woolsey Hall.</li>
           <li><strong className="text-ink">4.</strong> Finalists present live on stage.</li>

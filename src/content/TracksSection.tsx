@@ -12,6 +12,15 @@
    Neither track's copy names a major or a background. Both are open to
    anyone, and saying otherwise would quietly sort students out of the
    one they might actually be better at.
+
+   Teams do NOT choose a track at registration (decided 2026-08-18).
+   Prompts release Sep 14, four days AFTER registration closes, so a
+   choice made at signup could only be based on identity ("I'm a business
+   major") rather than on the work. They choose when they submit.
+
+   Neither track requires AI. Lovable credits are offered to everyone
+   because Lovable sponsors the event, not because the tools are
+   mandatory.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { COCOA_DOLCE_ABOUT_URL } from "./links";
@@ -28,10 +37,10 @@ const TRACKS: Track[] = [
     name: "Build Track",
     line: "Ship something that works.",
     body:
-      "You answer the challenge by building it: a working prototype, made " +
-      "with AI, that Cocoa Dolce could actually put to use.",
+      "You answer the challenge by building it: a working product or " +
+      "prototype that Cocoa Dolce could actually put to use.",
     bullets: [
-      "You submit a working product",
+      "You submit the product, a video, and a demo",
       "Judged on how useful and well built it is",
       "Any skill level",
     ],
@@ -41,9 +50,9 @@ const TRACKS: Track[] = [
     line: "Pitch something they should do.",
     body:
       "You answer the challenge by making the case for it: a recommendation " +
-      "Cocoa Dolce could act on, backed by AI-assisted research and evidence.",
+      "Cocoa Dolce could act on, backed by real evidence.",
     bullets: [
-      "You submit a pitch plus a Lovable-built demo",
+      "You submit a pitch video and a demo",
       "Judged on the argument and the evidence behind it",
       "Any skill level",
     ],
@@ -60,9 +69,11 @@ export default function TracksSection() {
             Pick your track.
           </h2>
           <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">
-            You choose one when you register. Both run as separate
-            competitions with the same prizes, so you are only ever judged
-            against teams doing the same kind of work as you.
+            You do not pick a track when you register. Prompts release
+            September 14, and once you have seen them you decide which way to
+            answer. Both run as separate competitions with the same prizes, so
+            you are only ever judged against teams doing the same kind of work
+            as you.
           </p>
         </div>
 
@@ -96,6 +107,10 @@ export default function TracksSection() {
           <p className="mx-auto max-w-lg text-base leading-relaxed text-ink/70">
             Whichever track you pick, you are solving for a real company. Start
             by getting to know them.
+          </p>
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-ink/55">
+            Every participant gets free Lovable credits. Use them, or build
+            with whatever you like. Neither track requires AI.
           </p>
           <div className="mt-6">
             <a

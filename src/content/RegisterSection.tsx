@@ -21,9 +21,10 @@ export default function RegisterSection() {
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">
           Open to all WSU students: undergraduate, graduate, and doctoral.
-          Teams of one to four, locked at registration, and you pick your
-          track when you sign up. Registration runs August 24 to September 10,
-          prompts release September 14, and the finale is September 19.
+          Teams of one to four, locked at registration. You choose your track
+          later, once the prompts are out. Registration runs August 24 to
+          September 10, prompts release September 14, and the finale is
+          September 19.
         </p>
         <div className="mt-9">
           <a
