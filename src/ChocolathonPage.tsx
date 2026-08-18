@@ -42,7 +42,7 @@ export default function ChocolathonPage() {
 
   return (
     <div id="chocolathon-top" className="choco-root">
-      <Masthead />
+      <Masthead deferSurface={filmCapable} />
       {filmCapable ? (
         <ScrollFilm>
           <Overlay />

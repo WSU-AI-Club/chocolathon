@@ -2,15 +2,47 @@
    Register CTA. This bar is the ONLY register affordance until the finale,
    so it stays visible for the whole scroll. */
 
+import { useEffect, useState } from "react";
+
 import { ACTIVE_FORM_URL, CLUB_JOIN_URL } from "./links";
 
-export default function Masthead() {
+export default function Masthead({
+  deferSurface = false,
+}: {
+  /* True while the scroll film is running. The crown parks its highest
+     chocolates at ~0.13 x viewport height, which is exactly where a solid
+     bar sits, so the surface would clip the payoff of the whole animation.
+     While the film runs the bar stays transparent (the crown is centred and
+     the controls are at the edges, so nothing actually collides); the
+     surface fades in once the stacked sections start scrolling underneath,
+     which is the only place it was needed. */
+  deferSurface?: boolean;
+}) {
+  const [solid, setSolid] = useState(!deferSurface);
+
+  useEffect(() => {
+    const onScroll = () => {
+      if (deferSurface) {
+        const tracks = document.getElementById("tracks");
+        setSolid(!!tracks && tracks.getBoundingClientRect().top <= 0);
+      } else {
+        setSolid(window.scrollY > 8);
+      }
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [deferSurface]);
+
   return (
-    /* A real surface, not floating text: content scrolls BEHIND the bar
-       instead of colliding with it, and the edge makes it legible as a
-       masthead. Kept translucent + blurred so the photography still
-       reads through it. */
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/80 backdrop-blur-md">
+    <header
+      className={
+        "fixed inset-x-0 top-0 z-50 transition-colors duration-300 " +
+        (solid
+          ? "border-b border-ink/[0.08] bg-white/85 backdrop-blur-md"
+          : "border-b border-transparent bg-transparent")
+      }
+    >
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
         {/* No club mark here: the current logo is a placeholder and read
             badly beside the professionally designed partner logos. Text
