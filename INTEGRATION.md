@@ -1,74 +1,55 @@
-# Installing Chocolathon into the wsuaiclub.com project
+# Where this page lives
 
-Three steps. Everything the page needs is self-contained — scoped styles, its own
-assets folder, one route component.
+**Superseded 2026-08-18.** This file used to describe copying the page into the
+Lovable-built `wsuaiclub/wsuaiclub` app. That app is being abandoned and rebuilt,
+so those instructions are gone. The old version is in git history if it is ever
+needed again.
 
-## 1 · Copy these into the club-site repo
+## Today
 
-| From this repo | To the club-site repo |
+This repo deploys on its own.
+
+| | |
 |---|---|
-| `src/ChocolathonPage.tsx` | `src/pages/chocolathon/ChocolathonPage.tsx` |
-| `src/chocolathon.css` | `src/pages/chocolathon/chocolathon.css` |
-| `src/film/` (ScrollFilm.tsx, beats.ts) | `src/pages/chocolathon/film/` |
-| `src/content/` (all 6 files) | `src/pages/chocolathon/content/` |
-| `public/chocolathon/` (box, sprites, sponsors) | `public/chocolathon/` |
+| Host | Vercel, team **WSU AI Club** (`wsu-ai-club`), project `chocolathon` |
+| Live | https://chocolathon.vercel.app |
+| Source | `github.com/wsuaiclub/chocolathon`, `main` connected for auto-deploy |
 
-Note: after moving into `src/pages/chocolathon/`, the relative imports inside
-ChocolathonPage.tsx (`./film/ScrollFilm`, `./content/...`, `./chocolathon.css`)
-still resolve unchanged — the folder moves as one unit.
+Push to `main` and Vercel builds and promotes to production. Any other branch
+gets its own preview URL. To deploy by hand, `vercel --prod` (requires
+`vercel login` as the club account).
 
-## 2 · Add the route
+## The open question: the real domain
 
-In the club site's router (where `/events`, `/workshops` etc. are declared):
+`wsuaiclub.com/chocolathon` is a **path**, and DNS cannot point at a path. Only
+three things actually work:
 
-```tsx
-import ChocolathonPage from "@/pages/chocolathon/ChocolathonPage";
+1. **One project owns the apex.** The rebuilt club site serves `wsuaiclub.com`
+   and carries `/chocolathon` as a route. Cleanest end state, but it needs the
+   new club site to exist, and this page would fold into that codebase.
+2. **Subdomain.** `chocolathon.wsuaiclub.com` points at this project. DNS can do
+   this today, and it needs nothing from the club site.
+3. **Rewrite.** The apex project rewrites `/chocolathon/*` to this deployment.
+   Gives the exact URL while keeping two repos, at the cost of some config.
 
-<Route path="/chocolathon" element={<ChocolathonPage />} />
-```
+Option 2 ships now and does not block option 1 later.
 
-If the site wraps routes in a global nav/footer layout, mount this route
-OUTSIDE that layout — the page brings its own masthead and footer and is
-designed as a full-bleed takeover.
+## If this ever does get folded into the club site
 
-## 3 · Merge six design tokens into `tailwind.config`
+Two things bit us when the old app was surveyed, and they will apply to any React
+app this page moves into:
 
-Add to `theme.extend` (these are additive — nothing existing changes):
+- **Route placement.** The old router ended in a catch-all that redirected
+  unauthenticated visitors to `/auth`. A public event page registered after that
+  catch-all sends every student to a login wall. Register it in the public block.
+- **Token collisions.** This page defines `display`, `ui`, `mono`, `ink`, `gold`.
+  A host app that already defines any of those will either lose its own or break
+  this one. Namespace them (`choco-ink`, `font-choco-display`) rather than
+  merging.
 
-```ts
-colors: {
-  ink: "#232A4D",
-  gold: "#B8912D",
-  amber: "#FAC905",
-  paper: "#FFFFFF",
-},
-fontFamily: {
-  display: ['"Bodoni Moda"', "Didot", "Georgia", "serif"],
-  ui: ["Archivo", "Helvetica Neue", "Arial", "sans-serif"],
-  mono: ['"Space Mono"', "ui-monospace", "monospace"],
-},
-```
+## Editing
 
-(Fonts load themselves via `@import` in chocolathon.css — no index.html edits.)
-
-## Done — verify
-
-- `/chocolathon` renders the white page: open box, title, amber CTA.
-- Scroll: six chocolates rise one by one, each with its text; they collect in
-  an arc above the box; finale CTA; register section below.
-- The REST of the site looks exactly as before (styles are scoped under
-  `.choco-root`; assets are namespaced under `/chocolathon/`).
-- Mobile (<768px) shows the sectioned story instead of the scroll experience.
-
-## Rules for future edits (put this in Lovable's Knowledge box)
-
-> The /chocolathon page is a scroll-choreographed experience. Never modify
-> `src/pages/chocolathon/film/` — that's the animation engine. All copy,
-> buttons, and panels live in `src/pages/chocolathon/content/` and are
-> safe to edit.
->
-> Registration is NOT built in code — it's a Microsoft Form owned by the
-> AI Club's Teams account. Its URL and the August 24 open/closed switch
-> are the only two values in `content/links.ts`; change them there and
-> every button follows. In-page CTAs scroll to `#register`; the button
-> inside that section is the one that opens the form.
+`src/film/` is the scroll-choreography engine and is sealed; changing it breaks
+the whole experience. Everything else is in `src/content/`: copy, panels,
+sections, and `links.ts`, which holds every outbound URL and the
+`REGISTRATION_OPEN` switch.
