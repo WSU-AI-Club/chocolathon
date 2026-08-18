@@ -122,8 +122,13 @@ const PANELS: Panel[] = [
             <p className="font-ui text-lg font-semibold leading-snug text-ink">
               The finale
             </p>
-            <ul className="mt-2 space-y-1 text-sm leading-relaxed text-ink/60">
-              <li>Two live sessions</li>
+            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-ink/60">
+              <li>
+                Two industry speaker sessions
+                <span className="block text-ink/45">
+                  including Cargill&rsquo;s AI Governance Lead
+                </span>
+              </li>
               <li>Project submissions</li>
               <li>Final presentations on stage</li>
               <li>Winners announced</li>
@@ -184,7 +189,7 @@ const PANELS: Panel[] = [
           </div>
         </dl>
         <p className="ml-auto mt-4 max-w-[240px] font-mono text-xs uppercase tracking-[0.12em] text-gold">
-          Refreshments, lunch and two live sessions for everyone
+          Refreshments, lunch and two industry speaker sessions
         </p>
       </div>
     ),
