@@ -16,7 +16,7 @@ export default function RegisterSection() {
     >
       <div className="mx-auto max-w-2xl">
         <p className="eyebrow mb-4">Registration</p>
-        <h2 className="font-display text-4xl font-medium tracking-tight text-ink md:text-5xl">
+        <h2 className="font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
           Build ahead. Bring your team.
         </h2>
         <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">

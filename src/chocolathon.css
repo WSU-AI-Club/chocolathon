@@ -6,13 +6,27 @@
    without the site's globals bleeding in). No body/html selectors.
    ═══════════════════════════════════════════════════════════════════ */
 
-@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,700&family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700&family=Space+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..900&family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700&family=Space+Mono:wght@400;700&display=swap");
 
 .choco-root {
   background: #ffffff;
   color: #232a4d;
   font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Bodoni Moda is a Didone: its HORIZONTAL strokes are the hairlines, and a
+   "T" is a thick stem plus a thin crossbar. The font ships an optical-size
+   axis (6-96), and browsers request opsz = rendered size by default, so at
+   display sizes the browser asks for the 96pt cut - maximum contrast, and
+   the crossbar of a T thins out until it reads as an L.
+
+   Pinning opsz to a text-range value keeps the sturdier drawing at every
+   size, so crossbars and thin joins stay visible. This is the fix; weight
+   alone would not solve it. */
+.choco-root .font-display {
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" 32;
 }
 
 .choco-root :focus-visible {
@@ -73,15 +87,40 @@
   min-height: 40px;
   padding: 0 0.75rem;
   font-family: "Space Mono", ui-monospace, monospace;
-  font-size: 0.625rem;
-  letter-spacing: 0.16em;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgb(35 42 77 / 0.55);
+  color: rgb(35 42 77 / 0.75);
   text-decoration: none;
   transition: color 200ms ease;
 }
 .choco-root .masthead-link:hover {
-  color: rgb(35 42 77 / 0.9);
+  color: #232a4d;
+}
+
+/* Compact ghost link for the narrow scroll panels, where the full-size
+   button would overflow a 320px column. */
+.choco-root .btn-ghost-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 0.875rem;
+  border: 1px solid rgb(35 42 77 / 0.25);
+  color: #232a4d;
+  font-family: Archivo, sans-serif;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+.choco-root .btn-ghost-sm:hover {
+  border-color: rgb(35 42 77 / 0.55);
+  background: rgb(35 42 77 / 0.04);
 }
 
 /* Outlined secondary button. Used for the club asks in the footer so

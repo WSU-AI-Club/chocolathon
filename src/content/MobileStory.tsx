@@ -23,7 +23,7 @@ export default function MobileStory() {
       {/* Hero */}
       <section className="flex min-h-screen flex-col items-center justify-center px-6 pt-20 text-center">
         <p className="eyebrow mb-4">WSU AI Club × Cocoa Dolce × Lovable</p>
-        <h1 className="font-display text-5xl font-medium tracking-tight text-ink">
+        <h1 className="font-display text-5xl font-semibold tracking-tight text-ink">
           Chocolathon
         </h1>
         <p className="mt-2 font-display text-lg italic text-ink/80">
@@ -53,7 +53,7 @@ export default function MobileStory() {
       {/* What it is */}
       <section className="px-6 py-14 text-center">
         <p className="eyebrow mb-3">What it is</p>
-        <h2 className="font-display text-3xl font-medium text-ink">
+        <h2 className="font-display text-3xl font-semibold text-ink">
           Build for a real chocolate maker.
         </h2>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-ink/80">
@@ -68,7 +68,7 @@ export default function MobileStory() {
       {/* How it works — the mechanics, kept distinct from the premise above. */}
       <section className="px-6 py-14 text-center">
         <p className="eyebrow mb-3">How it works</p>
-        <h2 className="font-display text-3xl font-medium text-ink">
+        <h2 className="font-display text-3xl font-semibold text-ink">
           Build ahead. Compete live.
         </h2>
         <ol className="mx-auto mt-5 max-w-md space-y-2 text-left text-base leading-relaxed text-ink/80">
@@ -112,7 +112,7 @@ export default function MobileStory() {
       {/* Prizes + who */}
       <section className="px-6 py-14 text-center">
         <p className="eyebrow mb-3">Prizes</p>
-        <p className="font-display text-5xl font-medium text-ink">$1,200</p>
+        <p className="font-display text-5xl font-semibold text-ink">$1,200</p>
         <p className="mt-1 text-sm text-ink/80">
           in prizes across two tracks
         </p>

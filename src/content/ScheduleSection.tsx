@@ -56,7 +56,7 @@ export default function ScheduleSection() {
       <div className="mx-auto max-w-2xl">
         <div className="text-center">
           <p className="eyebrow mb-4">Finale day · September 19</p>
-          <h2 className="font-display text-4xl font-medium tracking-tight text-ink md:text-5xl">
+          <h2 className="font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
             How the day runs.
           </h2>
           <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">

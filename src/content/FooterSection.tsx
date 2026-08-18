@@ -80,7 +80,7 @@ export default function FooterSection() {
 
         {/* Stay-with-the-club block. */}
         <div className="mt-16 border-t border-ink/10 pt-12">
-          <h2 className="font-display text-2xl font-medium tracking-tight text-ink">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
             Not competing? Stay in the loop.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-ink/70">

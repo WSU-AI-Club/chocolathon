@@ -13,7 +13,7 @@ export default function Masthead() {
             only until a real mark exists. */}
         <a
           href="#chocolathon-top"
-          className="shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-ink/50 no-underline"
+          className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-ink/75 no-underline"
         >
           <span className="hidden sm:inline">WSU AI Club · </span>Sep 19
         </a>

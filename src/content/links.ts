@@ -47,3 +47,8 @@ export const CLUB_EMAIL = "aiclub@wichita.edu";
    business, so the page sends students there to read up first. */
 export const COCOA_DOLCE_ABOUT_URL =
   "https://shop.cocoadolce.com/pages/about-us";
+
+/* Lovable sponsors the event and gives every participant credits, so the
+   who-can-enter beat links out to them. lovable.dev/about is a 404; the
+   homepage is the canonical destination. */
+export const LOVABLE_URL = "https://lovable.dev";

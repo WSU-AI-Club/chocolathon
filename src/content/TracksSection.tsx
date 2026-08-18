@@ -65,7 +65,7 @@ export default function TracksSection() {
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <p className="eyebrow mb-4">Two ways to compete</p>
-          <h2 className="font-display text-4xl font-medium tracking-tight text-ink md:text-5xl">
+          <h2 className="font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
             Pick your track.
           </h2>
           <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">
@@ -83,7 +83,7 @@ export default function TracksSection() {
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
                 {t.name}
               </p>
-              <h3 className="mt-3 font-display text-2xl font-medium leading-tight text-ink">
+              <h3 className="mt-3 font-display text-2xl font-semibold leading-tight text-ink">
                 {t.line}
               </h3>
               <p className="mt-3 text-base leading-relaxed text-ink/70">

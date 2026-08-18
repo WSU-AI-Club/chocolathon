@@ -13,7 +13,12 @@
 
 import type { ReactNode } from "react";
 import { BEATS, type BeatKey } from "../film/beats";
-import { ACTIVE_FORM_URL, REGISTRATION_OPEN } from "./links";
+import {
+  ACTIVE_FORM_URL,
+  COCOA_DOLCE_ABOUT_URL,
+  LOVABLE_URL,
+  REGISTRATION_OPEN,
+} from "./links";
 import Countdown from "./Countdown";
 
 export type Panel = {
@@ -33,13 +38,13 @@ const PANELS: Panel[] = [
       <div className="flex h-full flex-col items-center justify-between pb-8 pt-20 text-center">
         <div>
           <p className="eyebrow mb-4">WSU AI Club × Cocoa Dolce × Lovable</p>
-          <h1 className="font-display text-6xl font-medium tracking-tight text-ink md:text-8xl">
+          <h1 className="font-display text-6xl font-semibold tracking-tight text-ink md:text-8xl">
             Chocolathon
           </h1>
           <p className="mt-2 font-display text-xl italic text-ink/80 md:text-2xl">
             The world&rsquo;s first chocolate hackathon.
           </p>
-          <p className="mt-4 font-mono text-xs uppercase tracking-[0.14em] text-ink/60">
+          <p className="mt-5 font-mono text-sm font-bold uppercase tracking-[0.12em] text-ink/70">
             Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall, WSU
           </p>
         </div>
@@ -64,7 +69,7 @@ const PANELS: Panel[] = [
     node: (
       <div className="max-w-xs">
         <p className="eyebrow mb-3">What it is</p>
-        <h2 className="font-display text-3xl font-medium leading-tight text-ink md:text-4xl">
+        <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">
           Build for a real chocolate maker.
         </h2>
         <p className="mt-4 text-base leading-relaxed text-ink/80">
@@ -74,6 +79,17 @@ const PANELS: Panel[] = [
           invented for a classroom, and the people who run the business decide
           who wins.
         </p>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <img src="/chocolathon/sponsors/cocoadolce.png" alt="Cocoa Dolce" className="h-4 w-auto" />
+          <a
+            className="btn-ghost-sm"
+            href={COCOA_DOLCE_ABOUT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Who they are
+          </a>
+        </div>
       </div>
     ),
   },
@@ -125,7 +141,7 @@ const PANELS: Panel[] = [
     node: (
       <div className="max-w-xs">
         <p className="eyebrow mb-3">How it works</p>
-        <h2 className="font-display text-3xl font-medium leading-tight text-ink md:text-4xl">
+        <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">
           Build ahead. Compete live.
         </h2>
         <ol className="mt-4 space-y-2 text-base leading-relaxed text-ink/80">
@@ -145,7 +161,7 @@ const PANELS: Panel[] = [
     node: (
       <div className="max-w-xs text-right">
         <p className="eyebrow mb-3">Prizes</p>
-        <p className="font-display text-6xl font-medium text-ink">$1,200</p>
+        <p className="font-display text-6xl font-semibold text-ink">$1,200</p>
         <p className="mt-1 font-ui text-sm text-ink/80">
           in prizes across two tracks
         </p>
@@ -181,7 +197,7 @@ const PANELS: Panel[] = [
     node: (
       <div className="max-w-xs">
         <p className="eyebrow mb-3">Who can enter</p>
-        <h2 className="font-display text-3xl font-medium leading-tight text-ink md:text-4xl">
+        <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">
           Every major. No code required.
         </h2>
         <p className="mt-4 text-base leading-relaxed text-ink/80">
@@ -189,6 +205,17 @@ const PANELS: Panel[] = [
           an AI platform that turns ideas into working software, and every
           participant gets free credits.
         </p>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <img src="/chocolathon/sponsors/lovable.png" alt="Lovable" className="h-5 w-auto" />
+          <a
+            className="btn-ghost-sm"
+            href={LOVABLE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            See Lovable
+          </a>
+        </div>
       </div>
     ),
   },
@@ -200,7 +227,7 @@ const PANELS: Panel[] = [
     node: (
       <div className="max-w-xs text-right">
         <p className="eyebrow mb-3">Fueled by</p>
-        <h2 className="font-display text-3xl font-medium leading-tight text-ink">
+        <h2 className="font-display text-3xl font-semibold leading-tight text-ink">
           Good taste, all day.
         </h2>
         <div className="mt-6 flex flex-col items-end gap-5">
@@ -230,7 +257,7 @@ const PANELS: Panel[] = [
               ? "Registration closes September 10"
               : "Registration opens August 24"}
           </p>
-          <h2 className="font-display text-5xl font-medium tracking-tight text-ink md:text-6xl">
+          <h2 className="font-display text-5xl font-semibold tracking-tight text-ink md:text-6xl">
             Pick your team.
           </h2>
           <p className="mt-4 max-w-md text-base text-ink/80">

@@ -119,7 +119,7 @@ export default function Countdown({
         {spoken}
         <p
           aria-hidden="true"
-          className="font-mono text-[11px] uppercase tracking-[0.16em] text-ink/55"
+          className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-ink/65"
         >
           <span className="text-gold">{caption}</span>
           <span className="mx-2 text-ink/25">|</span>
@@ -147,7 +147,7 @@ export default function Countdown({
         <div className="flex items-start justify-center gap-5 sm:gap-7">
           {units.map(([value, label]) => (
             <div key={label} className="text-center">
-              <p className="font-display text-3xl font-medium tabular-nums leading-none text-ink sm:text-4xl">
+              <p className="font-display text-3xl font-semibold tabular-nums leading-none text-ink sm:text-4xl">
                 {value}
               </p>
               <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/45">
