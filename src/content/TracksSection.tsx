@@ -9,6 +9,10 @@
    Both tracks carry IDENTICAL prizes on purpose: a team shipping a
    prototype is never scored against a team pitching a business case.
 
+   The "get to know Cocoa Dolce" block that used to close this section was
+   removed 2026-08-18: the what-it-is beat now carries their logo and a link,
+   so it was a duplicate, and it read as filler.
+
    Neither track's copy names a major or a background. Both are open to
    anyone, and saying otherwise would quietly sort students out of the
    one they might actually be better at.
@@ -22,8 +26,6 @@
    because Lovable sponsors the event, not because the tools are
    mandatory.
    ═══════════════════════════════════════════════════════════════════ */
-
-import { COCOA_DOLCE_ABOUT_URL } from "./links";
 
 type Track = {
   name: string;
@@ -73,7 +75,8 @@ export default function TracksSection() {
             September 14, and once you have seen them you decide which way to
             answer. Both run as separate competitions with the same prizes, so
             you are only ever judged against teams doing the same kind of work
-            as you.
+            as you. Neither track requires AI, though every participant gets
+            free Lovable credits.
           </p>
         </div>
 
@@ -101,30 +104,7 @@ export default function TracksSection() {
           ))}
         </div>
 
-        {/* Both tracks require understanding the business, so the invitation
-            to go read about Cocoa Dolce belongs here rather than in the footer. */}
-        <div className="mt-16 border-t border-ink/10 pt-12 text-center">
-          <p className="mx-auto max-w-lg text-base leading-relaxed text-ink/70">
-            Whichever track you pick, you are solving for a real company. Start
-            by getting to know them.
-          </p>
-          <p className="mx-auto mt-4 max-w-lg text-sm leading-relaxed text-ink/55">
-            Every participant gets free Lovable credits. Use them, or build
-            with whatever you like. Neither track requires AI.
-          </p>
-          <div className="mt-6">
-            <a
-              className="btn-ghost"
-              href={COCOA_DOLCE_ABOUT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              About Cocoa Dolce
-            </a>
-          </div>
-        </div>
-
-        <p className="mt-12 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
+        <p className="mt-14 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
           $1,200 in prizes total · four winning teams
         </p>
       </div>
