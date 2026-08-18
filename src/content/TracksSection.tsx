@@ -28,8 +28,8 @@ const TRACKS: Track[] = [
     name: "Build Track",
     line: "Ship something that works.",
     body:
-      "Take a real operational problem from inside Cocoa Dolce, production, " +
-      "packaging, shipping, ordering, and build a working prototype with AI.",
+      "You answer the challenge by building it: a working prototype, made " +
+      "with AI, that Cocoa Dolce could actually put to use.",
     bullets: [
       "You submit a working product",
       "Judged on how useful and well built it is",
@@ -40,10 +40,10 @@ const TRACKS: Track[] = [
     name: "Case Track",
     line: "Pitch something they should do.",
     body:
-      "Make the business case for a growth idea: a new event, a partnership, " +
-      "a new channel. Back it with AI-assisted research and evidence.",
+      "You answer the challenge by making the case for it: a recommendation " +
+      "Cocoa Dolce could act on, backed by AI-assisted research and evidence.",
     bullets: [
-      "You submit a pitch, plus something you built with Lovable to show the idea",
+      "You submit a pitch plus a Lovable-built demo",
       "Judged on the argument and the evidence behind it",
       "Any skill level",
     ],
@@ -66,9 +66,9 @@ export default function TracksSection() {
           </p>
         </div>
 
-        <div className="mt-14 grid gap-12 sm:grid-cols-2 sm:gap-10">
+        <div className="mt-14 grid items-stretch gap-12 sm:grid-cols-2 sm:gap-10">
           {TRACKS.map((t) => (
-            <div key={t.name}>
+            <div key={t.name} className="flex flex-col">
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
                 {t.name}
               </p>
@@ -83,7 +83,7 @@ export default function TracksSection() {
                   <li key={b}>{b}</li>
                 ))}
               </ul>
-              <p className="mt-5 font-ui text-sm font-semibold text-ink">
+              <p className="mt-auto pt-5 font-ui text-sm font-semibold text-ink">
                 $400 first place · $200 second place
               </p>
             </div>

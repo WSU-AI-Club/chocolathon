@@ -10,7 +10,14 @@
 
 /* `highlight` pulls a row forward — used for the moments a student is
    actually deciding on: the workshops, lunch, and the public finals. */
-type Row = { time: string; what: string; note?: string; highlight?: boolean };
+type Row = {
+  time: string;
+  what: string;
+  /* Rendered bold on its own line, above the description. */
+  speaker?: string;
+  note?: string;
+  highlight?: boolean;
+};
 
 const SCHEDULE: Row[] = [
   { time: "8:30 AM", what: "Doors open", note: "Coffee, pastries, and Cocoa Dolce chocolates" },
@@ -19,11 +26,11 @@ const SCHEDULE: Row[] = [
   {
     time: "11:30 AM",
     what: "Workshop 1: Open Weights, Open Questions",
+    speaker: "Fareeha Amber Ansari — AI Governance Lead, Cargill",
     note:
       "A discussion and Q&A on open-source and open-weight models, where " +
-      "government policy is heading, and what Meta and others opening up " +
-      "frontier models means. With Fareeha Amber Ansari, AI Governance Lead " +
-      "at Cargill.",
+      "government policy is heading, and what it means that Meta and others " +
+      "are opening up frontier models.",
     highlight: true,
   },
   { time: "12:15 PM", what: "Lunch", note: "Provided by Jimmy John's", highlight: true },
@@ -78,8 +85,13 @@ export default function ScheduleSection() {
                 >
                   {row.what}
                 </p>
+                {row.speaker ? (
+                  <p className="mt-1.5 font-ui text-sm font-semibold leading-snug text-ink/85">
+                    {row.speaker}
+                  </p>
+                ) : null}
                 {row.note ? (
-                  <p className="mt-1 text-sm leading-relaxed text-ink/55">
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink/55">
                     {row.note}
                   </p>
                 ) : null}
