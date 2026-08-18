@@ -80,6 +80,12 @@ vercel --prod
 
 `.vercel/` holds the local project link and is gitignored.
 
+**Commit identity:** this repo sets `user.name` / `user.email` locally to the club's
+GitHub account. Vercel's Hobby plan refuses to build a private repo when the commit
+author is not the Vercel account owner, so commits must come from the club identity
+for auto-deploy to work. Do not "fix" this back to a personal identity without either
+making the repo public or upgrading the Vercel plan.
+
 **Domain:** `wsuaiclub.com/chocolathon` is a *path*, and DNS cannot point at a path.
 It has to be either a route inside whatever serves the apex, a subdomain such as
 `chocolathon.wsuaiclub.com`, or a rewrite from the main project. Not yet decided.
