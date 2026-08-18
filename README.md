@@ -61,14 +61,28 @@ that's why they have no visible edges.
 - All copy lives in real DOM (panels stay mounted, visibility-toggled), so
   crawlers and screen readers see the full content.
 
-## Deploying via Lovable
+## Deploying
 
-1. Michael: create the Lovable project and connect GitHub (Lovable's UI).
-2. Push this repo into that connected repo (or use Lovable's GitHub import for
-   Vite/React projects).
-3. Lovable hosts it; route it at `/chocolathon` on wsuaiclub.com (or its own
-   domain, then link).
-4. After that: content tweaks by Lovable prompt, engine work back here.
+Hosted on **Vercel**, under the club's own account (`wsuaiclub`), team **WSU AI Club**.
+Lovable is no longer the host; it remains only the AI build platform that gives
+participants credits.
+
+`main` is connected to the Vercel project, so:
+
+- **push to `main`** -> deploys to production at https://chocolathon.vercel.app
+- **push any branch** -> gets its own preview URL
+
+To deploy by hand without a push (needs `vercel login` as the club account):
+
+```bash
+vercel --prod
+```
+
+`.vercel/` holds the local project link and is gitignored.
+
+**Domain:** `wsuaiclub.com/chocolathon` is a *path*, and DNS cannot point at a path.
+It has to be either a route inside whatever serves the apex, a subdomain such as
+`chocolathon.wsuaiclub.com`, or a rewrite from the main project. Not yet decided.
 
 ## Event facts the page states (source: planning docs)
 
