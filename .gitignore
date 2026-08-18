@@ -9,3 +9,6 @@ dist
 # history forever and ship on every deploy. The pipeline/README.md
 # recipe is kept; the artifacts are not.
 pipeline/clips/
+
+# Vercel CLI project link (contains project + org ids, machine-local)
+.vercel
