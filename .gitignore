@@ -1,0 +1,11 @@
+node_modules
+dist
+*.local
+.DS_Store
+
+# Local generation workspace. The whole clips/ tree is output from the
+# abandoned AI-video approach (dropped 2026-08-14 for pure code
+# choreography) plus its intermediates: ~38MB that would live in git
+# history forever and ship on every deploy. The pipeline/README.md
+# recipe is kept; the artifacts are not.
+pipeline/clips/

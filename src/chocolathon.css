@@ -1,0 +1,164 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CHOCOLATHON — self-contained styles for the /chocolathon route.
+
+   Everything is scoped under .choco-root so this page can live inside
+   the wsuaiclub.com app without touching the rest of the site (and
+   without the site's globals bleeding in). No body/html selectors.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,700&family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700&family=Space+Mono:wght@400;700&display=swap");
+
+.choco-root {
+  background: #ffffff;
+  color: #232a4d;
+  font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.choco-root :focus-visible {
+  outline: 3px solid #fac905;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Overlay panels never intercept the scroll — only marked controls do */
+.choco-root .panel-layer {
+  pointer-events: none;
+}
+.choco-root .panel-layer a,
+.choco-root .panel-layer button {
+  pointer-events: auto;
+}
+
+.choco-root .eyebrow {
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #b8912d;
+}
+
+.choco-root .btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.75rem 2rem;
+  background: #fac905;
+  color: #16182b;
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  text-decoration: none;
+  transition:
+    background 200ms ease,
+    transform 200ms ease;
+}
+.choco-root .btn-cta:hover {
+  background: #ffd52b;
+}
+.choco-root .btn-cta:active {
+  transform: translateY(1px);
+}
+
+/* Quiet section jumps in the masthead. Deliberately not buttons: the
+   amber Register CTA must stay the only loud thing up there. */
+.choco-root .masthead-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 0.75rem;
+  font-family: "Space Mono", ui-monospace, monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgb(35 42 77 / 0.55);
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+.choco-root .masthead-link:hover {
+  color: rgb(35 42 77 / 0.9);
+}
+
+/* Outlined secondary button. Used for the club asks in the footer so
+   they read as available without competing with the amber register CTA. */
+.choco-root .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.625rem 1.5rem;
+  border: 1px solid rgb(35 42 77 / 0.25);
+  background: transparent;
+  color: #232a4d;
+  font-family: Archivo, sans-serif;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  text-decoration: none;
+  transition:
+    border-color 200ms ease,
+    background 200ms ease;
+}
+.choco-root .btn-ghost:hover {
+  border-color: rgb(35 42 77 / 0.55);
+  background: rgb(35 42 77 / 0.04);
+}
+
+.choco-root .social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(35 42 77 / 0.2);
+  border-radius: 2px;
+  color: rgb(35 42 77 / 0.6);
+  text-decoration: none;
+  transition:
+    color 200ms ease,
+    border-color 200ms ease;
+}
+.choco-root .social-btn:hover {
+  color: #232a4d;
+  border-color: rgb(35 42 77 / 0.5);
+}
+
+/* Feathered white pool behind overlay text — invisible against the page,
+   but guarantees the photography never sits directly under copy. */
+.choco-root .panel-scrim {
+  padding: 3rem 3.5rem;
+  margin: -3rem -3.5rem;
+  background: radial-gradient(
+    ellipse closest-side,
+    rgba(255, 255, 255, 0.97) 52%,
+    rgba(255, 255, 255, 0.82) 74%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.choco-root .scroll-hint {
+  animation: choco-hint 2.2s ease-in-out infinite;
+}
+@keyframes choco-hint {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .choco-root .scroll-hint {
+    animation: none;
+  }
+}

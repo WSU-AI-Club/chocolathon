@@ -1,0 +1,17 @@
+/* Standalone dev shell only — the club site brings its own Tailwind
+   layers. Everything Chocolathon-specific lives in chocolathon.css. */
+
+@import "./chocolathon.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
