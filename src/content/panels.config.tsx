@@ -35,7 +35,7 @@ const PANELS: Panel[] = [
     beat: "hero",
     position: "center",
     node: (
-      <div className="flex h-full flex-col items-center justify-between pb-8 pt-20 text-center">
+      <div className="flex h-full flex-col items-center justify-between pb-8 pt-24 text-center">
         <div>
           <p className="eyebrow mb-4">WSU AI Club × Cocoa Dolce × Lovable</p>
           <h1 className="font-display text-6xl font-semibold tracking-tight text-ink md:text-8xl">

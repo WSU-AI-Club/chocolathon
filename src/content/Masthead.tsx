@@ -6,8 +6,12 @@ import { ACTIVE_FORM_URL, CLUB_JOIN_URL } from "./links";
 
 export default function Masthead() {
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4">
+    /* A real surface, not floating text: content scrolls BEHIND the bar
+       instead of colliding with it, and the edge makes it legible as a
+       masthead. Kept translucent + blurred so the photography still
+       reads through it. */
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
         {/* No club mark here: the current logo is a placeholder and read
             badly beside the professionally designed partner logos. Text
             only until a real mark exists. */}
@@ -21,7 +25,7 @@ export default function Masthead() {
         {/* Section jumps collapse below md so the two CTAs never wrap on a
             phone. The Join label shortens on small screens for the same
             reason. */}
-        <nav className="flex items-center gap-1 sm:gap-2">
+        <nav className="flex items-center gap-0.5">
           <a href="#tracks" className="masthead-link hidden md:inline-flex">
             Tracks
           </a>
@@ -40,7 +44,7 @@ export default function Masthead() {
               href={CLUB_JOIN_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost ml-1 !min-h-[40px] !bg-white !px-4 !text-xs sm:ml-2 sm:!px-5"
+              className="btn-ghost ml-2 !min-h-[38px] !bg-white !px-4 !text-xs sm:ml-3"
             >
               <span className="sm:hidden">Join Club</span>
               <span className="hidden sm:inline">Join the AI Club</span>
@@ -50,7 +54,7 @@ export default function Masthead() {
             href={ACTIVE_FORM_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-cta !min-h-[40px] !px-4 !text-xs sm:!px-5"
+            className="btn-cta ml-2 !min-h-[38px] !px-4 !text-xs sm:!px-5"
           >
             Register
           </a>

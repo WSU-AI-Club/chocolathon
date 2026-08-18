@@ -84,8 +84,9 @@
 .choco-root .masthead-link {
   display: inline-flex;
   align-items: center;
-  min-height: 40px;
-  padding: 0 0.75rem;
+  min-height: 38px;
+  padding: 0 0.5rem;
+  border-radius: 2px;
   font-family: "Space Mono", ui-monospace, monospace;
   font-size: 0.6875rem;
   font-weight: 700;
@@ -95,8 +96,11 @@
   text-decoration: none;
   transition: color 200ms ease;
 }
+/* A hover surface is the cheapest way to say "this is a control" for text
+   that carries no button chrome. */
 .choco-root .masthead-link:hover {
   color: #232a4d;
+  background: rgb(35 42 77 / 0.06);
 }
 
 /* Compact ghost link for the narrow scroll panels, where the full-size
