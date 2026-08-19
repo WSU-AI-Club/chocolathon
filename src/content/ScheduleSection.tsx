@@ -25,7 +25,7 @@ const SCHEDULE: Row[] = [
   { time: "9:30 AM", what: "Teams work and refine" },
   {
     time: "11:30 AM",
-    what: "Workshop 1: Open Weights, Open Questions",
+    what: "Session 1: Open Weights, Open Questions",
     speaker: "Fareeha Amber Ansari — AI Governance Lead, Cargill",
     note:
       "A discussion and Q&A on open-source and open-weight models, where " +
@@ -38,7 +38,7 @@ const SCHEDULE: Row[] = [
   { time: "2:15 PM", what: "Submissions close" },
   {
     time: "2:30 PM",
-    what: "Workshop 2: to be announced",
+    what: "Session 2: to be announced",
     note: "Speaker and subject coming soon. Runs during preliminary judging.",
     highlight: true,
   },

@@ -99,8 +99,13 @@ export default function FooterSection() {
                 Join the AI Club
               </a>
             ) : null}
-            <a className="btn-ghost" href={`mailto:${CLUB_EMAIL}`}>
-              Contact us
+            {/* The address IS the label. A mailto: only works when the
+                visitor has a default mail handler registered - often not
+                true on desktop or a campus lab machine - and when it fails
+                it fails silently. Showing the address means a dead click
+                still leaves something readable and copyable. */}
+            <a className="btn-ghost !lowercase !tracking-normal" href={`mailto:${CLUB_EMAIL}`}>
+              {CLUB_EMAIL}
             </a>
           </div>
 
