@@ -210,10 +210,9 @@ const PANELS: Panel[] = [
         </h2>
         <p className="mt-4 text-base leading-relaxed text-ink/80">
           Open to all WSU students. Cocoa Dolce&rsquo;s problems are not all
-          software problems: some are about materials and process, some about
-          logistics and cost, some about data they do not have yet, some about
-          where the business goes next. Whatever you study, one of them is
-          already in your lane.
+          software problems: some are materials, some logistics, some data,
+          some strategy. Whatever you study, one is in your lane. You can build
+          with our sponsor Lovable, and every participant gets free credits.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <img src="/chocolathon/sponsors/lovable.png" alt="Lovable" className="h-5 w-auto" />

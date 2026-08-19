@@ -76,19 +76,6 @@ export default function TracksSection() {
           <h2 className="font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
             Pick your track.
           </h2>
-          <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">
-            The challenges span the whole business, not just the technical
-            corners of it. Whatever you study, there is a version of this you
-            are already equipped for.
-          </p>
-          <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-ink/70">
-            You do not pick a track when you register. Prompts release
-            September 14, and once you have seen them you decide which way to
-            answer. Each track is judged on its own, so you are only ever
-            compared with teams doing the same kind of work. Build carries the
-            larger prize because it is the heavier lift. Neither track requires
-            AI, though every participant gets free Lovable credits.
-          </p>
         </div>
 
         <div className="mt-14 grid items-stretch gap-12 sm:grid-cols-2 sm:gap-10">
@@ -115,7 +102,17 @@ export default function TracksSection() {
           ))}
         </div>
 
-        <p className="mt-14 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
+        {/* The mechanics sit BELOW the two tracks on purpose. Above them,
+            this paragraph pushed the actual content off the first screen and
+            made a reader wade through admin before seeing what they came for. */}
+        <p className="mx-auto mt-14 max-w-lg text-center text-base leading-relaxed text-ink/70">
+          You do not pick a track when you register. Prompts release September
+          14, and once you have seen them you decide which way to answer. Each
+          track is judged on its own, and Build carries the larger prize because
+          it is the heavier lift.
+        </p>
+
+        <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
           $1,200 in prizes total · four winning teams
         </p>
       </div>
