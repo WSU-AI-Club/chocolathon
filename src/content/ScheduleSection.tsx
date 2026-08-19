@@ -25,12 +25,11 @@ const SCHEDULE: Row[] = [
   { time: "9:30 AM", what: "Teams work and refine" },
   {
     time: "11:30 AM",
-    what: "Session 1: Open Weights, Open Questions",
-    speaker: "Fareeha Amber Ansari — AI Governance Lead, Cargill",
+    what: "Session 1: Open Source, Open Weights, Open Questions",
+    speaker: "Fareeha Amber Ansari · AI Governance Lead, Cargill",
     note:
-      "A discussion and Q&A on open-source and open-weight models, where " +
-      "government policy is heading, and what it means that Meta and others " +
-      "are opening up frontier models.",
+      "A discussion and Q&A on open-source and open-weight AI models, and " +
+      "where government AI policy is heading.",
     highlight: true,
   },
   { time: "12:15 PM", what: "Lunch", note: "Provided by Jimmy John's", highlight: true },
