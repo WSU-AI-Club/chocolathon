@@ -128,7 +128,10 @@ export default function MobileStory() {
           work to.
         </p>
         <p className="mx-auto mt-8 max-w-md text-base leading-relaxed text-ink/80">
-          Open to all WSU students, any major, any skill level.
+          Open to all WSU students, any major, any skill level. Cocoa
+          Dolce&rsquo;s problems are not all software problems: some are about
+          materials and process, some about logistics and cost, some about data
+          they do not have yet.
           You can build with our sponsor Lovable, an AI platform that turns
           ideas into working software, and every participant gets free
           credits. Local AI industry judges advance the top teams, and the

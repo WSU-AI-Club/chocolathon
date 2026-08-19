@@ -77,6 +77,11 @@ export default function TracksSection() {
             Pick your track.
           </h2>
           <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">
+            The challenges span the whole business, not just the technical
+            corners of it. Whatever you study, there is a version of this you
+            are already equipped for.
+          </p>
+          <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-ink/70">
             You do not pick a track when you register. Prompts release
             September 14, and once you have seen them you decide which way to
             answer. Each track is judged on its own, so you are only ever
