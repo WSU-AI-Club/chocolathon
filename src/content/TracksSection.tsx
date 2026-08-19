@@ -48,7 +48,7 @@ const TRACKS: Track[] = [
     ],
   },
   {
-    name: "Case Track",
+    name: "Pitch Track",
     line: "Pitch something they should do.",
     body:
       "You answer the challenge by making the case for it: a recommendation " +
