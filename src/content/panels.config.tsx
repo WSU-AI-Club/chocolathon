@@ -52,7 +52,28 @@ const PANELS: Panel[] = [
             and the finale panel carries the ask once the story has landed.
             The countdown lives down here, BELOW the box photo — in the
             title block it overlapped the product shot. */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-col items-center gap-4">
+          {/* Partner marks on the first screen. They sit in the BOTTOM block,
+              below the box photo, for the same reason the countdown does:
+              anything added to the title block grows downward and covers the
+              product shot. */}
+          <div className="flex items-center justify-center gap-8">
+            <img
+              src="/chocolathon/sponsors/cocoadolce.png"
+              alt="Cocoa Dolce"
+              className="h-4 w-auto"
+            />
+            <img
+              src="/chocolathon/sponsors/lovable.png"
+              alt="Lovable"
+              className="h-5 w-auto"
+            />
+            <img
+              src="/chocolathon/sponsors/jimmyjohns.webp"
+              alt="Jimmy John's Sandwiches"
+              className="h-9 w-auto"
+            />
+          </div>
           <Countdown />
           <p className="scroll-hint font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50">
             Scroll · every chocolate tells you something ↓
