@@ -13,7 +13,6 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 import {
-  CLUB_EMAIL,
   CLUB_INSTAGRAM_URL,
   CLUB_JOIN_URL,
   CLUB_LINKEDIN_URL,
@@ -88,10 +87,15 @@ export default function FooterSection() {
             list and you will hear about the next one.
           </p>
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+          {/* The mailto: contact button was removed 2026-08-18: it depends on
+              the visitor having a default mail handler registered, which
+              often is not the case on desktop, and it fails silently when
+              they do not. LinkedIn and Instagram below are the working
+              contact routes, and joining the list opens an email channel. */}
+          <div className="mt-7 flex justify-center">
             {CLUB_JOIN_URL ? (
               <a
-                className="btn-cta"
+                className="btn-ghost !bg-white"
                 href={CLUB_JOIN_URL}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -99,14 +103,6 @@ export default function FooterSection() {
                 Join the AI Club
               </a>
             ) : null}
-            {/* The address IS the label. A mailto: only works when the
-                visitor has a default mail handler registered - often not
-                true on desktop or a campus lab machine - and when it fails
-                it fails silently. Showing the address means a dead click
-                still leaves something readable and copyable. */}
-            <a className="btn-ghost !lowercase !tracking-normal" href={`mailto:${CLUB_EMAIL}`}>
-              {CLUB_EMAIL}
-            </a>
           </div>
 
           {hasSocials ? (
