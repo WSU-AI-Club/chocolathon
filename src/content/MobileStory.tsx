@@ -127,7 +127,7 @@ export default function MobileStory() {
           work to.
         </p>
         <p className="mx-auto mt-8 max-w-md text-base leading-relaxed text-ink/80">
-          Open to all WSU students, every major, no coding background needed.
+          Open to all WSU students, any major, any skill level.
           You can build with our sponsor Lovable, an AI platform that turns
           ideas into working software, and every participant gets free
           credits. Local AI industry judges advance the top teams, and the

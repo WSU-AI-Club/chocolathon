@@ -203,7 +203,7 @@ const PANELS: Panel[] = [
       <div className="max-w-xs">
         <p className="eyebrow mb-3">Who can enter</p>
         <h2 className="font-display text-3xl font-semibold leading-tight text-ink md:text-4xl">
-          Every major. No code required.
+          Any major. Any skill level.
         </h2>
         <p className="mt-4 text-base leading-relaxed text-ink/80">
           Open to all WSU students. You can build with our sponsor Lovable,
