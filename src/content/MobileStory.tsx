@@ -114,11 +114,12 @@ export default function MobileStory() {
         <p className="eyebrow mb-3">Prizes</p>
         <p className="font-display text-5xl font-semibold text-ink">$1,200</p>
         <p className="mt-1 text-sm text-ink/80">
-          in prizes across two tracks
+          across two tracks, four winning teams
         </p>
         <p className="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-ink/70">
-          In each track: $400 first place plus a large box of Cocoa Dolce
-          chocolates, $200 second place plus a medium box.
+          Build Track: $500 first place, $250 second. Pitch Track: $300 first
+          place, $150 second. Winners also take home a box of Cocoa Dolce
+          chocolates.
         </p>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink/70">
           Cocoa Dolce provides morning refreshments, coffee and chocolates.

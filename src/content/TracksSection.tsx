@@ -6,8 +6,11 @@
    register, and the narrow scroll-film panels physically cannot carry
    two track descriptions.
 
-   Both tracks carry IDENTICAL prizes on purpose: a team shipping a
-   prototype is never scored against a team pitching a business case.
+   Prizes are deliberately UNEQUAL (changed 2026-08-18): Build pays
+   $500/$250 and Pitch $300/$150. Building is the heavier lift, and Pitch
+   was forecast to draw the larger field anyway, so the weighting is a
+   recruiting lever toward Build. The page says why out loud rather than
+   letting students infer that pitch work is valued less.
 
    The "get to know Cocoa Dolce" block that used to close this section was
    removed 2026-08-18: the what-it-is beat now carries their logo and a link,
@@ -32,6 +35,7 @@ type Track = {
   line: string;
   body: string;
   bullets: string[];
+  prize: string;
 };
 
 const TRACKS: Track[] = [
@@ -46,6 +50,7 @@ const TRACKS: Track[] = [
       "Judged on how useful and well built it is",
       "Any skill level",
     ],
+    prize: "$500 first place · $250 second place",
   },
   {
     name: "Pitch Track",
@@ -58,6 +63,7 @@ const TRACKS: Track[] = [
       "Judged on the argument and the evidence behind it",
       "Any skill level",
     ],
+    prize: "$300 first place · $150 second place",
   },
 ];
 
@@ -73,10 +79,10 @@ export default function TracksSection() {
           <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-ink/70">
             You do not pick a track when you register. Prompts release
             September 14, and once you have seen them you decide which way to
-            answer. Both run as separate competitions with the same prizes, so
-            you are only ever judged against teams doing the same kind of work
-            as you. Neither track requires AI, though every participant gets
-            free Lovable credits.
+            answer. Each track is judged on its own, so you are only ever
+            compared with teams doing the same kind of work. Build carries the
+            larger prize because it is the heavier lift. Neither track requires
+            AI, though every participant gets free Lovable credits.
           </p>
         </div>
 
@@ -98,7 +104,7 @@ export default function TracksSection() {
                 ))}
               </ul>
               <p className="mt-auto pt-5 font-ui text-sm font-semibold text-ink">
-                $400 first place · $200 second place
+                {t.prize}
               </p>
             </div>
           ))}

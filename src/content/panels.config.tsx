@@ -168,26 +168,29 @@ const PANELS: Panel[] = [
         <p className="eyebrow mb-3">Prizes</p>
         <p className="font-display text-6xl font-semibold text-ink">$1,200</p>
         <p className="mt-1 font-ui text-sm text-ink/80">
-          in prizes across two tracks
+          across two tracks, four winning teams
         </p>
-        <dl className="ml-auto mt-5 max-w-[240px] space-y-2 border-r-2 border-gold pr-5 text-right">
-          <div>
-            <dt className="font-ui text-base font-semibold text-ink">
-              $400 first place
+        <dl className="ml-auto mt-5 max-w-[250px] space-y-2 border-r-2 border-gold pr-5 text-right">
+          <div className="flex items-baseline justify-end gap-3">
+            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/50">
+              Build
             </dt>
-            <dd className="text-sm text-ink/60">
-              in each track, plus a large box of Cocoa Dolce chocolates
+            <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
+              $500 · $250
             </dd>
           </div>
-          <div>
-            <dt className="font-ui text-base font-semibold text-ink">
-              $200 second place
+          <div className="flex items-baseline justify-end gap-3">
+            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/50">
+              Pitch
             </dt>
-            <dd className="text-sm text-ink/60">
-              in each track, plus a medium box
+            <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
+              $300 · $150
             </dd>
           </div>
         </dl>
+        <p className="ml-auto mt-3 max-w-[240px] text-sm leading-relaxed text-ink/60">
+          First and second in each track, plus a box of Cocoa Dolce chocolates.
+        </p>
         <p className="ml-auto mt-4 max-w-[240px] font-mono text-xs uppercase tracking-[0.12em] text-gold">
           Refreshments, lunch and two industry speaker sessions
         </p>
