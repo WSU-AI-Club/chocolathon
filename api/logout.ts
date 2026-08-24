@@ -2,7 +2,8 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { clearCookie } from "./_session";
+/* .js extension required — see the note in hub.ts. */
+import { clearCookie } from "./_session.js";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {

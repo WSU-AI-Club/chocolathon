@@ -6,7 +6,9 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-import { loadTeams, matchTeam, mintCookie } from "./_session";
+/* .js extension required — see the note in hub.ts. Node's ESM loader in
+   production does no extensionless resolution; `vercel dev` hides it. */
+import { loadTeams, matchTeam, mintCookie } from "./_session.js";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {

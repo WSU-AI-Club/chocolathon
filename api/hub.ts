@@ -16,14 +16,27 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
+/* The .js extensions below are REQUIRED, not a typo, and the same goes
+   for every relative import under api/. package.json sets
+   "type": "module", so these functions run under Node's ESM loader in
+   production, which does not do extensionless resolution. `vercel dev`
+   IS lenient about it and runs fine without them, so this only shows up
+   once deployed — as ERR_MODULE_NOT_FOUND on every single request.
+   The extension names the compiled output; the source stays .ts. */
+
 import {
   CONTACT_EMAIL,
   KEY_DATES,
   PROMPTS,
   RUN_OF_DAY,
   SECTIONS,
-} from "./_content";
-import { hubIsPublic, promptsUnlocked, readCookie, releaseAt } from "./_session";
+} from "./_content.js";
+import {
+  hubIsPublic,
+  promptsUnlocked,
+  readCookie,
+  releaseAt,
+} from "./_session.js";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store, private");
