@@ -1,8 +1,37 @@
-/* Standalone dev harness — in the club site this file is not used;
-   the router mounts ChocolathonPage directly. */
+/* Standalone dev harness AND the route switch.
+
+   There is deliberately no router dependency here. The site has exactly
+   two views, and INTEGRATION.md's plan is for this page to eventually be
+   mounted inside the club site's own router — a second router in this
+   repo would have to be unpicked at that point. Twenty lines of pathname
+   matching costs nothing and unpicks itself.
+
+   When this does fold into the club site, register BOTH routes, and
+   register them in the PUBLIC block: the competitor gate does its own
+   auth against /api/hub, so a host-app auth redirect in front of it
+   would send registered students to the wrong login screen. */
+
+import { Suspense, lazy } from "react";
 
 import ChocolathonPage from "./ChocolathonPage";
 
+/* Lazy so the landing page never downloads the hub. Not a security
+   measure — the gate is server-side — just weight. */
+const CompetitorApp = lazy(() => import("./competitor/CompetitorApp"));
+
+/* Matches /competitors, /competitors/, and a mounted prefix such as
+   /chocolathon/competitors. */
+function isCompetitorRoute(pathname: string): boolean {
+  return /(^|\/)competitors\/?$/i.test(pathname);
+}
+
 export default function App() {
+  if (typeof window !== "undefined" && isCompetitorRoute(window.location.pathname)) {
+    return (
+      <Suspense fallback={null}>
+        <CompetitorApp />
+      </Suspense>
+    );
+  }
   return <ChocolathonPage />;
 }
