@@ -412,17 +412,22 @@ function SectionBlock({
   );
 }
 
+/* overflow-x-auto is kept as a safety net, but the table carries no
+   min-width: a 420px floor made the whole run of day scroll sideways on
+   every phone narrower than a Pro Max, and this is the one table a team
+   checks on the morning of the 19th. The time column is nowrap and the
+   description wraps, so it fits 320px unaided. */
 function RunOfDay({ rows }: { rows: HubData["runOfDay"] }) {
   return (
     <div className="mt-10 overflow-x-auto">
-      <table className="w-full min-w-[420px] border-collapse text-left">
+      <table className="w-full border-collapse text-left">
         <tbody>
           {rows.map((r) => (
             <tr key={r.time} className="border-t border-ink/10">
               <th
                 scope="row"
                 className={
-                  "whitespace-nowrap py-3 pr-6 align-top font-mono text-[11px] font-normal uppercase tracking-[0.1em] " +
+                  "whitespace-nowrap py-3 pr-4 align-top font-mono text-[11px] font-normal uppercase tracking-[0.1em] sm:pr-6 " +
                   (r.flag ? "text-gold" : "text-ink/45")
                 }
               >
