@@ -52,3 +52,15 @@ export const COCOA_DOLCE_ABOUT_URL =
    who-can-enter beat links out to them. lovable.dev/about is a 404; the
    homepage is the canonical destination. */
 export const LOVABLE_URL = "https://lovable.dev";
+
+/* ── Competitor HQ ───────────────────────────────────────────────────
+   The gated area for registered teams: prompts, rules, submission and
+   judging. Same origin, not an outbound link — the App-level route
+   switch in `src/App.tsx` picks it up. It is deliberately reachable
+   only from the small footer line, never from the masthead: the
+   masthead's single primary action is Register, and 95% of visitors
+   before September 10 are not competitors yet.
+
+   The content behind it is served by /api/hub and gated server-side,
+   so linking to the path leaks nothing. */
+export const COMPETITOR_PATH = "/competitors";

@@ -16,6 +16,7 @@ import {
   CLUB_INSTAGRAM_URL,
   CLUB_JOIN_URL,
   CLUB_LINKEDIN_URL,
+  COMPETITOR_PATH,
 } from "./links";
 
 /* Full-colour brand marks. The earlier monochrome versions looked
@@ -131,6 +132,20 @@ export default function FooterSection() {
               ) : null}
             </div>
           ) : null}
+        </div>
+
+        {/* Registered teams only. Kept at the very bottom and kept quiet
+            on purpose — before September 10 nobody has a code yet, and a
+            prominent second door would generate support email from
+            students who have not registered. The gate itself explains
+            when codes go out. */}
+        <div className="mt-14 border-t border-ink/10 pt-8">
+          <a
+            href={COMPETITOR_PATH}
+            className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40 no-underline transition-colors hover:text-ink/70"
+          >
+            Registered? Competitor HQ →
+          </a>
         </div>
       </div>
     </footer>

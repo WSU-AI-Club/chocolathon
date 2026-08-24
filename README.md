@@ -17,6 +17,10 @@ and fully reversible scrubbing.
 ```
 src/content/    ← EDIT FREELY (Lovable prompts are safe here)
 src/film/       ← DO NOT TOUCH (choreography engine + the beat map)
+src/competitor/ ← the gated area's UI. Safe to restyle; holds NO content.
+api/            ← DO NOT PASTE INTO LOVABLE. Serverless functions.
+                  api/_content.ts is the ONLY copy of the challenge
+                  prompts, and it must never be imported from src/.
 public/box.webp     ← the real product photo (base of everything)
 public/sprites/     ← the six chocolate cutouts
 public/sponsors/    ← partner logos
@@ -60,6 +64,93 @@ that's why they have no visible edges.
   same story as normal sections over three key frames (`MobileStory.tsx`).
 - All copy lives in real DOM (panels stay mounted, visibility-toggled), so
   crawlers and screen readers see the full content.
+
+## The competitor area (`/competitors`)
+
+A gated hub for registered teams: the eight challenge prompts, the rules,
+how you submit, how you get judged, and the run of finale day. Reached from
+one quiet line in the footer; not in the masthead, not indexed.
+
+### Why it is server-side and not a password in the JavaScript
+
+The prompts describe how a real local business actually runs, and they must
+stay closed until September 14. A client-side password would ship all eight
+prompts inside the JS bundle where anyone can read them with View Source —
+that is a doormat, not a lock. So the prompt text lives **only** in
+`api/_content.ts`, is compiled into the Vercel functions, and reaches a
+browser only after the server checks a signed cookie.
+
+Verify this whenever you touch it:
+
+```bash
+bun run build
+grep -ric "truffle\|polycarbonate\|Odoo" dist/    # must print 0
+```
+
+If that is ever non-zero, something in `src/` imported the server content and
+the gate is decorative. Fix it before deploying.
+
+### Two independent gates
+
+| Gate | Controls | Where |
+|---|---|---|
+| A valid team code | the whole hub | `COMPETITOR_CODES` |
+| The release clock | the prompts only | `PROMPTS_RELEASE_AT` |
+
+Before September 14, a logged-in team gets the full briefing and a countdown
+where the prompts will be. So a code that leaks early still cannot surface a
+prompt, and nobody has to be at a keyboard on the 14th to publish them.
+
+### Environment variables (Vercel → Project → Settings → Environment Variables)
+
+| Variable | Required | What |
+|---|---|---|
+| `COMPETITOR_CODES` | **yes** | Comma- or newline-separated. `CODE` or `CODE:Team Name`. **One entry = one shared passcode. Many entries = per-team codes**, and the hub greets each team by name. Switching between the two is an env edit, not a rebuild. |
+| `SESSION_SECRET` | **yes** | Any long random string. Signs the cookie. Changing it logs everyone out. |
+| `PROMPTS_RELEASE_AT` | no | ISO datetime. Defaults to `2026-09-14T05:00:00.000Z` — midnight, Wichita time, September 14. |
+| `PROMPTS_UNLOCKED` | no | `true` to bypass the clock for your own preview. **Remove it afterwards.** |
+| `HUB_PUBLIC` | no | `true` drops the gate entirely, after the event. |
+
+With no `COMPETITOR_CODES` set, production returns 503 and refuses every
+login. That is deliberate: a missing config must never mean an open door.
+
+### Running it
+
+**Before September 10** there is nothing to send — nobody has a code yet. The
+gate says so.
+
+**After registration closes (Sep 10):** generate one code per team, set
+`COMPETITOR_CODES`, and email each team its own. Codes are compared
+case-insensitively with whitespace stripped, so `Cocoa-1111` and
+`cocoa 1111` both work — students type these off a phone screen.
+
+**September 14:** nothing to do. The clock releases the prompts.
+
+**After the event:** set `HUB_PUBLIC=true` and the hub reads without a code.
+
+### Local development
+
+`bun run dev` serves the API too — `vite.config.ts` mounts the same handler
+files on the same paths in dev only, so you do not need `vercel dev` or a
+login to the club account. Put your test values in `.env.local`
+(gitignored via `*.local`):
+
+```
+COMPETITOR_CODES=cocoa-1111:Team Alpha,cocoa-2222:Team Beta
+SESSION_SECRET=local-only-secret
+PROMPTS_UNLOCKED=true
+```
+
+Without a `COMPETITOR_CODES`, dev — and **only** dev — falls back to the
+code `chocolate`.
+
+### Editing the prompts, rules or FAQ
+
+All of it is data in `api/_content.ts`: `PROMPTS`, `SECTIONS`, `KEY_DATES`,
+`RUN_OF_DAY`. Blocks are either `{kind:"text"}` or `{kind:"list"}` and render
+themselves; no component needs touching to add a section. Things marked TBA
+in there are genuinely undecided — replace them with real answers, not
+guesses.
 
 ## Deploying
 
