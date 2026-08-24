@@ -16,11 +16,15 @@ export const REGISTER_URL = "https://forms.cloud.microsoft/r/aCrbnM5Dys";
    August 24; the CTA then points at the registration form regardless. */
 export const INTEREST_URL = "";
 
-/* Flip to `true` on Monday, August 24, when registration opens. Swaps
+/* Flipped `true` on Monday, August 24, when registration opened. Swaps
    the CTA target, its label, and the line beneath it. The Microsoft
    Form also enforces its own open/close window in its own settings —
-   set that too, so the two can never drift apart. */
-export const REGISTRATION_OPEN = false;
+   set that too, so the two can never drift apart.
+
+   Nothing flips it back on September 10: the Form closes itself, and the
+   page should keep saying "closes September 10" rather than reverting to
+   "opens August 24". */
+export const REGISTRATION_OPEN = true;
 
 /* Where every CTA actually points right now. Before August 24 this is
    the interest form, but only if one has been set above — otherwise
