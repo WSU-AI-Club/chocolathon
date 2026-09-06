@@ -99,6 +99,24 @@ export default function ScheduleSection() {
           ))}
         </ol>
 
+        {/* OCPD sits with the day, not with the food (decided 2026-09-06):
+            the Barton School's Office of Career and Professional Development
+            covers the room, and the industry sessions are the professional
+            side of the event, which is what OCPD exists for. Footer lists
+            them too. Keep the claim narrow: they support the day; they do
+            not run the sessions. */}
+        <div className="mx-auto mt-14 flex max-w-lg flex-col items-center gap-4 border-t border-ink/10 pt-10 text-center">
+          <img
+            src="/chocolathon/sponsors/ocpd.png"
+            alt="Office of Career and Professional Development, Barton School of Business"
+            className="h-12 w-auto"
+          />
+          <p className="text-sm leading-relaxed text-ink/60">
+            The day at Woolsey Hall is supported by the Barton School&rsquo;s
+            Office of Career and Professional Development.
+          </p>
+        </div>
+
         <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
           Schedule tentative · subject to minor changes
         </p>

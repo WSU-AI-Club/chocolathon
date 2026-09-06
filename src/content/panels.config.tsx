@@ -15,7 +15,6 @@ import type { ReactNode } from "react";
 import { BEATS, type BeatKey } from "../film/beats";
 import { COCOA_DOLCE_ABOUT_URL, COMPETITOR_PATH, LOVABLE_URL } from "./links";
 import Countdown from "./Countdown";
-import { HeroSponsorsBand, HeroSponsorsConstellation } from "./HeroSponsors";
 
 export type Panel = {
   beat: BeatKey;
@@ -44,20 +43,14 @@ const PANELS: Panel[] = [
             Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall, WSU
           </p>
         </div>
-        {/* The middle region: the box photo lives here (drawn by the film
-            underneath), and the sponsor marks scatter around it. It is the
-            flex-1 band between the title and the countdown, so the marks
-            are anchored to that band and can never reach the title on a
-            short window. See HeroSponsors.tsx. */}
-        <div className="relative min-h-0 w-full flex-1">
-          <HeroSponsorsConstellation />
-        </div>
-        {/* No CTA in the hero: the finale panel carries the ask once the
-            story has landed. The countdown lives down here, BELOW the box
-            photo — in the title block it overlapped the product shot. */}
+        {/* No CTA and no sponsor marks in the hero (decided 2026-09-06 after
+            trying a row, flank columns, a marquee, and a scattered
+            constellation): the box owns the first screen, the eyebrow names
+            the co-hosts, and the film uncovers the sponsors beat by beat
+            before the footer lists them. The countdown lives down here,
+            BELOW the box photo — in the title block it overlapped the
+            product shot. */}
         <div className="flex w-full flex-col items-center gap-4">
-          {/* Below lg the marks run as a band here instead of scattering. */}
-          <HeroSponsorsBand />
           <Countdown />
           <p className="scroll-hint font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50">
             Scroll · every chocolate tells you something ↓
