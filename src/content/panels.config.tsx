@@ -67,6 +67,16 @@ const PANELS: Panel[] = [
               alt="Jimmy John's Sandwiches"
               className="h-9 w-auto"
             />
+            <img
+              src="/chocolathon/sponsors/redbull.svg"
+              alt="Red Bull"
+              className="h-7 w-auto"
+            />
+            <img
+              src="/chocolathon/sponsors/ocpd.png"
+              alt="Office of Career and Professional Development, Barton School of Business"
+              className="h-8 w-auto"
+            />
           </div>
           <Countdown />
           <p className="scroll-hint font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50">
