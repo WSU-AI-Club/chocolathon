@@ -12,9 +12,11 @@
    toward Build. The page says why out loud rather than letting students
    infer that pitch work is valued less.
 
-   One cash prize per track (changed 2026-09-06, from $500/$250 and
-   $300/$150): Build $700, Pitch $500, each with a big box of Cocoa Dolce
-   chocolates. Second place in each track takes the same box, no cash.
+   One scholarship per track (changed 2026-09-06, from $500/$250 and
+   $300/$150 cash): a $700 scholarship for Build, $500 for Pitch, each
+   with a big box of Cocoa Dolce chocolates. Second place in each track
+   takes the same box, no scholarship. Prizes are scholarships, not cash;
+   say "scholarship" everywhere, never "cash" or "money".
    Same $1,200, same four winning teams, bigger headline per track.
 
    The "get to know Cocoa Dolce" block that used to close this section was
@@ -55,7 +57,7 @@ const TRACKS: Track[] = [
       "Judged on how useful and well built it is",
       "Any skill level",
     ],
-    prize: "$700 to the winning team",
+    prize: "$700 scholarship to the winning team",
   },
   {
     name: "Pitch Track",
@@ -68,7 +70,7 @@ const TRACKS: Track[] = [
       "Judged on the argument and the evidence behind it",
       "Any skill level",
     ],
-    prize: "$500 to the winning team",
+    prize: "$500 scholarship to the winning team",
   },
 ];
 
@@ -115,12 +117,12 @@ export default function TracksSection() {
           September 14, and once you have seen them you decide which way to
           answer. Each track is judged on its own, and Build carries the larger
           prize because it is the heavier lift. The winning team in each track
-          takes the cash and a big box of Cocoa Dolce chocolates; second place
-          takes home the same box.
+          takes the scholarship and a big box of Cocoa Dolce chocolates; second
+          place takes home the same box.
         </p>
 
         <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
-          $1,200 in prizes total · four winning teams
+          $1,200 in scholarships · four winning teams
         </p>
       </div>
     </section>

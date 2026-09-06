@@ -205,3 +205,30 @@
     animation: none;
   }
 }
+
+/* First-screen sponsor band (HeroSponsors.tsx). One run's width is
+   exactly half the track, so -50% loops seamlessly. Edges fade so the
+   band reads as passing behind the page rather than clipped by it. */
+.choco-root .sponsor-marquee {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+}
+.choco-root .sponsor-marquee-track {
+  animation: choco-marquee 32s linear infinite;
+}
+.choco-root .sponsor-marquee:hover .sponsor-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes choco-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .choco-root .sponsor-marquee-track {
+    animation: none;
+  }
+}

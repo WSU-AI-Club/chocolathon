@@ -15,6 +15,7 @@ import type { ReactNode } from "react";
 import { BEATS, type BeatKey } from "../film/beats";
 import { COCOA_DOLCE_ABOUT_URL, COMPETITOR_PATH, LOVABLE_URL } from "./links";
 import Countdown from "./Countdown";
+import { HeroSponsorsBand, HeroSponsorsConstellation } from "./HeroSponsors";
 
 export type Panel = {
   beat: BeatKey;
@@ -43,41 +44,20 @@ const PANELS: Panel[] = [
             Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall, WSU
           </p>
         </div>
+        {/* The middle region: the box photo lives here (drawn by the film
+            underneath), and the sponsor marks scatter around it. It is the
+            flex-1 band between the title and the countdown, so the marks
+            are anchored to that band and can never reach the title on a
+            short window. See HeroSponsors.tsx. */}
+        <div className="relative min-h-0 w-full flex-1">
+          <HeroSponsorsConstellation />
+        </div>
         {/* No CTA in the hero: the finale panel carries the ask once the
             story has landed. The countdown lives down here, BELOW the box
             photo — in the title block it overlapped the product shot. */}
-        <div className="flex flex-col items-center gap-4">
-          {/* Partner marks on the first screen. They sit in the BOTTOM block,
-              below the box photo, for the same reason the countdown does:
-              anything added to the title block grows downward and covers the
-              product shot. */}
-          <div className="flex items-center justify-center gap-8">
-            <img
-              src="/chocolathon/sponsors/cocoadolce.png"
-              alt="Cocoa Dolce"
-              className="h-4 w-auto"
-            />
-            <img
-              src="/chocolathon/sponsors/lovable.png"
-              alt="Lovable"
-              className="h-5 w-auto"
-            />
-            <img
-              src="/chocolathon/sponsors/jimmyjohns.webp"
-              alt="Jimmy John's Sandwiches"
-              className="h-9 w-auto"
-            />
-            <img
-              src="/chocolathon/sponsors/redbull.svg"
-              alt="Red Bull"
-              className="h-7 w-auto"
-            />
-            <img
-              src="/chocolathon/sponsors/ocpd.png"
-              alt="Office of Career and Professional Development, Barton School of Business"
-              className="h-8 w-auto"
-            />
-          </div>
+        <div className="flex w-full flex-col items-center gap-4">
+          {/* Below lg the marks run as a band here instead of scattering. */}
+          <HeroSponsorsBand />
           <Countdown />
           <p className="scroll-hint font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50">
             Scroll · every chocolate tells you something ↓
@@ -193,18 +173,18 @@ const PANELS: Panel[] = [
         <p className="eyebrow mb-3">Prizes</p>
         <p className="font-display text-6xl font-semibold text-ink">$1,200</p>
         <p className="mt-1 font-ui text-sm text-ink/80">
-          across two tracks, four winning teams
+          in scholarships across two tracks, four winning teams
         </p>
-        {/* One cash prize per track (decided 2026-09-06): the winning team
-            takes the money and a big box of Cocoa Dolce chocolates; second
-            place takes the same box, no cash. */}
+        {/* One scholarship per track (decided 2026-09-06): the winning team
+            takes the scholarship and a big box of Cocoa Dolce chocolates; second
+            place takes the same box, no scholarship. */}
         <dl className="ml-auto mt-5 max-w-[250px] space-y-2 border-r-2 border-gold pr-5 text-right">
           <div className="flex items-baseline justify-end gap-3">
             <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/50">
               Build
             </dt>
             <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
-              $700
+              $700 scholarship
             </dd>
           </div>
           <div className="flex items-baseline justify-end gap-3">
@@ -212,13 +192,13 @@ const PANELS: Panel[] = [
               Pitch
             </dt>
             <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
-              $500
+              $500 scholarship
             </dd>
           </div>
         </dl>
         <p className="ml-auto mt-3 max-w-[240px] text-sm leading-relaxed text-ink/60">
-          Winners take the cash and a big box of Cocoa Dolce chocolates.
-          Second place takes home the same box.
+          To the winning team in each track, plus a big box of Cocoa Dolce
+          chocolates. Second place takes home the same box.
         </p>
         <p className="ml-auto mt-4 max-w-[240px] font-mono text-xs uppercase tracking-[0.12em] text-gold">
           Refreshments, lunch and two industry speaker sessions

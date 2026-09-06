@@ -105,11 +105,11 @@ export default function MobileStory() {
         <p className="eyebrow mb-3">Prizes</p>
         <p className="font-display text-5xl font-semibold text-ink">$1,200</p>
         <p className="mt-1 text-sm text-ink/80">
-          across two tracks, four winning teams
+          in scholarships across two tracks, four winning teams
         </p>
         <p className="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-ink/70">
-          Build Track: $700 to the winning team. Pitch Track: $500 to the
-          winning team. Each winner also takes home a big box of Cocoa Dolce
+          Build Track: a $700 scholarship to the winning team. Pitch Track: a
+          $500 scholarship to the winning team. Each winner also takes home a big box of Cocoa Dolce
           chocolates, and second place in each track takes the same box.
         </p>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink/70">
