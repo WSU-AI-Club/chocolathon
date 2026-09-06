@@ -6,11 +6,16 @@
    register, and the narrow scroll-film panels physically cannot carry
    two track descriptions.
 
-   Prizes are deliberately UNEQUAL (changed 2026-08-18): Build pays
-   $500/$250 and Pitch $300/$150. Building is the heavier lift, and Pitch
-   was forecast to draw the larger field anyway, so the weighting is a
-   recruiting lever toward Build. The page says why out loud rather than
-   letting students infer that pitch work is valued less.
+   Prizes are deliberately UNEQUAL (changed 2026-08-18): Build pays more
+   than Pitch. Building is the heavier lift, and Pitch was forecast to
+   draw the larger field anyway, so the weighting is a recruiting lever
+   toward Build. The page says why out loud rather than letting students
+   infer that pitch work is valued less.
+
+   One cash prize per track (changed 2026-09-06, from $500/$250 and
+   $300/$150): Build $700, Pitch $500, each with a big box of Cocoa Dolce
+   chocolates. Second place in each track takes the same box, no cash.
+   Same $1,200, same four winning teams, bigger headline per track.
 
    The "get to know Cocoa Dolce" block that used to close this section was
    removed 2026-08-18: the what-it-is beat now carries their logo and a link,
@@ -50,7 +55,7 @@ const TRACKS: Track[] = [
       "Judged on how useful and well built it is",
       "Any skill level",
     ],
-    prize: "$500 first place · $250 second place",
+    prize: "$700 to the winning team",
   },
   {
     name: "Pitch Track",
@@ -63,7 +68,7 @@ const TRACKS: Track[] = [
       "Judged on the argument and the evidence behind it",
       "Any skill level",
     ],
-    prize: "$300 first place · $150 second place",
+    prize: "$500 to the winning team",
   },
 ];
 
@@ -106,10 +111,12 @@ export default function TracksSection() {
             this paragraph pushed the actual content off the first screen and
             made a reader wade through admin before seeing what they came for. */}
         <p className="mx-auto mt-14 max-w-lg text-center text-base leading-relaxed text-ink/70">
-          You do not pick a track when you register. Prompts release September
-          14, and once you have seen them you decide which way to answer. Each
-          track is judged on its own, and Build carries the larger prize because
-          it is the heavier lift.
+          You pick your track when you submit, not before. Prompts release
+          September 14, and once you have seen them you decide which way to
+          answer. Each track is judged on its own, and Build carries the larger
+          prize because it is the heavier lift. The winning team in each track
+          takes the cash and a big box of Cocoa Dolce chocolates; second place
+          takes home the same box.
         </p>
 
         <p className="mt-10 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">

@@ -524,7 +524,7 @@ export const SECTIONS: Section[] = [
           "Answer by building: a working product or prototype Cocoa Dolce could put to use",
           "You submit the product, a video, and a demo",
           "Judged on how genuinely useful and how well built it is",
-          "$500 first place · $250 second place",
+          "$700 to the winning team, with a big box of Cocoa Dolce chocolates",
         ],
       },
       {
@@ -534,7 +534,7 @@ export const SECTIONS: Section[] = [
           "Answer by making the case: a recommendation Cocoa Dolce could act on, backed by real evidence",
           "You submit a pitch video and a demo that makes the idea tangible — a mock landing page, a concept prototype, a data visualization",
           "Judged on the strength of the argument and the evidence behind it",
-          "$300 first place · $150 second place",
+          "$500 to the winning team, with a big box of Cocoa Dolce chocolates",
         ],
       },
       {
@@ -542,8 +542,10 @@ export const SECTIONS: Section[] = [
         label: "Why the prizes are unequal",
         body:
           "Build pays more because it is the heavier lift. That is a deliberate " +
-          "weighting, not a statement about which work matters. Both tracks keep a " +
-          "second-place prize, and both are judged on their own terms.",
+          "weighting, not a statement about which work matters. One cash prize per " +
+          "track: the winning team takes the money and a big box of Cocoa Dolce " +
+          "chocolates, and second place in each track takes home the same box. " +
+          "Both tracks are judged on their own terms.",
       },
       {
         kind: "text",

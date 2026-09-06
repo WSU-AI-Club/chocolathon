@@ -1,11 +1,11 @@
 /* Mobile + reduced-motion fallback — the same story as normal scroll
    sections built on the real photography. No scroll-jacking.
 
-   The hero CTA stays here (unlike the desktop film, where the masthead
-   carries it and the finale panel pays it off): there is no crown-arc
-   payoff on this path, so the ask has to be reachable immediately. */
+   The hero Register CTA was removed 2026-09-06: registration is a
+   separate form that closed September 10, and the page launches after
+   that. The masthead's Join-the-club button is the only CTA up top;
+   Competitor HQ is reachable from the footer. */
 
-import { ACTIVE_FORM_URL } from "./links";
 import Countdown from "./Countdown";
 
 const SPRITES = [
@@ -40,14 +40,6 @@ export default function MobileStory() {
           Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall
         </p>
         <Countdown className="mt-9" variant="stack" />
-        <a
-          className="btn-cta mt-6"
-          href={ACTIVE_FORM_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Register your team
-        </a>
       </section>
 
       {/* What it is */}
@@ -72,7 +64,7 @@ export default function MobileStory() {
           Build ahead. Compete live.
         </h2>
         <ol className="mx-auto mt-5 max-w-md space-y-2 text-left text-base leading-relaxed text-ink/80">
-          <li><strong className="text-ink">1.</strong> Register solo or with a team of up to four.</li>
+          <li><strong className="text-ink">1.</strong> Teams of one to four, any major.</li>
           <li><strong className="text-ink">2.</strong> Prompts release September 14. Build on your own time, at your own pace.</li>
           <li><strong className="text-ink">3.</strong> Submit at the finale, September 19, at Woolsey Hall.</li>
           <li><strong className="text-ink">4.</strong> Finalists present live on stage.</li>
@@ -90,7 +82,6 @@ export default function MobileStory() {
       <section className="px-6 py-14">
         <dl className="mx-auto max-w-xs space-y-3 border-l-2 border-gold pl-5">
           {[
-            ["Registration", "Aug 24 – Sep 10"],
             ["Prompts release", "Monday, September 14"],
             ["Finale", "Saturday, September 19"],
             ["Time", "8:30 AM – 5:00 PM"],
@@ -117,15 +108,15 @@ export default function MobileStory() {
           across two tracks, four winning teams
         </p>
         <p className="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-ink/70">
-          Build Track: $500 first place, $250 second. Pitch Track: $300 first
-          place, $150 second. Winners also take home a box of Cocoa Dolce
-          chocolates.
+          Build Track: $700 to the winning team. Pitch Track: $500 to the
+          winning team. Each winner also takes home a big box of Cocoa Dolce
+          chocolates, and second place in each track takes the same box.
         </p>
         <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink/70">
           Cocoa Dolce provides morning refreshments, coffee and chocolates.
-          Jimmy John's provides lunch. You are fed all day, you get two
-          two industry speaker sessions, and a room of people to show your
-          work to.
+          Jimmy John's provides lunch. Red Bull keeps the drinks coming all
+          day. You are fed all day, you get two industry speaker sessions,
+          and a room of people to show your work to.
         </p>
         <p className="mx-auto mt-8 max-w-md text-base leading-relaxed text-ink/80">
           Open to all WSU students, any major, any skill level. Cocoa

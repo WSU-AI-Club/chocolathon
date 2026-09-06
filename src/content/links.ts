@@ -1,36 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LINKS — every outbound URL and date-driven switch, in one place.
+   LINKS — every outbound URL, in one place.
 
-   Lovable: these three values are safe to edit. Nothing else on the
-   page hardcodes a form URL, so changing them here changes every
-   button at once.
+   Nothing else on the page hardcodes a URL, so changing a value here
+   changes every button at once.
+
+   Registration is NOT on this page (decided 2026-09-06). It ran
+   August 24 – September 10 as a Microsoft Form circulated separately
+   (https://forms.cloud.microsoft/r/aCrbnM5Dys, owned in the club's
+   MS 365 group). The page launches when the competition starts, after
+   registration has closed, so it carries no register CTA and no
+   registration dates. The registration switch and form URL that used to
+   live here were removed with the buttons.
    ═══════════════════════════════════════════════════════════════════ */
-
-/* The REGISTRATION form — full team roster. Opens Monday, August 24
-   and closes Thursday, September 10. Lives in the AI Club's Microsoft
-   Teams account; responses land in the club's Excel sheet. */
-export const REGISTER_URL = "https://forms.cloud.microsoft/r/aCrbnM5Dys";
-
-/* The INTEREST form — email capture only, running August 6–23 per the
-   Master Document. Leave empty if the page won't be public before
-   August 24; the CTA then points at the registration form regardless. */
-export const INTEREST_URL = "";
-
-/* Flipped `true` on Monday, August 24, when registration opened. Swaps
-   the CTA target, its label, and the line beneath it. The Microsoft
-   Form also enforces its own open/close window in its own settings —
-   set that too, so the two can never drift apart.
-
-   Nothing flips it back on September 10: the Form closes itself, and the
-   page should keep saying "closes September 10" rather than reverting to
-   "opens August 24". */
-export const REGISTRATION_OPEN = true;
-
-/* Where every CTA actually points right now. Before August 24 this is
-   the interest form, but only if one has been set above — otherwise
-   the registration form, so a CTA can never dead-end on an empty href. */
-export const ACTIVE_FORM_URL =
-  !REGISTRATION_OPEN && INTEREST_URL ? INTEREST_URL : REGISTER_URL;
 
 /* ── AI Club (not Chocolathon-specific) ──────────────────────────────
    Any of the three URLs below may be left empty: the footer hides that

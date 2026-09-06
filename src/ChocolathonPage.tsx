@@ -16,7 +16,6 @@ import Masthead from "./content/Masthead";
 import TracksSection from "./content/TracksSection";
 import ScheduleSection from "./content/ScheduleSection";
 import JudgesSection from "./content/JudgesSection";
-import RegisterSection from "./content/RegisterSection";
 import FooterSection from "./content/FooterSection";
 import MobileStory from "./content/MobileStory";
 import "./chocolathon.css";
@@ -53,7 +52,8 @@ export default function ChocolathonPage() {
       <TracksSection />
       <ScheduleSection />
       <JudgesSection />
-      <RegisterSection />
+      {/* RegisterSection was removed 2026-09-06: registration is a separate
+          form that closed September 10, and the page launches after that. */}
       <FooterSection />
     </div>
   );

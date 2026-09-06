@@ -1,15 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════════
-   FOOTER — partners and sponsors, and the ways to stay in touch that
-   are NOT Chocolathon registration.
+   FOOTER — partners and sponsors, and the ways to stay in touch.
 
-   Kept separate from RegisterSection on purpose: the register CTA has
-   to be the loudest thing on that section, so the "join the club" and
-   "contact us" asks live down here where they cannot compete with it.
+   One sponsor row (2026-09-06), in this order: Cocoa Dolce, Lovable,
+   Jimmy John's, Red Bull, OCPD. Red Bull sponsors the drinks; the Barton
+   School's Office of Career and Professional Development covers the
+   room. The row is larger than it used to be on purpose: with the
+   register CTA gone from the page, this is the last thing a visitor
+   sees and it can afford the room.
+
+   Logo heights are set per mark, not shared: the wordmarks (Cocoa Dolce,
+   Lovable) are wide and thin, the badges (Jimmy John's, OCPD) are tall,
+   and Red Bull sits between. Equal heights would make the wordmarks
+   read as banners and the badges as icons.
 
    No AI Club logo here (removed 2026-08-18). The current mark is a
-   placeholder and sat badly next to the professionally designed Cocoa
-   Dolce, Lovable and Jimmy John's logos; the club is named in text
-   instead until a real mark exists.
+   placeholder and sat badly next to the professionally designed partner
+   logos; the club is named in text instead until a real mark exists.
    ═══════════════════════════════════════════════════════════════════ */
 
 import {
@@ -54,30 +60,34 @@ export default function FooterSection() {
 
   return (
     <footer className="border-t border-ink/10 bg-white px-5 py-20 text-center">
-      <div className="mx-auto max-w-2xl">
+      {/* The sponsor row sits outside the narrow footer column so five
+          marks fit on one line at desktop widths; on a phone they wrap. */}
+      <div className="mx-auto max-w-5xl">
         <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
-          Hosted by the WSU AI Club · In partnership with
+          Hosted by the WSU AI Club · Sponsored by
         </p>
-        <div className="mt-6 flex items-center justify-center">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
           <img
             src="/chocolathon/sponsors/cocoadolce.png"
             alt="Cocoa Dolce"
-            className="h-5 w-auto"
+            className="h-7 w-auto"
           />
-        </div>
-
-        <p className="mt-10 font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
-          Sponsored by
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-5">
-          <img src="/chocolathon/sponsors/lovable.png" alt="Lovable" className="h-6 w-auto" />
+          <img src="/chocolathon/sponsors/lovable.png" alt="Lovable" className="h-9 w-auto" />
           <img
             src="/chocolathon/sponsors/jimmyjohns.webp"
             alt="Jimmy John's Sandwiches"
-            className="h-12 w-auto"
+            className="h-20 w-auto"
+          />
+          <img src="/chocolathon/sponsors/redbull.svg" alt="Red Bull" className="h-14 w-auto" />
+          <img
+            src="/chocolathon/sponsors/ocpd.png"
+            alt="Office of Career and Professional Development, Barton School of Business"
+            className="h-16 w-auto"
           />
         </div>
+      </div>
 
+      <div className="mx-auto max-w-2xl">
         {/* Stay-with-the-club block. */}
         <div className="mt-16 border-t border-ink/10 pt-12">
           <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
@@ -134,10 +144,9 @@ export default function FooterSection() {
           ) : null}
         </div>
 
-        {/* Registered teams only. Kept at the very bottom and kept quiet
-            on purpose — before September 10 nobody has a code yet, and a
-            prominent second door would generate support email from
-            students who have not registered. The gate itself explains
+        {/* Registered teams only. Kept quiet down here on purpose so it
+            never competes with the club ask above; the finale panel on
+            desktop carries the loud version. The gate itself explains
             when codes go out. */}
         <div className="mt-14 border-t border-ink/10 pt-8">
           <a

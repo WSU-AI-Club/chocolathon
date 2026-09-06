@@ -1,10 +1,11 @@
-/* Persistent top bar: club badge, section jumps, and the always-available
-   Register CTA. This bar is the ONLY register affordance until the finale,
-   so it stays visible for the whole scroll. */
+/* Persistent top bar: club badge, section jumps, and the Join-the-club
+   CTA. The Register button that used to sit here was removed 2026-09-06:
+   registration is a separate form that closed September 10, and the page
+   launches after that. */
 
 import { useEffect, useState } from "react";
 
-import { ACTIVE_FORM_URL, CLUB_JOIN_URL } from "./links";
+import { CLUB_JOIN_URL } from "./links";
 
 export default function Masthead({
   deferSurface = false,
@@ -54,7 +55,7 @@ export default function Masthead({
           <span className="hidden sm:inline">WSU AI Club · </span>Sep 19
         </a>
 
-        {/* Section jumps collapse below md so the two CTAs never wrap on a
+        {/* Section jumps collapse below md so the CTA never wraps on a
             phone. The Join label shortens on small screens for the same
             reason. */}
         <nav className="flex items-center gap-0.5">
@@ -67,29 +68,20 @@ export default function Masthead({
           <a href="#judges" className="masthead-link hidden md:inline-flex">
             Judges
           </a>
-          {/* White, not amber: Register has to stay the single primary
-              action up here. Explicit white background rather than the
-              transparent btn-ghost, because this bar floats over the
-              scrolling photography and must stay legible. */}
+          {/* Explicit white background rather than the transparent
+              btn-ghost, because this bar floats over the scrolling
+              photography and must stay legible. */}
           {CLUB_JOIN_URL ? (
             <a
               href={CLUB_JOIN_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost ml-2 !min-h-[38px] !bg-white !px-4 !text-xs sm:ml-3"
+              className="btn-ghost ml-2 !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs sm:ml-3"
             >
               <span className="sm:hidden">Join Club</span>
               <span className="hidden sm:inline">Join the AI Club</span>
             </a>
           ) : null}
-          <a
-            href={ACTIVE_FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-cta ml-2 !min-h-[38px] !px-4 !text-xs sm:!px-5"
-          >
-            Register
-          </a>
         </nav>
       </div>
     </header>

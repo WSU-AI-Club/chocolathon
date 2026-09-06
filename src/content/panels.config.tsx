@@ -13,12 +13,7 @@
 
 import type { ReactNode } from "react";
 import { BEATS, type BeatKey } from "../film/beats";
-import {
-  ACTIVE_FORM_URL,
-  COCOA_DOLCE_ABOUT_URL,
-  LOVABLE_URL,
-  REGISTRATION_OPEN,
-} from "./links";
+import { COCOA_DOLCE_ABOUT_URL, COMPETITOR_PATH, LOVABLE_URL } from "./links";
 import Countdown from "./Countdown";
 
 export type Panel = {
@@ -48,10 +43,9 @@ const PANELS: Panel[] = [
             Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall, WSU
           </p>
         </div>
-        {/* No CTA in the hero: the masthead Register button is persistent,
-            and the finale panel carries the ask once the story has landed.
-            The countdown lives down here, BELOW the box photo — in the
-            title block it overlapped the product shot. */}
+        {/* No CTA in the hero: the finale panel carries the ask once the
+            story has landed. The countdown lives down here, BELOW the box
+            photo — in the title block it overlapped the product shot. */}
         <div className="flex flex-col items-center gap-4">
           {/* Partner marks on the first screen. They sit in the BOTTOM block,
               below the box photo, for the same reason the countdown does:
@@ -171,7 +165,7 @@ const PANELS: Panel[] = [
           Build ahead. Compete live.
         </h2>
         <ol className="mt-4 space-y-2 text-base leading-relaxed text-ink/80">
-          <li><strong className="text-ink">1.</strong> Register solo or with a team of up to four.</li>
+          <li><strong className="text-ink">1.</strong> Teams of one to four, any major.</li>
           <li><strong className="text-ink">2.</strong> Prompts release September 14. Build on your own time, at your own pace.</li>
           <li><strong className="text-ink">3.</strong> Submit at the finale, September 19, at Woolsey Hall.</li>
           <li><strong className="text-ink">4.</strong> Finalists present live on stage.</li>
@@ -191,13 +185,16 @@ const PANELS: Panel[] = [
         <p className="mt-1 font-ui text-sm text-ink/80">
           across two tracks, four winning teams
         </p>
+        {/* One cash prize per track (decided 2026-09-06): the winning team
+            takes the money and a big box of Cocoa Dolce chocolates; second
+            place takes the same box, no cash. */}
         <dl className="ml-auto mt-5 max-w-[250px] space-y-2 border-r-2 border-gold pr-5 text-right">
           <div className="flex items-baseline justify-end gap-3">
             <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/50">
               Build
             </dt>
             <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
-              $500 · $250
+              $700
             </dd>
           </div>
           <div className="flex items-baseline justify-end gap-3">
@@ -205,12 +202,13 @@ const PANELS: Panel[] = [
               Pitch
             </dt>
             <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
-              $300 · $150
+              $500
             </dd>
           </div>
         </dl>
         <p className="ml-auto mt-3 max-w-[240px] text-sm leading-relaxed text-ink/60">
-          First and second in each track, plus a box of Cocoa Dolce chocolates.
+          Winners take the cash and a big box of Cocoa Dolce chocolates.
+          Second place takes home the same box.
         </p>
         <p className="ml-auto mt-4 max-w-[240px] font-mono text-xs uppercase tracking-[0.12em] text-gold">
           Refreshments, lunch and two industry speaker sessions
@@ -264,10 +262,11 @@ const PANELS: Panel[] = [
           <img src="/chocolathon/sponsors/cocoadolce.png" alt="Cocoa Dolce" className="h-5 w-auto" />
           <img src="/chocolathon/sponsors/lovable.png" alt="Lovable" className="h-7 w-auto" />
           <img src="/chocolathon/sponsors/jimmyjohns.webp" alt="Jimmy John's Sandwiches" className="h-14 w-auto" />
+          <img src="/chocolathon/sponsors/redbull.svg" alt="Red Bull" className="h-9 w-auto" />
         </div>
         <p className="mt-5 text-sm leading-relaxed text-ink/70">
           Morning refreshments and chocolates from Cocoa Dolce. AI build
-          credits from Lovable. Lunch by Jimmy John&rsquo;s.
+          credits from Lovable. Lunch by Jimmy John&rsquo;s. Red Bull all day.
         </p>
       </div>
     ),
@@ -280,29 +279,22 @@ const PANELS: Panel[] = [
     node: (
       <div className="flex h-full flex-col items-center justify-end pb-[7vh] text-center">
         <div className="panel-scrim flex flex-col items-center">
-          {/* Flips with the REGISTRATION_OPEN switch in ./links, so this
-              line above the main Register button can never go stale. */}
-          <p className="eyebrow mb-4">
-            {REGISTRATION_OPEN
-              ? "Registration closes September 10"
-              : "Registration opens August 24"}
-          </p>
+          {/* The register CTA that closed the story was removed 2026-09-06:
+              registration is a separate form that closed September 10, and
+              the page launches after that. The ask is now the hub, since
+              every registered team holds a code by launch. */}
+          <p className="eyebrow mb-4">Finale September 19</p>
           <h2 className="font-display text-5xl font-semibold tracking-tight text-ink md:text-6xl">
-            Pick your team.
+            Bring your best.
           </h2>
           <p className="mt-4 max-w-md text-base text-ink/80">
             Local AI industry judges review every submission and advance the
             top teams. Finalists present live, where the Cocoa Dolce leadership
-            picks the winners. Teams lock at registration and close September 10.
+            picks the winners.
           </p>
           <div className="mt-7">
-            <a
-              className="btn-cta"
-              href={ACTIVE_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Register your team
+            <a className="btn-cta" href={COMPETITOR_PATH}>
+              Competitor HQ
             </a>
           </div>
         </div>

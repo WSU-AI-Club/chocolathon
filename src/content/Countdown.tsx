@@ -22,19 +22,14 @@ import { useEffect, useState } from "react";
 
 /* The milestones the timer walks through, in order. It always counts to
    the FIRST one still in the future, so the deadline on screen is always
-   the next thing a student can still act on — registration first, since
-   that is the only one they can miss.
+   the next thing a student can still act on. The registration milestone
+   was removed 2026-09-06: registration is a separate form that closed
+   September 10, and the page launches after that.
 
    Explicit UTC offsets, NOT local time: the countdown must read the same
    for a student in Wichita and a parent in another timezone. Central
    Daylight Time is UTC-5 in September. */
 const MILESTONES: Array<{ at: Date; caption: string; spoken: string }> = [
-  {
-    /* "Closes Thursday, September 10" reads as: you have all of the 10th. */
-    at: new Date("2026-09-10T23:59:00-05:00"),
-    caption: "Registration closes September 10",
-    spoken: "until registration closes on September 10",
-  },
   {
     at: new Date("2026-09-14T09:00:00-05:00"),
     caption: "Prompts release September 14",
