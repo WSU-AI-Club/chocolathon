@@ -15,15 +15,16 @@ import { useEffect, useMemo, useState } from "react";
 
 import { REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
-import type { Block, HubData, Prompt, Section } from "./types";
+import type { Block, HubData, Prompt, ResultEntry, Section } from "./types";
 
 export default function CompetitorHub({ data }: { data: HubData }) {
   const navItems = useMemo(
     () => [
+      ...(data.results.published ? [{ id: "results", nav: "Results" }] : []),
       { id: "prompts", nav: "Prompts" },
       ...data.sections.map((s) => ({ id: s.id, nav: s.nav })),
     ],
-    [data.sections],
+    [data.sections, data.results.published],
   );
   const active = useActiveSection(navItems.map((n) => n.id));
 
@@ -32,6 +33,7 @@ export default function CompetitorHub({ data }: { data: HubData }) {
       <HqBar items={navItems} active={active} />
 
       <main className="mx-auto max-w-3xl px-5 pb-32 pt-28 sm:px-8">
+        {data.results.published ? <ResultsSection data={data} /> : null}
         <PromptsSection data={data} />
         {data.sections.map((s) => (
           <SectionBlock key={s.id} section={s} data={data} />
@@ -132,6 +134,93 @@ function useActiveSection(ids: string[]): string | null {
   }, [key]);
 
   return active;
+}
+
+/* ── results (after the event) ────────────────────────────────────── */
+
+function ResultsSection({ data }: { data: HubData }) {
+  const r = data.results;
+  const title = (id: string) => data.prompts.find((p) => p.id === id)?.title ?? "";
+  return (
+    <section id="results" className="mb-24 scroll-mt-20">
+      <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight text-ink md:text-6xl">
+        The results.
+      </h1>
+      {r.intro ? (
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/80">{r.intro}</p>
+      ) : null}
+      <div className="mt-10 space-y-14">
+        {r.tracks.map((t) => (
+          <div key={t.track}>
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-ink">
+              {t.track === "build" ? "Build Track" : "Pitch Track"}
+            </h2>
+            <div className="mt-6 space-y-8">
+              <ResultCard place="Winner" entry={t.winner} title={title} big />
+              <ResultCard place="Second place" entry={t.second} title={title} />
+            </div>
+            {t.finalists.length ? (
+              <p className="mt-6 text-base leading-relaxed text-ink/80">
+                <span className="label">Also in the finals</span>
+                <br />
+                {t.finalists.join(" · ")}
+              </p>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ResultCard({
+  place,
+  entry,
+  title,
+  big = false,
+}: {
+  place: string;
+  entry: ResultEntry;
+  title: (id: string) => string;
+  big?: boolean;
+}) {
+  if (!entry.team) return null;
+  return (
+    <div className="border-l-2 border-gold pl-5">
+      <p className="label label-accent">{place}</p>
+      <p
+        className={
+          "mt-1 font-display font-semibold leading-tight tracking-tight text-ink " +
+          (big ? "text-3xl" : "text-2xl")
+        }
+      >
+        {entry.team}
+      </p>
+      {entry.prompt ? (
+        <p className="label mt-2">
+          {entry.prompt}
+          {title(entry.prompt) ? ` · ${title(entry.prompt)}` : ""}
+        </p>
+      ) : null}
+      {entry.line ? (
+        <p className="mt-3 max-w-xl text-base leading-relaxed text-ink/80">{entry.line}</p>
+      ) : null}
+      {entry.demo || entry.video ? (
+        <div className="mt-4 flex flex-wrap gap-3">
+          {entry.demo ? (
+            <a href={entry.demo} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm">
+              See the project
+            </a>
+          ) : null}
+          {entry.video ? (
+            <a href={entry.video} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm">
+              Watch the video
+            </a>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 /* ── prompts ──────────────────────────────────────────────────────── */

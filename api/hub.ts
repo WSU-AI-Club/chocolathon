@@ -28,6 +28,7 @@ import {
   CONTACT_EMAIL,
   PROMPTS,
   PROMPTS_INTRO,
+  RESULTS,
   RUN_OF_DAY,
   SECTIONS,
 } from "./_content.js";
@@ -52,6 +53,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     prompts: unlocked ? PROMPTS : [],
     sections: SECTIONS,
     runOfDay: RUN_OF_DAY,
+    results: RESULTS,
     contactEmail: CONTACT_EMAIL,
   });
 }

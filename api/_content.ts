@@ -681,4 +681,53 @@ export const SECTIONS: Section[] = [
   },
 ];
 
+/* ── Results ──────────────────────────────────────────────────────────
+   Prepared before the event, published after it by flipping ONE switch:
+   set `published: true` below, fill in the names, push. The HQ page then
+   opens on Results (above the prompts) and the landing page's HQ band
+   gains a Results row; nothing else changes. Empty strings render as
+   nothing, so a half-filled entry never shows a blank line. */
+
+export type ResultEntry = {
+  team: string;
+  prompt: string; // e.g. "B-2"
+  line: string; // one sentence on what they built or pitched
+  demo?: string;
+  video?: string;
+};
+
+export type TrackResult = {
+  track: "build" | "pitch";
+  winner: ResultEntry;
+  second: ResultEntry;
+  finalists: string[]; // the other finalist team names
+};
+
+export type Results = {
+  published: boolean;
+  intro: string;
+  tracks: TrackResult[];
+};
+
+export const RESULTS: Results = {
+  published: false,
+  intro:
+    "Twenty-odd teams, eight prompts, one Saturday at Woolsey Hall. Here is who " +
+    "the Cocoa Dolce leadership picked, and what they built.",
+  tracks: [
+    {
+      track: "build",
+      winner: { team: "", prompt: "", line: "", demo: "", video: "" },
+      second: { team: "", prompt: "", line: "", demo: "", video: "" },
+      finalists: [],
+    },
+    {
+      track: "pitch",
+      winner: { team: "", prompt: "", line: "", demo: "", video: "" },
+      second: { team: "", prompt: "", line: "", demo: "", video: "" },
+      finalists: [],
+    },
+  ],
+};
+
 export const CONTACT_EMAIL = "aiclub@wichita.edu";

@@ -32,6 +32,27 @@ export type Section = {
   blocks: Block[];
 };
 
+export type ResultEntry = {
+  team: string;
+  prompt: string;
+  line: string;
+  demo?: string;
+  video?: string;
+};
+
+export type TrackResult = {
+  track: "build" | "pitch";
+  winner: ResultEntry;
+  second: ResultEntry;
+  finalists: string[];
+};
+
+export type Results = {
+  published: boolean;
+  intro: string;
+  tracks: TrackResult[];
+};
+
 export type HubData = {
   promptsUnlocked: boolean;
   releaseAt: string;
@@ -39,5 +60,6 @@ export type HubData = {
   prompts: Prompt[];
   sections: Section[];
   runOfDay: { time: string; what: string; who?: string; flag?: boolean }[];
+  results: Results;
   contactEmail: string;
 };
