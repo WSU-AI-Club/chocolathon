@@ -19,11 +19,11 @@ import ChocolathonPage from "./ChocolathonPage";
    measure — the gate is server-side — just weight. */
 const CompetitorApp = lazy(() => import("./competitor/CompetitorApp"));
 
-/* Matches /prompts, /prompts/, a mounted prefix such as
-   /chocolathon/prompts, and the older /competitors path so any link
-   sent out before 2026-09-06 keeps working. */
+/* Matches /hq, /hq/, a mounted prefix such as /chocolathon/hq, and the
+   older /prompts and /competitors paths so any link sent out before
+   2026-09-06 keeps working. */
 function isCompetitorRoute(pathname: string): boolean {
-  return /(^|\/)(prompts|competitors)\/?$/i.test(pathname);
+  return /(^|\/)(hq|prompts|competitors)\/?$/i.test(pathname);
 }
 
 export default function App() {

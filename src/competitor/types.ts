@@ -3,7 +3,7 @@
    Deliberately a mirror of `api/_content.ts` rather than an import from
    it. Importing the server file into `src/` would pull every prompt into
    the browser bundle and quietly undo the release clock. Keep the two
-   in sync by hand; it is four types. */
+   in sync by hand; it is a handful of types. */
 
 export type Block =
   | { kind: "text"; label: string; body: string }
@@ -29,9 +29,9 @@ export type Section = {
 export type HubData = {
   promptsUnlocked: boolean;
   releaseAt: string;
+  promptsIntro: string;
   prompts: Prompt[];
   sections: Section[];
-  keyDates: { date: string; what: string }[];
-  runOfDay: { time: string; what: string; flag?: boolean }[];
+  runOfDay: { time: string; what: string; who?: string; flag?: boolean }[];
   contactEmail: string;
 };

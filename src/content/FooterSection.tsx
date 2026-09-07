@@ -22,7 +22,7 @@ import {
   CLUB_INSTAGRAM_URL,
   CLUB_JOIN_URL,
   CLUB_LINKEDIN_URL,
-  PROMPTS_PATH,
+  HQ_PATH,
 } from "./links";
 
 /* Full-colour brand marks. The earlier monochrome versions looked
@@ -63,7 +63,7 @@ export default function FooterSection() {
       {/* The sponsor row sits outside the narrow footer column so five
           marks fit on one line at desktop widths; on a phone they wrap. */}
       <div className="mx-auto max-w-5xl">
-        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
+        <p className="label">
           Hosted by the WSU AI Club · Sponsored by
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
@@ -144,15 +144,12 @@ export default function FooterSection() {
           ) : null}
         </div>
 
-        {/* The prompts page. Kept quiet down here so it never competes
-            with the club ask above; the masthead and the finale panel
-            carry the louder versions. */}
+        {/* Competition HQ. Kept quiet down here so it never competes with
+            the club ask above; the masthead and the HQ band carry the
+            louder versions. */}
         <div className="mt-14 border-t border-ink/10 pt-8">
-          <a
-            href={PROMPTS_PATH}
-            className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40 no-underline transition-colors hover:text-ink/70"
-          >
-            The challenge prompts, rules, and finale day →
+          <a href={HQ_PATH} className="label no-underline transition-colors hover:text-ink">
+            Competition HQ: prompts, tracks, schedule, judges, rules →
           </a>
         </div>
       </div>

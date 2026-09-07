@@ -45,14 +45,21 @@ export const COCOA_DOLCE_ABOUT_URL =
    homepage is the canonical destination. */
 export const LOVABLE_URL = "https://lovable.dev";
 
-/* ── The prompts page ────────────────────────────────────────────────
+/* ── Competition HQ ──────────────────────────────────────────────────
    Public (decided 2026-09-06, no logins): the eight challenge prompts,
-   the rules, submission, judging, and the run of finale day. Same
-   origin, not an outbound link — the App-level route switch in
-   `src/App.tsx` picks it up. /competitors still resolves to the same
-   page for anyone holding the old link.
+   the tracks, the finale-day schedule, the judges, the rules, and the
+   FAQ, on one page. Same origin, not an outbound link — the App-level
+   route switch in `src/App.tsx` picks it up. /prompts and /competitors
+   resolve to the same page for anyone holding an older link.
 
-   The prompt text is served by /api/hub only after the release clock
-   (midnight, September 14, Wichita time); before that the page shows a
-   countdown and the prompts do not exist in the browser at all. */
-export const PROMPTS_PATH = "/prompts";
+   The prompt text is served by /api/hub only after the release clock;
+   before that the page shows a countdown and the prompts do not exist
+   in the browser at all. */
+export const HQ_PATH = "/hq";
+export const PROMPTS_HREF = `${HQ_PATH}#prompts`;
+
+/* The client's copy of the server clock in api/_release.ts: midnight on
+   September 14, Wichita time. Decides what the prompts BUTTON looks
+   like; the server decides what the prompts PAGE contains. Keep the two
+   identical. */
+export const PROMPTS_RELEASE_AT = new Date("2026-09-14T05:00:00.000Z");

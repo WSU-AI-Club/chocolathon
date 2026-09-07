@@ -7,15 +7,19 @@
    It is fully self-contained: its styles are scoped under .choco-root
    (see chocolathon.css) and its assets live in /public/chocolathon/.
    See INTEGRATION.md for the three-step install.
+
+   Structure (reset 2026-09-06): the story film (or its mobile
+   fallback), the Competition HQ band, the Barton School block, the
+   footer. The Tracks, Schedule, and Judges sections that used to stack
+   here moved into Competition HQ so every fact lives in one place.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from "react";
 import ScrollFilm from "./film/ScrollFilm";
 import Overlay from "./content/Overlay";
 import Masthead from "./content/Masthead";
-import TracksSection from "./content/TracksSection";
-import ScheduleSection from "./content/ScheduleSection";
-import JudgesSection from "./content/JudgesSection";
+import HqSection from "./content/HqSection";
+import BackedBySection from "./content/BackedBySection";
 import FooterSection from "./content/FooterSection";
 import MobileStory from "./content/MobileStory";
 import "./chocolathon.css";
@@ -49,11 +53,8 @@ export default function ChocolathonPage() {
       ) : (
         <MobileStory />
       )}
-      <TracksSection />
-      <ScheduleSection />
-      <JudgesSection />
-      {/* RegisterSection was removed 2026-09-06: registration is a separate
-          form that closed September 10, and the page launches after that. */}
+      <HqSection />
+      <BackedBySection />
       <FooterSection />
     </div>
   );

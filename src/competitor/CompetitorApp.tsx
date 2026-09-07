@@ -34,7 +34,7 @@ export default function CompetitorApp() {
           status: "error",
           message:
             body?.error ??
-            "The prompts page is having a problem. Try again in a minute.",
+            "Competition HQ is having a problem. Try again in a minute.",
         });
         return;
       }
@@ -70,7 +70,7 @@ export default function CompetitorApp() {
     tag.content = "noindex, nofollow";
     document.head.appendChild(tag);
     const previousTitle = document.title;
-    document.title = "Chocolathon — The Prompts";
+    document.title = "Chocolathon — Competition HQ";
     return () => {
       tag.remove();
       document.title = previousTitle;
@@ -81,9 +81,7 @@ export default function CompetitorApp() {
     <div className="choco-root">
       {state.status === "loading" ? (
         <Centered>
-          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40">
-            Loading…
-          </p>
+          <p className="label">Loading…</p>
         </Centered>
       ) : state.status === "error" ? (
         <Centered>

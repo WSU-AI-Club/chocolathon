@@ -1,12 +1,15 @@
-/* Persistent top bar: club badge, section jumps, the Join-the-club CTA,
-   and the Register CTA. Register is the single amber action up here
-   while it lasts; it hides itself on the date in ./links and Join stays. */
+/* Persistent top bar. Three controls and nothing else (2026-09-06):
+   Competition HQ, Join the AI Club, and Register. The section jumps
+   that used to live here are gone; everything they pointed at now
+   lives in HQ, one click away. Register is the single amber action and
+   hides itself on the date in ./links. On a phone Join drops out (it is
+   in the footer) so HQ and Register never wrap. */
 
 import { useEffect, useState } from "react";
 
 import {
   CLUB_JOIN_URL,
-  PROMPTS_PATH,
+  HQ_PATH,
   REGISTER_URL,
   registrationOpen,
 } from "./links";
@@ -29,8 +32,8 @@ export default function Masthead({
   useEffect(() => {
     const onScroll = () => {
       if (deferSurface) {
-        const tracks = document.getElementById("tracks");
-        setSolid(!!tracks && tracks.getBoundingClientRect().top <= 0);
+        const hq = document.getElementById("hq");
+        setSolid(!!hq && hq.getBoundingClientRect().top <= 0);
       } else {
         setSolid(window.scrollY > 8);
       }
@@ -55,40 +58,27 @@ export default function Masthead({
             only until a real mark exists. */}
         <a
           href="#chocolathon-top"
-          className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-ink/75 no-underline"
+          className="label label-strong shrink-0 no-underline"
         >
           <span className="hidden sm:inline">WSU AI Club · </span>Sep 19
         </a>
 
-        {/* Section jumps collapse below md so the CTA never wraps on a
-            phone. The Join label shortens on small screens for the same
-            reason. */}
-        <nav className="flex items-center gap-0.5">
-          <a href="#tracks" className="masthead-link hidden md:inline-flex">
-            Tracks
+        <nav className="flex items-center gap-2 sm:gap-3">
+          <a
+            href={HQ_PATH}
+            className="btn-ghost !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs"
+          >
+            <span className="sm:hidden">HQ</span>
+            <span className="hidden sm:inline">Competition HQ</span>
           </a>
-          <a href="#schedule" className="masthead-link hidden md:inline-flex">
-            Schedule
-          </a>
-          <a href="#judges" className="masthead-link hidden md:inline-flex">
-            Judges
-          </a>
-          <a href={PROMPTS_PATH} className="masthead-link hidden md:inline-flex">
-            Prompts
-          </a>
-          {/* White, not amber: Register has to stay the single primary
-              action up here. Explicit white background rather than the
-              transparent btn-ghost, because this bar floats over the
-              scrolling photography and must stay legible. */}
           {CLUB_JOIN_URL ? (
             <a
               href={CLUB_JOIN_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-ghost ml-2 !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs sm:ml-3"
+              className="btn-ghost !hidden !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs sm:!inline-flex"
             >
-              <span className="sm:hidden">Join Club</span>
-              <span className="hidden sm:inline">Join the AI Club</span>
+              Join the AI Club
             </a>
           ) : null}
           {showRegister ? (
@@ -96,7 +86,7 @@ export default function Masthead({
               href={REGISTER_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-cta ml-2 !min-h-[38px] !px-4 !text-xs sm:!px-5"
+              className="btn-cta !min-h-[38px] !px-4 !text-xs sm:!px-5"
             >
               Register
             </a>

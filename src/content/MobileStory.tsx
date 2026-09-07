@@ -6,8 +6,8 @@
    payoff on this path, so the ask has to be reachable immediately. It
    hides itself on the date in ./links and the prompts link remains. */
 
-import { PROMPTS_PATH, REGISTER_URL, registrationOpen } from "./links";
-import Countdown from "./Countdown";
+import { HQ_PATH, REGISTER_URL, registrationOpen } from "./links";
+import PromptsButton from "./PromptsButton";
 
 const SPRITES = [
   "/chocolathon/sprites/yellow.webp",
@@ -37,11 +37,11 @@ export default function MobileStory() {
           width={1000}
           height={1000}
         />
-        <p className="font-mono text-xs uppercase tracking-[0.14em] text-ink/60">
+        <p className="label label-strong">
           Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall
         </p>
-        <Countdown className="mt-9" variant="stack" />
-        <div className="mt-6 flex flex-col items-center gap-3">
+        <div className="mt-8 flex flex-col items-center gap-3">
+          <PromptsButton />
           {registrationOpen() ? (
             <a
               className="btn-cta"
@@ -52,8 +52,8 @@ export default function MobileStory() {
               Register your team
             </a>
           ) : null}
-          <a className="btn-ghost" href={PROMPTS_PATH}>
-            See the prompts
+          <a className="btn-ghost" href={HQ_PATH}>
+            Competition HQ
           </a>
         </div>
       </section>
@@ -98,7 +98,7 @@ export default function MobileStory() {
       <section className="px-6 py-14">
         <dl className="mx-auto max-w-xs space-y-3 border-l-2 border-gold pl-5">
           {[
-            ["Prompts release", "Monday, September 14"],
+            ["Prompts unlock", "Monday, September 14, midnight"],
             ["Finale", "Saturday, September 19"],
             ["Time", "8:30 AM – 5:00 PM"],
             ["Place", "Woolsey Hall, WSU"],
@@ -107,10 +107,10 @@ export default function MobileStory() {
             ["Cost", "Free, food provided"],
           ].map(([k, v]) => (
             <div key={k}>
-              <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/50">
+              <dt className="label">
                 {k}
               </dt>
-              <dd className="font-ui text-lg font-semibold text-ink">{v}</dd>
+              <dd className="text-lg font-semibold text-ink">{v}</dd>
             </div>
           ))}
         </dl>

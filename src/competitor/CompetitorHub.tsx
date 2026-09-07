@@ -1,24 +1,25 @@
 /* ═══════════════════════════════════════════════════════════════════
-   THE PROMPTS PAGE — public since 2026-09-06, no logins.
+   COMPETITION HQ — the reference page (public since 2026-09-06).
 
-   Same palette, type and restraint as the public page (ink / gold /
-   amber, Bodoni display, Archivo body, Space Mono eyebrows) so it reads
-   as the same event — but no scroll film. This is a reference document
-   a team will open twenty times and read on a phone at 1 AM, so it is
-   built to be scanned, linked to, and printed. Nothing animates.
+   Same palette and type as the landing page so it reads as the same
+   event, but no scroll film. A team opens this twenty times and reads
+   it on a phone at 1 AM, so it is built to be scanned, linked to, and
+   printed. Nothing animates except the countdown.
 
-   Everything on this page arrives from /api/hub. There is no content in
-   this file.
+   No title block: the page opens directly on the prompts, which is
+   what people come for. A sticky bar carries the section buttons and
+   the Register CTA. Everything on this page arrives from /api/hub.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useMemo, useState } from "react";
 
+import { REGISTER_URL, registrationOpen } from "../content/links";
 import type { Block, HubData, Prompt, Section } from "./types";
 
 export default function CompetitorHub({ data }: { data: HubData }) {
   const navItems = useMemo(
     () => [
-      { id: "prompts", nav: "The prompts" },
+      { id: "prompts", nav: "Prompts" },
       ...data.sections.map((s) => ({ id: s.id, nav: s.nav })),
     ],
     [data.sections],
@@ -27,123 +28,79 @@ export default function CompetitorHub({ data }: { data: HubData }) {
 
   return (
     <div className="min-h-screen bg-white">
-      <HubBar />
+      <HqBar items={navItems} active={active} />
 
-      <main className="mx-auto max-w-6xl px-5 pb-32 pt-28 sm:px-8">
-        <HubHeader data={data} />
+      <main className="mx-auto max-w-3xl px-5 pb-32 pt-28 sm:px-8">
+        <PromptsSection data={data} />
+        {data.sections.map((s) => (
+          <SectionBlock key={s.id} section={s} data={data} />
+        ))}
 
-        <div className="mt-16 gap-14 lg:grid lg:grid-cols-[180px_minmax(0,1fr)]">
-          <SideNav items={navItems} active={active} />
-
-          <div className="min-w-0">
-            <PromptsSection data={data} />
-            {data.sections.map((s) => (
-              <SectionBlock key={s.id} section={s} data={data} />
-            ))}
-
-            <footer className="mt-24 border-t border-ink/10 pt-8">
-              <p className="text-sm leading-relaxed text-ink/55">
-                Something here is wrong, missing, or unclear — tell us and we
-                will fix it on this page.{" "}
-                <a
-                  href={`mailto:${data.contactEmail}`}
-                  className="text-ink underline decoration-gold underline-offset-4"
-                >
-                  {data.contactEmail}
-                </a>
-              </p>
-            </footer>
-          </div>
-        </div>
+        <footer className="mt-24 border-t border-ink/10 pt-8">
+          <p className="text-sm leading-relaxed text-ink/80">
+            Something here wrong, missing, or unclear? Tell us and we will fix
+            it on this page.{" "}
+            <a
+              href={`mailto:${data.contactEmail}`}
+              className="text-ink underline decoration-gold underline-offset-4"
+            >
+              {data.contactEmail}
+            </a>
+          </p>
+        </footer>
       </main>
     </div>
   );
 }
 
-/* ── top bar ──────────────────────────────────────────────────────── */
+/* ── sticky bar with the section buttons ─────────────────────────── */
 
-function HubBar() {
-  return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        <a
-          href="/"
-          className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-ink/75 no-underline"
-        >
-          Chocolathon
-          <span className="hidden text-ink/40 sm:inline"> · The prompts</span>
-        </a>
-        <a
-          href="/"
-          className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/45 no-underline transition-colors hover:text-ink"
-        >
-          ← Event page
-        </a>
-      </div>
-    </header>
-  );
-}
-
-/* ── header + key dates ───────────────────────────────────────────── */
-
-function HubHeader({ data }: { data: HubData }) {
-  return (
-    <>
-      <p className="eyebrow mb-4">The 2026 challenge</p>
-      <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight text-ink md:text-6xl">
-        The prompts.
-      </h1>
-      <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/70">
-        Everything you need to compete: the eight challenge prompts, the rules,
-        how you submit, and how you get judged.
-      </p>
-
-      <ol className="mt-10 grid gap-px overflow-hidden rounded-sm bg-ink/10 sm:grid-cols-2">
-        {data.keyDates.map((d) => (
-          <li key={d.date} className="bg-white px-4 py-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-gold">
-              {d.date}
-            </p>
-            <p className="mt-1.5 text-sm leading-snug text-ink/70">{d.what}</p>
-          </li>
-        ))}
-      </ol>
-    </>
-  );
-}
-
-/* ── side nav ─────────────────────────────────────────────────────── */
-
-function SideNav({
+function HqBar({
   items,
   active,
 }: {
   items: { id: string; nav: string }[];
   active: string | null;
 }) {
+  const showRegister = registrationOpen();
   return (
-    <nav className="mb-12 lg:sticky lg:top-24 lg:mb-0 lg:self-start">
-      <ul className="flex flex-wrap gap-x-5 gap-y-2 border-l-0 lg:block lg:space-y-1 lg:border-l lg:border-ink/10">
-        {items.map((item) => {
-          const on = active === item.id;
-          return (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                className={
-                  "block py-1 font-mono text-[10px] uppercase tracking-[0.14em] no-underline transition-colors lg:-ml-px lg:border-l-2 lg:pl-4 " +
-                  (on
-                    ? "text-ink lg:border-gold"
-                    : "text-ink/40 hover:text-ink/80 lg:border-transparent")
-                }
-              >
-                {item.nav}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2.5 sm:px-8">
+        <a href="/" className="label label-strong shrink-0 no-underline">
+          <span className="hidden sm:inline">Chocolathon · </span>HQ
+        </a>
+
+        {/* Horizontal scroll on a phone rather than wrapping: the bar
+            must stay one row tall or it eats the screen. */}
+        <nav className="-mx-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] sm:justify-center">
+          {items.map((item) => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className="hq-link"
+              aria-current={active === item.id ? "true" : undefined}
+            >
+              {item.nav}
+            </a>
+          ))}
+        </nav>
+
+        {showRegister ? (
+          <a
+            href={REGISTER_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-cta shrink-0 !min-h-[36px] !px-4 !text-xs"
+          >
+            Register
+          </a>
+        ) : (
+          <a href="/" className="hq-link shrink-0">
+            Event page
+          </a>
+        )}
+      </div>
+    </header>
   );
 }
 
@@ -167,7 +124,7 @@ function useActiveSection(ids: string[]): string | null {
       },
       /* Top band only: a section counts as "current" once its heading
          clears the fixed bar, not when its tail is still on screen. */
-      { rootMargin: "-88px 0px -70% 0px", threshold: 0 },
+      { rootMargin: "-80px 0px -70% 0px", threshold: 0 },
     );
     targets.forEach((t) => observer.observe(t));
     return () => observer.disconnect();
@@ -183,24 +140,18 @@ function PromptsSection({ data }: { data: HubData }) {
   const shown = data.prompts.filter((p) => p.track === track);
 
   return (
-    <section id="prompts" className="scroll-mt-24">
-      <SectionHeading
-        eyebrow={data.promptsUnlocked ? "Released" : "Locked"}
-        title="The prompts"
-      />
+    <section id="prompts" className="scroll-mt-20">
+      <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight text-ink md:text-6xl">
+        The prompts.
+      </h1>
+      <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/80">
+        {data.promptsIntro}
+      </p>
 
       {!data.promptsUnlocked ? (
         <PromptsLocked releaseAt={data.releaseAt} />
       ) : (
         <>
-          <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/70">
-            Eight prompts, four per track. Three are specific problems pulled
-            straight off Cocoa Dolce's floor; the fourth in each track is a
-            wildcard. <strong className="font-semibold text-ink">Pick one.</strong>{" "}
-            You declare which track you are in when you submit, so you can read
-            both sides before deciding.
-          </p>
-
           <div
             role="tablist"
             aria-label="Track"
@@ -213,10 +164,10 @@ function PromptsSection({ data }: { data: HubData }) {
                 aria-selected={track === t}
                 onClick={() => setTrack(t)}
                 className={
-                  "px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] transition-colors " +
+                  "label px-5 py-2.5 transition-colors " +
                   (track === t
-                    ? "bg-ink text-white"
-                    : "bg-white text-ink/50 hover:text-ink")
+                    ? "bg-ink !text-white"
+                    : "bg-white hover:!text-ink")
                 }
               >
                 {t === "build" ? "Build Track" : "Pitch Track"}
@@ -231,14 +182,12 @@ function PromptsSection({ data }: { data: HubData }) {
                   href={`#${p.id}`}
                   className="flex gap-4 px-4 py-3 no-underline transition-colors hover:bg-ink/[0.03]"
                 >
-                  <span className="shrink-0 font-mono text-[11px] font-bold text-gold">
-                    {p.id}
-                  </span>
+                  <span className="label label-accent shrink-0 pt-0.5">{p.id}</span>
                   <span className="min-w-0">
-                    <span className="block font-ui text-sm font-semibold text-ink">
+                    <span className="block text-base font-semibold text-ink">
                       {p.title}
                     </span>
-                    <span className="mt-0.5 block text-sm leading-snug text-ink/55">
+                    <span className="mt-0.5 block text-sm leading-snug text-ink/80">
                       {p.teaser}
                     </span>
                   </span>
@@ -258,20 +207,11 @@ function PromptsSection({ data }: { data: HubData }) {
   );
 }
 
-/* The countdown is the page until the clock turns over, so it gets the
-   same treatment as the landing page's: seconds shown so it reads as
-   live, tabular numerals and zero-padding so the row never twitches,
-   and the same stacked figures the mobile hero uses. It ticks every
-   second; the parent re-asks the server the moment it hits zero. */
+/* The countdown is the page until the clock turns over. Seconds shown
+   so it reads as live; tabular Fraunces figures and zero-padding keep
+   the row from twitching. The parent re-asks the server at zero. */
 function PromptsLocked({ releaseAt }: { releaseAt: string }) {
   const left = useCountdown(releaseAt);
-  const when = new Date(releaseAt);
-  const dayLabel = when.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    timeZone: "America/Chicago",
-  });
   const pad = (n: number) => String(n).padStart(2, "0");
 
   const units: Array<[string, string]> = left
@@ -284,19 +224,9 @@ function PromptsLocked({ releaseAt }: { releaseAt: string }) {
     : [];
 
   return (
-    <div className="mt-8">
-      <p className="max-w-xl text-base leading-relaxed text-ink/70">
-        The eight challenge prompts release at{" "}
-        <strong className="font-semibold text-ink">
-          midnight on {dayLabel}
-        </strong>
-        , Wichita time. They are not in this page yet — not hidden in it, not
-        in the code behind it. Until the clock turns over, they only exist on
-        the server.
-      </p>
-
+    <div className="mt-10 border-y border-ink/15 py-10">
       {left ? (
-        <div className="mt-10 border-y border-ink/10 py-10" aria-live="off">
+        <>
           <p className="sr-only">
             {left.days} days, {left.hours} hours and {left.minutes} minutes until
             the prompts release.
@@ -307,26 +237,21 @@ function PromptsLocked({ releaseAt }: { releaseAt: string }) {
                 <p className="font-display text-5xl font-semibold tabular-nums leading-none text-ink sm:text-7xl">
                   {value}
                 </p>
-                <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/45 sm:text-[10px]">
-                  {label}
-                </p>
+                <p className="label mt-3">{label}</p>
               </div>
             ))}
           </div>
-          <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
-            Until the prompts release
+          <p className="label label-accent mt-7">
+            Until the prompts unlock · midnight, September 14, Wichita time
           </p>
-        </div>
+        </>
       ) : (
-        <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.16em] text-gold">
-          Releasing now — one moment.
-        </p>
+        <p className="label label-accent">Releasing now — one moment.</p>
       )}
-
-      <p className="mt-8 max-w-xl text-sm leading-relaxed text-ink/55">
-        Nothing below is on the clock. Read the rules, the submission process
-        and the judging criteria now — the teams that place already know all
-        three before they see a prompt.
+      <p className="mt-6 max-w-xl text-base leading-relaxed text-ink/80">
+        The prompts are not in this page yet, and not in the code behind it.
+        Until the clock turns over they exist only on the server. Read the
+        rest of this page now.
       </p>
     </div>
   );
@@ -356,13 +281,11 @@ function useCountdown(iso: string): Remaining | null {
 
 function PromptCard({ prompt }: { prompt: Prompt }) {
   return (
-    <article id={prompt.id} className="scroll-mt-24">
+    <article id={prompt.id} className="scroll-mt-20">
       <div className="flex items-baseline gap-3">
-        <span className="font-mono text-xs font-bold tracking-[0.1em] text-gold">
-          {prompt.id}
-        </span>
+        <span className="label label-accent">{prompt.id}</span>
         {prompt.wildcard ? (
-          <span className="border border-ink/15 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-ink/50">
+          <span className="label border border-ink/20 px-2 py-0.5 !text-[10px]">
             Wildcard
           </span>
         ) : null}
@@ -381,44 +304,37 @@ function PromptCard({ prompt }: { prompt: Prompt }) {
 
 /* ── generic sections ─────────────────────────────────────────────── */
 
-function SectionBlock({
-  section,
-  data,
-}: {
-  section: Section;
-  data: HubData;
-}) {
+function SectionBlock({ section, data }: { section: Section; data: HubData }) {
   return (
-    <section id={section.id} className="mt-24 scroll-mt-24">
-      <SectionHeading title={section.title} />
+    <section id={section.id} className="mt-24 scroll-mt-20">
+      <div className="border-t border-ink/15 pt-7">
+        <h2 className="font-display text-4xl font-semibold tracking-tight text-ink">
+          {section.title}
+        </h2>
+      </div>
       {section.intro ? (
-        <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/70">
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/80">
           {section.intro}
         </p>
       ) : null}
+
+      {/* The run of day is the schedule section's body. */}
+      {section.id === "schedule" ? <RunOfDay rows={data.runOfDay} /> : null}
 
       <div className="mt-9 space-y-8">
         {section.blocks.map((b) => (
           <BlockView key={b.label} block={b} />
         ))}
       </div>
-
-      {/* The run of day belongs inside the finale-day section rather than
-          as a section of its own — it is the answer to "what happens on
-          the 19th", not a separate topic. */}
-      {section.id === "day" ? <RunOfDay rows={data.runOfDay} /> : null}
     </section>
   );
 }
 
-/* overflow-x-auto is kept as a safety net, but the table carries no
-   min-width: a 420px floor made the whole run of day scroll sideways on
-   every phone narrower than a Pro Max, and this is the one table a team
-   checks on the morning of the 19th. The time column is nowrap and the
-   description wraps, so it fits 320px unaided. */
+/* The time column is nowrap and the description wraps, so it fits
+   320px unaided. */
 function RunOfDay({ rows }: { rows: HubData["runOfDay"] }) {
   return (
-    <div className="mt-10 overflow-x-auto">
+    <div className="mt-8">
       <table className="w-full border-collapse text-left">
         <tbody>
           {rows.map((r) => (
@@ -426,19 +342,24 @@ function RunOfDay({ rows }: { rows: HubData["runOfDay"] }) {
               <th
                 scope="row"
                 className={
-                  "whitespace-nowrap py-3 pr-4 align-top font-mono text-[11px] font-normal uppercase tracking-[0.1em] sm:pr-6 " +
-                  (r.flag ? "text-gold" : "text-ink/45")
+                  "label whitespace-nowrap py-3 pr-4 align-top !font-medium sm:pr-6 " +
+                  (r.flag ? "label-accent" : "")
                 }
               >
                 {r.time}
               </th>
-              <td
-                className={
-                  "py-3 text-sm leading-snug " +
-                  (r.flag ? "font-semibold text-ink" : "text-ink/70")
-                }
-              >
-                {r.what}
+              <td className="py-3">
+                <p
+                  className={
+                    "text-base leading-snug " +
+                    (r.flag ? "font-semibold text-ink" : "text-ink")
+                  }
+                >
+                  {r.what}
+                </p>
+                {r.who ? (
+                  <p className="mt-1 text-sm leading-snug text-ink/80">{r.who}</p>
+                ) : null}
               </td>
             </tr>
           ))}
@@ -448,37 +369,18 @@ function RunOfDay({ rows }: { rows: HubData["runOfDay"] }) {
   );
 }
 
-function SectionHeading({
-  eyebrow,
-  title,
-}: {
-  eyebrow?: string;
-  title: string;
-}) {
-  return (
-    <div className="border-t border-ink/15 pt-7">
-      {eyebrow ? <p className="eyebrow mb-3">{eyebrow}</p> : null}
-      <h2 className="font-display text-4xl font-semibold tracking-tight text-ink">
-        {title}
-      </h2>
-    </div>
-  );
-}
-
 function BlockView({ block }: { block: Block }) {
   return (
     <div>
-      <h4 className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/45">
-        {block.label}
-      </h4>
+      <h4 className="label">{block.label}</h4>
       {block.kind === "text" ? (
-        <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink/75">
+        <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink/80">
           {block.body}
         </p>
       ) : (
         <ul className="mt-3 max-w-2xl space-y-2.5 border-l-2 border-gold pl-5">
           {block.items.map((item) => (
-            <li key={item} className="text-base leading-relaxed text-ink/75">
+            <li key={item} className="text-base leading-relaxed text-ink/80">
               {item}
             </li>
           ))}

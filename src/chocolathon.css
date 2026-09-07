@@ -4,29 +4,45 @@
    Everything is scoped under .choco-root so this page can live inside
    the wsuaiclub.com app without touching the rest of the site (and
    without the site's globals bleeding in). No body/html selectors.
+
+   TYPE SYSTEM (reset 2026-09-06). Two families, four roles:
+     display  Fraunces — headings, the hero title, the countdown digits.
+              Optical sizing on, so hairlines stay sturdy at every size
+              (the reason Bodoni Moda was retired: its mid-size headings
+              thinned to nothing on ordinary laptop screens).
+     body     Archivo — prose and interface.
+     label    Archivo, 12px, semibold, uppercase, tracked — the small
+              tags above things. Replaces the 10px Space Mono labels.
+     button   Archivo, semibold, uppercase.
+
+   CONTRAST FLOOR. No text below 70% ink on white (5.3:1). The 40–60%
+   tints that used to carry labels, captions, and the footer are gone
+   from text; they survive only on rules and borders. Gold (#b8912d,
+   2.9:1 on white) is never used for text smaller than 24px; the darker
+   goldink token (#8a6a16, 5.1:1) carries small accents instead.
    ═══════════════════════════════════════════════════════════════════ */
 
-@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400..900&family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700&family=Space+Mono:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Archivo:wdth,wght@62..125,400;62..125,500;62..125,600;62..125,700&display=swap");
 
 .choco-root {
+  --choco-display: "Fraunces", Georgia, serif;
+  --choco-ink: #232a4d;
+  --choco-ink-soft: rgb(35 42 77 / 0.7); /* 5.3:1 — the floor for text */
+  --choco-goldink: #8a6a16; /* 5.1:1 — small gold accents */
+  --choco-rule: rgb(35 42 77 / 0.12);
   background: #ffffff;
-  color: #232a4d;
+  color: var(--choco-ink);
   font-family: Archivo, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Bodoni Moda is a Didone: its HORIZONTAL strokes are the hairlines, and a
-   "T" is a thick stem plus a thin crossbar. The font ships an optical-size
-   axis (6-96), and browsers request opsz = rendered size by default, so at
-   display sizes the browser asks for the 96pt cut - maximum contrast, and
-   the crossbar of a T thins out until it reads as an L.
-
-   Pinning opsz to a text-range value keeps the sturdier drawing at every
-   size, so crossbars and thin joins stay visible. This is the fix; weight
-   alone would not solve it. */
+/* Fraunces carries a "SOFT" axis and optical sizing; the browser picks
+   the right optical cut per rendered size, which is exactly what we want
+   from a display face that has to work from 18px to 120px. */
 .choco-root .font-display {
-  font-optical-sizing: none;
-  font-variation-settings: "opsz" 32;
+  font-family: var(--choco-display);
+  font-optical-sizing: auto;
+  font-variant-numeric: tabular-nums;
 }
 
 .choco-root :focus-visible {
@@ -44,19 +60,32 @@
   pointer-events: auto;
 }
 
+/* ── labels ────────────────────────────────────────────────────────── */
+
+.choco-root .label,
 .choco-root .eyebrow {
-  font-family: "Space Mono", ui-monospace, monospace;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
+  font-family: Archivo, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #b8912d;
+  color: var(--choco-ink-soft);
 }
+.choco-root .label-accent,
+.choco-root .eyebrow {
+  color: var(--choco-goldink);
+}
+.choco-root .label-strong {
+  color: var(--choco-ink);
+}
+
+/* ── buttons ───────────────────────────────────────────────────────── */
 
 .choco-root .btn-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   min-height: 48px;
   padding: 0.75rem 2rem;
   background: #fac905;
@@ -79,65 +108,17 @@
   transform: translateY(1px);
 }
 
-/* Quiet section jumps in the masthead. Deliberately not buttons: the
-   amber Register CTA must stay the only loud thing up there. */
-.choco-root .masthead-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 38px;
-  padding: 0 0.5rem;
-  border-radius: 2px;
-  font-family: "Space Mono", ui-monospace, monospace;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgb(35 42 77 / 0.75);
-  text-decoration: none;
-  transition: color 200ms ease;
-}
-/* A hover surface is the cheapest way to say "this is a control" for text
-   that carries no button chrome. */
-.choco-root .masthead-link:hover {
-  color: #232a4d;
-  background: rgb(35 42 77 / 0.06);
-}
-
-/* Compact ghost link for the narrow scroll panels, where the full-size
-   button would overflow a 320px column. */
-.choco-root .btn-ghost-sm {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 0 0.875rem;
-  border: 1px solid rgb(35 42 77 / 0.25);
-  color: #232a4d;
-  font-family: Archivo, sans-serif;
-  font-weight: 600;
-  font-size: 0.6875rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  border-radius: 2px;
-  text-decoration: none;
-  transition: border-color 200ms ease, background 200ms ease;
-}
-.choco-root .btn-ghost-sm:hover {
-  border-color: rgb(35 42 77 / 0.55);
-  background: rgb(35 42 77 / 0.04);
-}
-
-/* Outlined secondary button. Used for the club asks in the footer so
-   they read as available without competing with the amber register CTA. */
+/* Outlined secondary button. */
 .choco-root .btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   min-height: 44px;
   padding: 0.625rem 1.5rem;
-  border: 1px solid rgb(35 42 77 / 0.25);
+  border: 1px solid rgb(35 42 77 / 0.3);
   background: transparent;
-  color: #232a4d;
+  color: var(--choco-ink);
   font-family: Archivo, sans-serif;
   font-weight: 600;
   font-size: 0.8125rem;
@@ -150,28 +131,91 @@
     background 200ms ease;
 }
 .choco-root .btn-ghost:hover {
-  border-color: rgb(35 42 77 / 0.55);
+  border-color: rgb(35 42 77 / 0.6);
   background: rgb(35 42 77 / 0.04);
 }
 
-.choco-root .social-btn {
+/* Compact ghost link for the narrow scroll panels, where the full-size
+   button would overflow a 320px column. */
+.choco-root .btn-ghost-sm {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgb(35 42 77 / 0.2);
+  min-height: 36px;
+  padding: 0 0.875rem;
+  border: 1px solid rgb(35 42 77 / 0.3);
+  color: var(--choco-ink);
+  font-family: Archivo, sans-serif;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   border-radius: 2px;
-  color: rgb(35 42 77 / 0.6);
   text-decoration: none;
   transition:
+    border-color 200ms ease,
+    background 200ms ease;
+}
+.choco-root .btn-ghost-sm:hover {
+  border-color: rgb(35 42 77 / 0.6);
+  background: rgb(35 42 77 / 0.04);
+}
+
+/* The locked prompts button. Reads as a button (same shape, border,
+   and type as .btn-ghost) but is inert: dashed border, a drawn lock,
+   the live countdown in tabular figures, and a not-allowed cursor. It
+   is a <button disabled>, so keyboards and screen readers get the
+   truth too. When the clock turns over the same slot renders .btn-cta. */
+.choco-root .btn-lock {
+  display: inline-flex;
+  flex-wrap: wrap; /* on a phone the time drops to its own line, whole */
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem 0.625rem;
+  min-height: 48px;
+  padding: 0.625rem 1.5rem;
+  border: 1px dashed rgb(35 42 77 / 0.45);
+  background: #ffffff;
+  color: var(--choco-ink);
+  font-family: Archivo, sans-serif;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: not-allowed;
+}
+.choco-root .btn-lock .btn-lock-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--choco-ink-soft);
+}
+
+/* Section buttons in the HQ bar. Text controls with a hover surface. */
+.choco-root .hq-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 0.625rem;
+  border-radius: 2px;
+  font-family: Archivo, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--choco-ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
     color 200ms ease,
-    border-color 200ms ease;
+    background 200ms ease;
 }
-.choco-root .social-btn:hover {
-  color: #232a4d;
-  border-color: rgb(35 42 77 / 0.5);
+.choco-root .hq-link:hover,
+.choco-root .hq-link[aria-current="true"] {
+  color: var(--choco-ink);
+  background: rgb(35 42 77 / 0.06);
 }
+
+/* ── film scrim and hint ───────────────────────────────────────────── */
 
 /* Feathered white pool behind overlay text — invisible against the page,
    but guarantees the photography never sits directly under copy. */
@@ -193,7 +237,7 @@
   0%,
   100% {
     transform: translateY(0);
-    opacity: 0.55;
+    opacity: 0.7;
   }
   50% {
     transform: translateY(8px);
@@ -204,4 +248,10 @@
   .choco-root .scroll-hint {
     animation: none;
   }
+}
+
+/* Text selection carries the palette too. */
+.choco-root ::selection {
+  background: #fac905;
+  color: #16182b;
 }

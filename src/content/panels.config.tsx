@@ -15,12 +15,12 @@ import type { ReactNode } from "react";
 import { BEATS, type BeatKey } from "../film/beats";
 import {
   COCOA_DOLCE_ABOUT_URL,
+  HQ_PATH,
   LOVABLE_URL,
-  PROMPTS_PATH,
   REGISTER_URL,
   registrationOpen,
 } from "./links";
-import Countdown from "./Countdown";
+import PromptsButton from "./PromptsButton";
 
 export type Panel = {
   beat: BeatKey;
@@ -45,20 +45,21 @@ const PANELS: Panel[] = [
           <p className="mt-2 font-display text-xl italic text-ink/80 md:text-2xl">
             The world&rsquo;s first chocolate hackathon.
           </p>
-          <p className="mt-5 font-mono text-sm font-bold uppercase tracking-[0.12em] text-ink/70">
+          <p className="label label-strong mt-5 !text-sm">
             Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall, WSU
           </p>
         </div>
-        {/* No CTA and no sponsor marks in the hero (decided 2026-09-06 after
-            trying a row, flank columns, a marquee, and a scattered
-            constellation): the box owns the first screen, the eyebrow names
-            the co-hosts, and the film uncovers the sponsors beat by beat
-            before the footer lists them. The countdown lives down here,
-            BELOW the box photo — in the title block it overlapped the
-            product shot. */}
-        <div className="flex w-full flex-col items-center gap-4">
-          <Countdown />
-          <p className="scroll-hint font-mono text-[11px] uppercase tracking-[0.2em] text-ink/50">
+        {/* No sponsor marks in the hero (decided 2026-09-06 after trying a
+            row, flank columns, a marquee, and a scattered constellation):
+            the box owns the first screen, the eyebrow names the co-hosts,
+            and the film uncovers the sponsors beat by beat before the
+            footer lists them. The one control down here is the prompts
+            button: locked with the live countdown until midnight on the
+            14th, then the amber link into HQ. It sits BELOW the box photo —
+            in the title block it overlapped the product shot. */}
+        <div className="flex w-full flex-col items-center gap-5">
+          <PromptsButton />
+          <p className="scroll-hint label">
             Scroll · every chocolate tells you something ↓
           </p>
         </div>
@@ -109,27 +110,27 @@ const PANELS: Panel[] = [
         <p className="eyebrow mb-3">How the event runs</p>
         <ol className="space-y-6 border-l-2 border-gold pl-5 text-left">
           <li>
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+            <p className="label label-accent">
               Sep 14
             </p>
-            <p className="font-ui text-lg font-semibold leading-snug text-ink">
+            <p className="text-lg font-semibold leading-snug text-ink">
               Start building
             </p>
-            <p className="mt-1 text-sm leading-relaxed text-ink/60">
+            <p className="mt-1 text-sm leading-relaxed text-ink/70">
               Prompts release. Build on your own time, at your own pace.
             </p>
           </li>
           <li>
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+            <p className="label label-accent">
               Sep 19
             </p>
-            <p className="font-ui text-lg font-semibold leading-snug text-ink">
+            <p className="text-lg font-semibold leading-snug text-ink">
               The finale
             </p>
-            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-ink/60">
+            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-ink/70">
               <li>
                 Two industry speaker sessions
-                <span className="block text-ink/45">
+                <span className="block text-ink/70">
                   including Cargill&rsquo;s AI Governance Lead
                 </span>
               </li>
@@ -171,7 +172,7 @@ const PANELS: Panel[] = [
       <div className="max-w-xs text-right">
         <p className="eyebrow mb-3">Prizes</p>
         <p className="font-display text-6xl font-semibold text-ink">$1,200</p>
-        <p className="mt-1 font-ui text-sm text-ink/80">
+        <p className="mt-1 text-sm text-ink/80">
           in scholarships across two tracks, four winning teams
         </p>
         {/* One scholarship per track (decided 2026-09-06): the winning team
@@ -179,27 +180,27 @@ const PANELS: Panel[] = [
             place takes the same box, no scholarship. */}
         <dl className="ml-auto mt-5 max-w-[250px] space-y-2 border-r-2 border-gold pr-5 text-right">
           <div className="flex items-baseline justify-end gap-3">
-            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/50">
+            <dt className="label">
               Build
             </dt>
-            <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
+            <dd className="text-lg font-semibold tabular-nums text-ink">
               $700 scholarship
             </dd>
           </div>
           <div className="flex items-baseline justify-end gap-3">
-            <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/50">
+            <dt className="label">
               Pitch
             </dt>
-            <dd className="font-ui text-lg font-semibold tabular-nums text-ink">
+            <dd className="text-lg font-semibold tabular-nums text-ink">
               $500 scholarship
             </dd>
           </div>
         </dl>
-        <p className="ml-auto mt-3 max-w-[240px] text-sm leading-relaxed text-ink/60">
+        <p className="ml-auto mt-3 max-w-[240px] text-sm leading-relaxed text-ink/70">
           To the winning team in each track, plus a big box of Cocoa Dolce
           chocolates. Second place takes home the same box.
         </p>
-        <p className="ml-auto mt-4 max-w-[240px] font-mono text-xs uppercase tracking-[0.12em] text-gold">
+        <p className="label label-accent ml-auto mt-4 max-w-[240px]">
           Refreshments, lunch and two industry speaker sessions
         </p>
       </div>
@@ -292,13 +293,13 @@ const PANELS: Panel[] = [
                 >
                   Register your team
                 </a>
-                <a className="btn-ghost" href={PROMPTS_PATH}>
-                  See the prompts
+                <a className="btn-ghost" href={HQ_PATH}>
+                  Competition HQ
                 </a>
               </>
             ) : (
-              <a className="btn-cta" href={PROMPTS_PATH}>
-                See the prompts
+              <a className="btn-cta" href={HQ_PATH}>
+                Competition HQ
               </a>
             )}
           </div>

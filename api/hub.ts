@@ -1,4 +1,4 @@
-/* GET /api/hub — everything the prompts page renders.
+/* GET /api/hub — everything Competition HQ renders.
 
    This endpoint is the reason the countdown is real. The prompt text is
    assembled here, in the function, and only leaves the server when the
@@ -26,8 +26,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import {
   CONTACT_EMAIL,
-  KEY_DATES,
   PROMPTS,
+  PROMPTS_INTRO,
   RUN_OF_DAY,
   SECTIONS,
 } from "./_content.js";
@@ -46,11 +46,11 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({
     promptsUnlocked: unlocked,
     releaseAt: releaseAt().toISOString(),
+    promptsIntro: PROMPTS_INTRO,
     /* The single most important line in this file: no prompts unless
        unlocked. Not stubs, not titles — an empty array. */
     prompts: unlocked ? PROMPTS : [],
     sections: SECTIONS,
-    keyDates: KEY_DATES,
     runOfDay: RUN_OF_DAY,
     contactEmail: CONTACT_EMAIL,
   });

@@ -8,7 +8,7 @@
   ],
   "headers": [
     {
-      "source": "/(prompts|competitors)",
+      "source": "/(hq|prompts|competitors)",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "Cache-Control", "value": "no-store" }

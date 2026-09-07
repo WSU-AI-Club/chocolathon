@@ -400,282 +400,191 @@ export type Section = {
   blocks: Block[];
 };
 
-/* No registration dates here on purpose: registration is handled off
-   this page, and this page must never contradict what the club announces
-   about it. */
-export const KEY_DATES: { date: string; what: string; done?: boolean }[] = [
-  { date: "Mon Sep 14", what: "Prompts release here, at midnight. Build starts." },
-  { date: "Sat Sep 19", what: "The finale — Woolsey Hall, 8:30 AM to 5:00 PM" },
-];
+/* Three lines above the prompts. The old "Start here" section is this. */
+export const PROMPTS_INTRO =
+  "Eight prompts, four per track. Pick one. You choose your track when you " +
+  "submit on the 19th, so read both sides.";
 
-export const RUN_OF_DAY: { time: string; what: string; flag?: boolean }[] = [
-  { time: "8:30 AM", what: "Doors open. Coffee, pastries, and Cocoa Dolce chocolates" },
+export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: boolean }[] = [
+  { time: "8:30 AM", what: "Doors open. Coffee, pastries, Cocoa Dolce chocolates." },
   { time: "9:15 AM", what: "Opening ceremony" },
   { time: "9:30 AM", what: "Teams work and refine" },
   {
     time: "11:30 AM",
-    what:
-      "Session 1: Open Source, Open Weights, Open Questions — Fareeha Amber Ansari, AI Governance Lead, Cargill",
+    what: "Session 1: Open Source, Open Weights, Open Questions",
+    who: "Fareeha Amber Ansari, AI Governance Lead, Cargill",
   },
-  { time: "12:15 PM", what: "Lunch (Jimmy John’s)" },
-  { time: "1:00 PM", what: "Submissions OPEN", flag: true },
-  { time: "2:15 PM", what: "Submissions CLOSE — hard cutoff", flag: true },
-  { time: "2:30 PM", what: "Session 2 (speaker TBA), during preliminary judging" },
-  { time: "3:45 PM", what: "Final presentations — open to the public" },
+  { time: "12:15 PM", what: "Lunch, by Jimmy John’s" },
+  { time: "1:00 PM", what: "Submissions open", flag: true },
+  { time: "2:15 PM", what: "Submissions close. Hard cutoff.", flag: true },
+  { time: "2:30 PM", what: "Session 2, during preliminary judging", who: "Speaker to be announced" },
+  { time: "3:45 PM", what: "Final presentations. Open to the public.", flag: true },
   { time: "4:45 PM", what: "Winners announced" },
   { time: "5:00 PM", what: "Pictures and wrap" },
 ];
 
+/* Every section is a budget: one intro line and the fewest bullets that
+   answer the question. Anything genuinely undecided is marked "to be
+   announced" rather than invented. */
 export const SECTIONS: Section[] = [
   {
-    id: "start",
-    nav: "Start here",
-    title: "How this works",
-    intro:
-      "Everything you need to compete is on this page: the eight prompts, the " +
-      "rules, how you submit, and how you get judged. Read this section once " +
-      "and you will not be surprised on the 19th.",
-    blocks: [
-      {
-        kind: "list",
-        label: "The short version",
-        items: [
-          "Eight prompts, four per track. Pick ONE and answer it.",
-          "You do not declare a track now — you choose Build or Pitch when you submit on the 19th.",
-          "Build ahead. The days between September 14 and 19 are the competition; the 19th is the finale.",
-          "Show up Saturday September 19 at Woolsey Hall. Submit between 1:00 and 2:15 PM.",
-          "Top teams present live at 3:45 PM. Winners at 4:45 PM.",
-        ],
-      },
-      {
-        kind: "text",
-        label: "Why building ahead is not optional",
-        body:
-          "Finale day gives you roughly three working hours before submissions " +
-          "close, and two of them have a session and lunch in them. A team that " +
-          "starts on Saturday morning is submitting a sketch. Treat September 14 " +
-          "as the start line, not the 19th.",
-      },
-      {
-        kind: "text",
-        label: "You keep what you build",
-        body:
-          "You own everything you make. Cocoa Dolce gets a non-exclusive licence " +
-          "to use ideas presented to them, and the WSU AI Club may feature your " +
-          "project in event photos, recaps, and promotion. Non-exclusive means " +
-          "nothing is taken from you — you keep using, showing, and building on " +
-          "your own work. This is the same clause you ticked at registration.",
-      },
-    ],
-  },
-  {
     id: "tracks",
-    nav: "The two tracks",
-    title: "Build or Pitch",
+    nav: "Tracks",
+    title: "Build or Pitch.",
     intro:
-      "Both tracks answer the same kind of problem. They differ in HOW you answer, " +
-      "and they are judged separately — a product is never scored against a " +
-      "recommendation.",
+      "Same problems, two ways to answer. Each track is judged on its own; a " +
+      "product is never scored against a recommendation.",
     blocks: [
       {
         kind: "list",
         label: "Build Track — ship something that works",
         items: [
-          "Answer by building: a working product or prototype Cocoa Dolce could put to use",
+          "A working product or prototype Cocoa Dolce could actually use",
           "You submit the product, a video, and a demo",
-          "Judged on how genuinely useful and how well built it is",
-          "$700 scholarship to the winning team, with a big box of Cocoa Dolce chocolates",
+          "Judged on how useful it is and how well it is built",
+          "$700 scholarship to the winning team, plus a big box of Cocoa Dolce chocolates",
         ],
       },
       {
         kind: "list",
-        label: "Pitch Track — pitch something they should do",
+        label: "Pitch Track — make the case",
         items: [
-          "Answer by making the case: a recommendation Cocoa Dolce could act on, backed by real evidence",
-          "You submit a pitch video and a demo that makes the idea tangible — a mock landing page, a concept prototype, a data visualization",
-          "Judged on the strength of the argument and the evidence behind it",
-          "$500 scholarship to the winning team, with a big box of Cocoa Dolce chocolates",
+          "A recommendation Cocoa Dolce could act on, backed by real evidence",
+          "You submit a pitch video and a demo that makes the idea tangible",
+          "Judged on the argument and the evidence behind it",
+          "$500 scholarship to the winning team, plus a big box of Cocoa Dolce chocolates",
         ],
       },
       {
         kind: "text",
-        label: "Why the prizes are unequal",
+        label: "Prizes",
         body:
-          "Build pays more because it is the heavier lift. That is a deliberate " +
-          "weighting, not a statement about which work matters. One scholarship per " +
-          "track: the winning team takes the scholarship and a big box of Cocoa Dolce " +
-          "chocolates, and second place in each track takes home the same box. " +
-          "Both tracks are judged on their own terms.",
+          "Build pays more because it is the heavier lift. Second place in each " +
+          "track takes home the same box of chocolates. $1,200 in scholarships, " +
+          "four winning teams. AI is optional in both tracks; every team gets " +
+          "Lovable credits because Lovable sponsors the event.",
       },
+    ],
+  },
+  {
+    id: "schedule",
+    nav: "Schedule",
+    title: "Saturday, September 19.",
+    intro:
+      "Woolsey Hall, WSU. Doors at 8:30 AM, wrap at 5:00 PM, food all day. " +
+      "Bring your laptop, charger, student ID, and links already tested.",
+    blocks: [
       {
         kind: "text",
-        label: "The Pitch demo is not an AI requirement",
+        label: "Backed by the Barton School",
         body:
-          "Pitch teams build a demo so you have something to show on stage rather " +
-          "than slides alone. Build it with anything — Lovable, a spreadsheet, " +
-          "Figma, code, paper. Every participant gets Lovable credits because " +
-          "Lovable sponsors the event, not because the tools are mandatory. No " +
-          "prompt on this page requires AI to answer.",
-        },
+          "The room at Woolsey Hall is supported by the Office of Career and " +
+          "Professional Development. Timing may shift by a few minutes; this " +
+          "page is the version of record.",
+      },
+    ],
+  },
+  {
+    id: "judges",
+    nav: "Judges",
+    title: "Who decides.",
+    intro:
+      "Two rounds. Local AI industry judges review every submission and advance " +
+      "the top teams. Finalists present live at 3:45 PM, open to the public, " +
+      "and the Cocoa Dolce leadership picks the winners.",
+    blocks: [
+      {
+        kind: "list",
+        label: "Preliminary panel",
+        items: [
+          "Grant Johnson — AI Software Engineering Leader, INVISTA. WSU alum.",
+          "Dane Laughlin — Industries Lead, Squint. WSU alum.",
+          "Two more local AI industry leaders, to be announced",
+        ],
+      },
+      {
+        kind: "list",
+        label: "Finals panel",
+        items: [
+          "Ben Hesse — Chief Operating Officer, Cocoa Dolce",
+          "Two more Cocoa Dolce leaders, to be announced",
+        ],
+      },
+      {
+        kind: "list",
+        label: "What moves the needle",
+        items: [
+          "Build: does it work, and would Cocoa Dolce actually use it?",
+          "Pitch: is the argument sound, and is the evidence real and verifiable?",
+          "Both: did you understand their business? A generic answer with a chocolate label scores badly.",
+          "Honesty about limits counts for you, not against you.",
+        ],
+      },
     ],
   },
   {
     id: "rules",
     nav: "Rules",
-    title: "The rules",
+    title: "The rules.",
     blocks: [
       {
         kind: "list",
-        label: "Eligibility and teams",
+        label: "Teams",
         items: [
-          "WSU students only — undergraduate, graduate, and doctoral. Any major.",
-          "Teams of one to four. Solo is allowed and competes on the same terms.",
-          "Teams lock at registration. No adding, swapping, or merging members after that, and no team formation on event day.",
-          "You must attend the finale on September 19 to compete. No remote submissions.",
+          "WSU students only. Any major, any level.",
+          "Teams of one to four. Solo competes on the same terms.",
+          "Teams lock at registration. No changes after, no forming on the day.",
+          "You must be at the finale to compete. No remote entries.",
         ],
       },
       {
         kind: "list",
         label: "The work",
         items: [
-          "Answer ONE prompt. Do not submit against two.",
-          "Choose your track when you submit, not before.",
-          "Start after the prompts release on September 14. Work you had already built before then is not an entry.",
-          "Any tools, any stack, any sources. AI is optional in both tracks.",
-          "Everything you submit must be your team’s own work. Use of AI tools is expected and fine; passing off someone else’s project as yours is not.",
-          "Cite your sources in the Pitch Track. “Verifiable” is in the judging criteria for a reason — an unsourced number is worth less than no number.",
+          "Answer one prompt. One submission, one track, chosen when you submit.",
+          "Start after the prompts unlock. A project you had already built is not an entry.",
+          "Any tools, any stack. AI is optional.",
+          "Your team’s own work. In the Pitch Track, cite your sources; an unsourced number is worth less than none.",
+          "The prompts describe a real business. Treat the detail as theirs, and do not contact Cocoa Dolce staff or suppliers for your entry.",
         ],
       },
       {
         kind: "list",
-        label: "What Cocoa Dolce shares with you",
+        label: "Submitting — 1:00 to 2:15 PM on the 19th",
         items: [
-          "These prompts describe how a real local business actually runs. Treat the operational detail in them as theirs, not yours to publish.",
-          "The finals at 3:45 PM are open to the public, so assume anything you put in a submission or say on stage will be heard publicly.",
-          "Do not contact Cocoa Dolce staff, stores, or suppliers for information as part of your entry. Their public site and anything in these prompts is fair game; their people are working.",
-        ],
-      },
-    ],
-  },
-  {
-    id: "submitting",
-    nav: "Submitting",
-    title: "How you submit",
-    intro:
-      "Submissions happen on finale day only, through a Microsoft Form, between " +
-      "1:00 and 2:15 PM. The window is short and the cutoff is hard — have your " +
-      "links ready before 1:00.",
-    blocks: [
-      {
-        kind: "list",
-        label: "What the form asks for",
-        items: [
-          "Your team name, exactly as registered",
-          "Your track — Build or Pitch. This is where you choose.",
-          "Which prompt you answered (e.g., B-2 or P-3)",
-          "A link to your product or demo — must open without a login and without an install",
-          "A link to your video",
-        ],
-      },
-      {
-        kind: "list",
-        label: "Make your links judgeable",
-        items: [
-          "Test your link in a private/incognito window before you submit. A judge who hits a login screen scores what they can see, which is nothing.",
-          "Deployed URL beats a repo. If you must send a repo, put a working link at the top of the README.",
-          "Unlisted video hosting is fine — private is not.",
-          "Video length, format, and the submission form URL are TBA and will be posted here before the 19th.",
+          "A Microsoft Form. The link is posted here on the day.",
+          "Team name, track, prompt, a link to your product or demo, a link to your video.",
+          "Links must open without a login or an install. Test them in a private window first.",
+          "Unlisted video is fine. Private is not.",
+          "2:15 PM is a hard cutoff. Judging starts the moment the form closes.",
         ],
       },
       {
         kind: "text",
-        label: "Late is late",
+        label: "You keep what you build",
         body:
-          "Preliminary judging starts the moment the form closes at 2:15 PM so " +
-          "that finalists can be on stage at 3:45. There is no grace period built " +
-          "into that schedule.",
-      },
-    ],
-  },
-  {
-    id: "judging",
-    nav: "Judging",
-    title: "How you get judged",
-    blocks: [
-      {
-        kind: "text",
-        label: "Two rounds",
-        body:
-          "First, a panel of local AI and industry judges reviews every submission " +
-          "through the form and advances the top teams. Those finalists then present " +
-          "live on stage at 3:45 PM, where the Cocoa Dolce leadership team helps " +
-          "decide the winners.",
-      },
-      {
-        kind: "list",
-        label: "What moves the needle",
-        items: [
-          "Build: does it work, and is it genuinely useful to Cocoa Dolce? Judging is weighted toward real usefulness over polish.",
-          "Pitch: is the argument sound, and is the evidence behind it real and verifiable?",
-          "Both: did you understand THEIR business? A generic solution with a chocolate label scores badly in either track.",
-          "Honesty about limits is scored as a strength, not a weakness — especially on B-1.",
-        ],
-      },
-      {
-        kind: "list",
-        label: "The panels",
-        items: [
-          "Preliminary: Grant Johnson, AI Software Engineering Leader, INVISTA (Koch Industries), WSU alum · Dane Laughlin, Industries Lead, Squint, WSU alum · two more TBA",
-          "Final: Ben Hesse, COO, Cocoa Dolce · two more Cocoa Dolce leaders TBA",
-          "Michael runs the day and breaks ties; he does not score.",
-        ],
-      },
-    ],
-  },
-  {
-    id: "day",
-    nav: "Finale day",
-    title: "Saturday, September 19",
-    intro:
-      "Woolsey Hall, WSU. Doors at 8:30 AM, wrap at 5:00 PM. Food is provided all " +
-      "day. Minor timing changes are possible; this page is the version of record.",
-    blocks: [
-      {
-        kind: "list",
-        label: "Bring",
-        items: [
-          "Your laptop and charger",
-          "Your project already deployed and your links already tested",
-          "Your student ID",
-        ],
-      },
-      {
-        kind: "text",
-        label: "Lovable credits",
-        body:
-          "Every participant gets Lovable build credits, handed out in person on " +
-          "the day. They are a sponsor benefit, not a requirement — nothing on " +
-          "this page has to be built with them.",
+          "You own everything you make. Cocoa Dolce gets a non-exclusive licence " +
+          "to use ideas presented to them, and the AI Club may feature your " +
+          "project in photos and recaps. Nothing is taken from you.",
       },
     ],
   },
   {
     id: "faq",
     nav: "FAQ",
-    title: "Questions we expect",
+    title: "Questions.",
     blocks: [
       {
         kind: "list",
         label: "Answers",
         items: [
-          "Can we switch tracks? Yes — you declare your track at submission, so you can change your mind right up to 2:15 PM on the 19th.",
-          "Can we answer two prompts? No. One prompt, one submission, one track.",
+          "Can we switch tracks? Yes, right up to 2:15 PM on the 19th. You declare at submission.",
+          "Can we answer two prompts? No. One prompt, one submission.",
           "Can we change our team? No. Teams lock at registration.",
-          "Does our project have to use AI? No. Neither track requires it.",
-          "Can we use code or research we wrote before September 14? Libraries, templates, and public tools yes. A project you had already built, no.",
-          "Do we have to be there all day? You must be there to submit and, if you advance, to present. Come for the whole thing — the sessions and the food are part of it.",
-          "What if only one of us can make it? A team can be represented by whoever can attend, but the team roster does not change.",
-          "Something is wrong or unclear — who do we ask? aiclub@wichita.edu.",
+          "Does the project have to use AI? No. Neither track requires it.",
+          "Can we use code or research from before the prompts unlocked? Libraries, templates, and public tools, yes. A project you had already built, no.",
+          "Do we have to be there all day? You must be there to submit and, if you advance, to present. Come for the whole thing.",
+          "Something is unclear? aiclub@wichita.edu.",
         ],
       },
     ],
