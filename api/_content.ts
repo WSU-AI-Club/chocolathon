@@ -568,23 +568,47 @@ export const SECTIONS: Section[] = [
         ],
       },
       {
-        kind: "list",
-        label: "Submitting — 1:00 to 2:15 PM on the 19th",
-        items: [
-          "A Microsoft Form. The button below unlocks at 1:00 PM on the day.",
-          "Team name, track, prompt, a link to your product or demo, a link to your video (three minutes maximum).",
-          "Links must open without a login or an install. Test them in a private window first.",
-          "Unlisted video is fine. Private is not.",
-          "2:15 PM is a hard cutoff. Judging starts the moment the form closes.",
-        ],
-      },
-      {
         kind: "text",
         label: "You keep what you build",
         body:
           "You own everything you make. Cocoa Dolce gets a non-exclusive licence " +
           "to use ideas presented to them, and the AI Club may feature your " +
           "project in photos and recaps. Nothing is taken from you.",
+      },
+    ],
+  },
+  {
+    id: "submissions",
+    nav: "Submissions",
+    title: "Submitting.",
+    intro:
+      "Saturday, September 19, 1:00 to 2:15 PM, through a Microsoft Form. The button " +
+      "below unlocks at 1:00. Have everything on this list ready before then.",
+    blocks: [
+      {
+        kind: "list",
+        label: "What the form asks for",
+        items: [
+          "Your team name, exactly as you registered it",
+          "The submitter’s name and WSU email",
+          "Your track, and which prompt you answered",
+          "One sentence: what you built, or what you are recommending",
+          "A link to your product, demo, or presentation",
+          "A link to your video, three minutes maximum",
+          "What a judge should click first",
+          "A repository or source link, if you have one",
+          "Anything the judges need to run it: a test login, a sample zip code, a demo account",
+        ],
+      },
+      {
+        kind: "list",
+        label: "Make it judgeable",
+        items: [
+          "Links must open without a login or an install. Test them in a private window first.",
+          "Unlisted video is fine. Private is not.",
+          "One submission per team, by one person.",
+          "2:15 PM is a hard cutoff. Judging starts the moment the form closes.",
+        ],
       },
     ],
   },

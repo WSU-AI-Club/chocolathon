@@ -6,7 +6,8 @@
    place. This band is what replaced them: one heading, six large
    links, each straight to its section of HQ. The prompts link carries
    the lock and the live countdown so the state is visible before the
-   click.
+   click; it is the only locked control here (2026-09-06). The
+   submissions button lives in HQ.
 
    Not cards. Each entry is a link block with a Fraunces title and one
    line, in a two-column grid, ruled not boxed.
@@ -14,7 +15,6 @@
 
 import { HQ_PATH } from "./links";
 import PromptsButton from "./PromptsButton";
-import SubmitButton from "./SubmitButton";
 
 const ENTRIES: Array<{ id: string; title: string; line: string }> = [
   {
@@ -34,8 +34,13 @@ const ENTRIES: Array<{ id: string; title: string; line: string }> = [
   },
   {
     id: "rules",
-    title: "Rules and submitting",
-    line: "Teams, eligibility, what counts as your own work, and the 2:15 PM cutoff.",
+    title: "Rules",
+    line: "Teams, eligibility, and what counts as your own work.",
+  },
+  {
+    id: "submissions",
+    title: "Submissions",
+    line: "What the form asks for on Saturday, 1:00 to 2:15 PM, so you have it ready.",
   },
   {
     id: "faq",
@@ -70,18 +75,6 @@ export default function HqSection() {
             </p>
           </div>
           <PromptsButton className="shrink-0" />
-        </div>
-
-        <div className="flex flex-col gap-5 border-t border-ink/15 py-8 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink">
-              Submissions
-            </h3>
-            <p className="mt-2 text-base leading-relaxed text-ink/80">
-              Saturday, 1:00 to 2:15 PM. Team, track, prompt, your demo link, your video.
-            </p>
-          </div>
-          <SubmitButton className="shrink-0" />
         </div>
 
         <ul className="grid gap-x-12 sm:grid-cols-2">

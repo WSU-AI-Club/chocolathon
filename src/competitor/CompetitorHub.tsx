@@ -332,8 +332,8 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
         ))}
       </div>
 
-      {/* The submissions button lives with the rules that govern it. */}
-      {section.id === "rules" ? (
+      {/* The submissions button lives in the section that says what to bring. */}
+      {section.id === "submissions" ? (
         <div className="mt-10">
           <SubmitButton />
         </div>
