@@ -571,7 +571,7 @@ export const SECTIONS: Section[] = [
         kind: "list",
         label: "Submitting — 1:00 to 2:15 PM on the 19th",
         items: [
-          "A Microsoft Form. The link is posted here on the day.",
+          "A Microsoft Form. The button below unlocks at 1:00 PM on the day.",
           "Team name, track, prompt, a link to your product or demo, a link to your video (three minutes maximum).",
           "Links must open without a login or an install. Test them in a private window first.",
           "Unlisted video is fine. Private is not.",
