@@ -80,3 +80,7 @@ export const SUBMISSIONS_OPEN_AT = new Date("2026-09-19T13:00:00-05:00");
    JUDGE_FORM_URL is the small scoring form; empty hides the buttons. */
 export const JUDGE_PATH = "/judge-c7m2x9";
 export const JUDGE_FORM_URL = "";
+
+/* The upload page: drop the form export, publish it to the judges. Also
+   unlisted; the write itself is protected by UPLOAD_KEY on the server. */
+export const UPLOAD_PATH = "/upload-k4n8pq";

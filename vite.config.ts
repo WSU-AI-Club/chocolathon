@@ -30,6 +30,8 @@ function devApi(): Plugin {
       for (const key of [
         "PROMPTS_RELEASE_AT",
         "PROMPTS_UNLOCKED",
+        "BLOB_READ_WRITE_TOKEN",
+        "UPLOAD_KEY",
       ]) {
         if (env[key] && !process.env[key]) process.env[key] = env[key];
       }

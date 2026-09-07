@@ -2,10 +2,11 @@
    JUDGE PAGE — every submission as a card, for the 90 minutes between
    2:15 and 3:45 on September 19.
 
-   Reads public/judging/submissions.json, which pipeline/make-judging.mjs
-   writes from the form export at 2:15 (see that file for the day-of
-   steps). The rubric at the top comes from /api/hub so it is the same
-   text the teams saw.
+   Reads /api/judging, the set Michael publishes from the upload page at
+   2:15 (drag the Forms export in, publish). Falls back to the static
+   public/judging/submissions.json that pipeline/make-judging.mjs writes,
+   which is also the rehearsal data. The rubric at the top comes from
+   /api/hub so it is the same text the teams saw.
 
    Unlisted path, no login: the links on it are public at the finals
    ninety minutes later, and a login that can fail at 2:15 is worse than
@@ -68,12 +69,13 @@ export default function JudgePage() {
   useEffect(() => {
     (async () => {
       try {
-        const [j, h] = await Promise.all([
-          fetch("/judging/submissions.json", { cache: "no-store" }),
-          fetch("/api/hub", { cache: "no-store" }).catch(() => null),
-        ]);
+        /* The published set (uploaded through the upload page) wins; the
+           static file in the repo is the fallback and the rehearsal. */
+        let j = await fetch("/api/judging", { cache: "no-store" }).catch(() => null);
+        if (!j || !j.ok) j = await fetch("/judging/submissions.json", { cache: "no-store" });
+        const h = await fetch("/api/hub", { cache: "no-store" }).catch(() => null);
         if (!j.ok) {
-          setState({ status: "error", message: "No submissions file yet. Run make-judging and push." });
+          setState({ status: "error", message: "Nothing published yet. Use the upload page." });
           return;
         }
         const judging = (await j.json()) as Judging;
