@@ -1,18 +1,21 @@
 /* ═══════════════════════════════════════════════════════════════════
-   COMPETITOR CONTENT — SERVER ONLY. NEVER IMPORT THIS FROM src/.
+   PROMPTS PAGE CONTENT — SERVER ONLY. NEVER IMPORT THIS FROM src/.
 
    This file is compiled into the Vercel serverless functions, not into
-   the browser bundle. That is the whole point: the challenge prompts do
-   not exist anywhere a logged-out visitor can reach them, including
-   View Source and the network tab. Import it from `src/` even once and
-   the secrecy is gone.
+   the browser bundle. That is the whole point: before the release clock
+   turns over, the challenge prompts do not exist anywhere a visitor can
+   reach them, including View Source and the network tab. Import it from
+   `src/` even once and the countdown is theatre.
 
-   Two gates protect the prompts:
-     1. a valid competitor code (see `_session.ts`)
-     2. the release clock — PROMPTS_RELEASE_AT, default Sep 14 midnight CT
+   One gate protects the prompts (the team-code gate was dropped on
+   2026-09-06 — the page is public, no logins):
+     the release clock — PROMPTS_RELEASE_AT, default Sep 14 midnight CT
 
-   Gate 2 means a code that leaks early still cannot surface the prompts,
-   and nobody has to be at a keyboard on the 14th to publish them.
+   Nobody has to be at a keyboard on the 14th to publish them.
+
+   The prompt text is the .docx `Chocolathon_Challenge_Prompts` word for
+   word (2026-09-06). Edit the document, then mirror the edit here; do
+   not improve the copy in one place only.
    ═══════════════════════════════════════════════════════════════════ */
 
 export type Block =
@@ -40,53 +43,38 @@ const BUILD: Prompt[] = [
     blocks: [
       {
         kind: "text",
-        label: "The problem on the floor",
+        label: "Problem",
         body:
-          "“How do we know every single chocolate that’s put in a box? " +
-          "We don’t have that data.” Every truffle is a uniform shape, " +
-          "hand-painted in cocoa-butter color patterns — splatters, swirls, " +
-          "splashes. No two are identical, but each variety shares a defined " +
-          "color palette.",
+          "Cocoa Dolce has no data on which truffles go into which box. Each " +
+          "variety is hand-painted with a distinct color palette (splatters, " +
+          "swirls, splashes), but no two pieces are identical.",
       },
       {
         kind: "text",
-        label: "The challenge",
+        label: "Challenge",
         body:
           "Build a proof-of-concept that identifies truffle varieties from a " +
-          "photo and logs what’s in a box. You do not need production-grade " +
-          "accuracy across every variety — you need to prove the idea works " +
-          "on a real, limited set. Start with color-palette matching (e.g., " +
-          "“70% of one color, 30% of another”) on a handful of varieties " +
-          "under good lighting. Getting three or four varieties classified " +
-          "reliably is a win; the honesty about where it breaks is part of the " +
-          "score.",
+          "photo and logs box contents. Start with color-palette matching on a " +
+          "handful of varieties under good lighting — reliably classifying 3–4 " +
+          "varieties is a win. This is the hardest, most research-heavy prompt " +
+          "on the board.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
-          "A working demo that classifies at least a few truffle varieties from photos, with stated accuracy",
-          "A simple capture workflow a packer could realistically follow (phone or fixed camera)",
-          "Structured output (JSON or CSV per box) that could feed Odoo inventory",
-          "Honest documentation of where accuracy holds and where it falls apart — lighting, similar palettes, pattern overlap",
+          "Working demo classifying at least a few varieties, with stated accuracy",
+          "Simple capture workflow a packer could realistically use (phone or fixed camera)",
+          "Structured output (JSON/CSV per box) that could feed Odoo inventory",
+          "Honest documentation of where accuracy breaks down (lighting, similar palettes, pattern overlap)",
         ],
       },
       {
         kind: "text",
         label: "Stretch goal",
         body:
-          "Push past color into pattern recognition, or flag boxes that deviate " +
-          "from the expected assortment before they ship.",
-      },
-      {
-        kind: "text",
-        label: "A note on scope",
-        body:
-          "This is the hardest prompt on the board and the most research-flavored. " +
-          "A small, honest, working proof-of-concept beats an over-promised demo " +
-          "that only works on three cherry-picked photos. Modern AI tools make a " +
-          "basic image classifier more reachable than it used to be — lean on " +
-          "them, and tell us what you learned.",
+          "Pattern recognition beyond color, or flagging boxes that deviate from " +
+          "the expected assortment before shipping.",
       },
     ],
   },
@@ -94,44 +82,39 @@ const BUILD: Prompt[] = [
     id: "B-2",
     track: "build",
     title: "Thermal Shipping Decision Engine",
-    teaser:
-      "Automate the daily call: no thermal, single thermal, or double with extra ice.",
+    teaser: "Decide the thermal packaging for every order from the forecast, automatically.",
     blocks: [
       {
         kind: "text",
-        label: "The problem on the floor",
+        label: "Problem",
         body:
-          "Every day the shipping team pulls order forms, eyeballs the zip code, " +
-          "checks whether it’s above 75°F in Wichita or the receiving state, " +
-          "and decides: no thermal, single thermal, or double thermal with extra " +
-          "ice packs. It works — but it’s manual, and one wrong call means " +
-          "melted product.",
+          "Each day, the shipping team manually checks zip codes and " +
+          "temperatures to decide: no thermal, single thermal, or double thermal " +
+          "with ice packs. It works, but one wrong call means melted product.",
       },
       {
         kind: "text",
-        label: "The challenge",
+        label: "Challenge",
         body:
-          "Automate the triage. Build a tool that ingests destination zip codes, " +
-          "pulls origin and destination forecasts for the transit window, applies " +
-          "the thermal thresholds, and outputs a daily pack list with the " +
-          "packaging decision per order.",
+          "Automate the decision. Build a tool that takes destination zip codes, " +
+          "pulls origin/destination forecasts for the transit window, applies " +
+          "thermal thresholds, and outputs a daily pack list per order.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
-          "A working tool that takes a batch of zip codes (or a Shopify order export) and returns thermal decisions",
-          "Configurable temperature thresholds so the team can tune the rules",
-          "A clear daily summary view the packing team can print or pull up on a tablet",
-          "Handling for multi-day transit (worst-case temperature along the window, not just day of shipment)",
+          "Working tool that takes a batch of zip codes (or a Shopify order export) and returns thermal decisions",
+          "Configurable temperature thresholds",
+          "Clear daily summary view the packing team can print or view on a tablet",
+          "Handling for multi-day transit (worst-case temperature across the window, not just ship day)",
+          "Shipping timeline guidance (how long shipping should take)",
         ],
       },
       {
         kind: "text",
         label: "Stretch goal",
-        body:
-          "Estimate ice-pack and thermal-liner cost per day so the business can " +
-          "see the spend.",
+        body: "Estimate daily ice-pack and thermal-liner cost.",
       },
     ],
   },
@@ -139,42 +122,40 @@ const BUILD: Prompt[] = [
     id: "B-3",
     track: "build",
     title: "Design-Your-Box — Visual Corporate Order Builder",
-    teaser:
-      "Give corporate clients the visual box builder that only consumers get today.",
+    teaser: "A drag-and-drop box configurator for corporate orders.",
     blocks: [
       {
         kind: "text",
-        label: "The problem on the floor",
+        label: "Problem",
         body:
-          "Direct-to-consumer customers get a visual box builder online. Corporate " +
-          "clients — the customers placing 75,000-piece orders — get a PDF " +
-          "and a long concierge email thread to specify where their logo chocolates " +
-          "and accents go.",
+          "Direct-to-consumer customers get an online visual box builder. " +
+          "Corporate clients placing 75,000-piece orders get a PDF and a long " +
+          "email thread to specify logo chocolate placement.",
       },
       {
         kind: "text",
-        label: "The challenge",
+        label: "Challenge",
         body:
-          "Build a web-based visual box configurator for corporate orders: pick a " +
-          "box size, drag chocolates (including logo pieces) into position, choose " +
-          "ribbon/card/band options, and output both a client-facing preview and a " +
-          "production spec.",
+          "Build a web-based visual box configurator for corporate orders — pick " +
+          "a box size, drag chocolates (including logo pieces) into position, " +
+          "choose ribbon/card/band options, and output a client-facing preview " +
+          "plus a production spec.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
-          "A working drag-and-drop box builder with at least two box sizes",
-          "Placement rules (e.g., logo pieces front-center) that the tool enforces or suggests",
-          "A shareable visual proof the concierge team can send for approval",
-          "A machine-readable spec export for production",
+          "Working drag-and-drop box builder with at least two box sizes",
+          "Placement rules the tool enforces or suggests (e.g., logo pieces front-center)",
+          "Shareable visual proof the concierge team can send for client approval",
+          "Machine-readable spec export for production",
         ],
       },
       {
         kind: "text",
         label: "Stretch goal",
         body:
-          "Brand-color matching: upload a logo and get suggested chocolate color " +
+          "Brand-color matching — upload a logo, get suggested chocolate color " +
           "palettes.",
       },
     ],
@@ -182,36 +163,27 @@ const BUILD: Prompt[] = [
   {
     id: "B-4",
     track: "build",
-    wildcard: true,
     title: "Wildcard — Build Something They Don’t Know They Need",
-    teaser: "You saw something we didn’t. This lane is for you.",
+    teaser: "Your own working tool for a real Cocoa Dolce problem or opportunity.",
+    wildcard: true,
     blocks: [
       {
         kind: "text",
-        label: "The opening",
+        label: "Challenge",
         body:
-          "The challenges above came from one afternoon on Cocoa Dolce’s floor. " +
-          "You saw something we didn’t, or you have an idea none of these " +
-          "capture. This lane is for you.",
-      },
-      {
-        kind: "text",
-        label: "The challenge",
-        body:
-          "Build a working tool that solves a real Cocoa Dolce problem or opens a " +
-          "real opportunity — anything grounded in how their business actually " +
-          "runs (production, packaging, shipping, ordering, retail, or the customer " +
-          "experience). It must be something Cocoa Dolce could imagine using, not a " +
-          "general-purpose app that happens to mention chocolate.",
+          "Build a working tool that solves a real Cocoa Dolce problem or opens " +
+          "a real opportunity — grounded in how their business actually runs " +
+          "(production, packaging, shipping, ordering, retail, or customer " +
+          "experience). It should be something Cocoa Dolce could actually use, " +
+          "not a generic app with a chocolate label.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
-          "A working build (Lovable or your own stack), demoable on Saturday",
+          "A working build (Lovable or your own stack), demoable Saturday",
           "A clear, one-sentence answer to “what Cocoa Dolce problem does this solve?”",
-          "Evidence you understood their business, not a generic solution with a chocolate label",
-          "The same bar as every other Build entry: does it work, and is it genuinely useful to them?",
+          "Evidence you understood their business specifically",
         ],
       },
       {
@@ -219,7 +191,7 @@ const BUILD: Prompt[] = [
         label: "The one rule",
         body:
           "If a judge can’t tell why Cocoa Dolce specifically would want this, it " +
-          "belongs in a different hackathon. Ground it in their floor.",
+          "belongs in a different hackathon.",
       },
     ],
   },
@@ -232,35 +204,32 @@ const PITCH: Prompt[] = [
     id: "P-1",
     track: "pitch",
     title: "The Mold Bottleneck — Make the Case for a Fix",
-    teaser:
-      "Hundreds of molds, hand-polished, half a day, every cycle. Cost it and fix it.",
+    teaser: "Cost the manual mold-polishing process and make the case for replacing it.",
     blocks: [
       {
         kind: "text",
-        label: "The problem on the floor",
+        label: "Problem",
         body:
-          "Polycarbonate molds lose their shine after two to three runs. Today’s " +
-          "fix is manual: alcohol wipe, rinse, wash, then hand-polishing — " +
-          "hundreds of molds, a whole team, half a day, every cycle. That’s labor " +
-          "and capacity Cocoa Dolce loses during the exact season they can least " +
-          "afford it.",
+          "Polycarbonate molds affect chocolate shine quality after every run. " +
+          "The current fix is manual — alcohol wipe, rinse, wash, hand-polish — " +
+          "hundreds of molds, a whole team, half a day, every cycle.",
       },
       {
         kind: "text",
-        label: "The challenge",
+        label: "Challenge",
         body:
-          "Don’t just find a cleaner mold process — build the business case " +
-          "for changing it. Research real options (machine agitators, ultrasonic or " +
-          "chemical baths, what other chocolatiers actually do, material-science " +
-          "limits on polycarbonate), then make a recommendation Cocoa Dolce could act " +
-          "on, with the labor and capacity math behind it. Frame it as: here’s what " +
-          "this manual process costs you, here’s the fix, here’s the payback.",
+          "Build the business case for changing the process. Research real " +
+          "alternatives (machine agitators, ultrasonic or chemical baths, what " +
+          "other chocolatiers do, material-science limits on polycarbonate) and " +
+          "make a recommendation with the labor and capacity math behind it: " +
+          "what the manual process costs, what the fix is, what the payback " +
+          "looks like.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
-          "A recommendation backed by real, sourced options (vendors, models, rough costs — all verifiable)",
+          "A recommendation backed by real, sourced options (vendors, models, rough costs — verifiable)",
           "The cost of the status quo in labor-hours and lost capacity, especially in peak season",
           "A payback and risk read: mold lifespan, food safety, finish quality",
           "A pilot Cocoa Dolce could run within one quarter",
@@ -270,11 +239,9 @@ const PITCH: Prompt[] = [
         kind: "text",
         label: "How Lovable helps",
         body:
-          "Make the case land with something interactive, not a static memo: a " +
-          "payback calculator where a judge adjusts labor hours and equipment cost " +
-          "and watches the break-even move, or a clean visual one-pager of the " +
-          "current-vs-proposed process. Every team gets Lovable credits — this is " +
-          "what turns a research memo into a pitch.",
+          "Build an interactive payback calculator (adjust labor hours and " +
+          "equipment cost, watch the break-even move) or a clean visual one-pager " +
+          "comparing current vs. proposed process.",
       },
     ],
   },
@@ -282,46 +249,43 @@ const PITCH: Prompt[] = [
     id: "P-2",
     track: "pitch",
     title: "Own the Off-Peak — Revenue Beyond the Holidays",
-    teaser: "Summer is the lightest season. Pitch the concept that fills it.",
+    teaser: "Pitch a revenue-driving concept for the slow summer months.",
     blocks: [
       {
         kind: "text",
-        label: "The problem on the floor",
+        label: "Problem",
         body:
-          "Summer is the lightest season, and leadership’s stated goal is to build " +
-          "the off-peak business so growth doesn’t depend on stacking more volume " +
-          "into an already-bottlenecked December. The turn-down chocolate program for " +
-          "a major hotel property (a 75,000–100,000 piece order) showed what a " +
-          "single B2B concept can unlock.",
+          "Summer is Cocoa Dolce’s lightest season. Leadership wants to build " +
+          "off-peak revenue rather than rely on an already-bottlenecked December. " +
+          "A recent hotel turn-down chocolate program (75,000–100,000 pieces) " +
+          "showed what one B2B concept can unlock.",
       },
       {
         kind: "text",
-        label: "The challenge",
+        label: "Challenge",
         body:
-          "Pitch a revenue-driving concept for the off-peak months: a seasonal event, " +
-          "a brand activation, a subscription, a new B2B product line, an experience. " +
-          "Think like a brand builder, not just a marketer.",
+          "Pitch a revenue-driving concept for the off-peak months — a seasonal " +
+          "event, brand activation, subscription, new B2B product line, or " +
+          "experience. Think like a brand builder, not just a marketer.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
           "A fully developed concept: audience, positioning, pricing, revenue model",
-          "An operating plan that fits their slow-season production capacity",
+          "An operating plan that fits slow-season production capacity",
           "Financial projections with stated, defensible assumptions",
-          "A launch timeline and marketing plan they could run with their current team",
+          "A launch timeline and marketing plan their current team could run",
         ],
       },
       {
         kind: "text",
         label: "How Lovable helps",
         body:
-          "Make the concept real enough to sell from the stage. Build the thing your " +
-          "pitch is about: the mock landing page for the summer subscription, the " +
-          "booking page for the event, the B2B microsite for the new product line. A " +
-          "judge who can click through your idea believes it more than one who only " +
-          "hears it described. Every team gets Lovable credits — this is exactly " +
-          "what it’s built for.",
+          "Build the thing your pitch is about — a mock landing page for the " +
+          "subscription, a booking page for the event, a B2B microsite for the " +
+          "new product line. A judge who can click through your idea believes it " +
+          "more.",
       },
     ],
   },
@@ -329,90 +293,85 @@ const PITCH: Prompt[] = [
     id: "P-3",
     track: "pitch",
     title: "The Cocoa Price Squeeze",
-    teaser:
-      "Cocoa tripled in two years. They made the piece bigger. Now what?",
+    teaser: "How a premium chocolatier should navigate cocoa prices that have tripled.",
     blocks: [
       {
         kind: "text",
-        label: "The problem on the floor",
+        label: "Problem",
         body:
           "Cocoa prices have roughly tripled in two years. Many chocolatiers are " +
-          "shrinking pieces or straying from real chocolate. Cocoa Dolce went the " +
-          "other way — it made the piece bigger — and quality is the brand.",
+          "shrinking pieces or cutting quality in response — Cocoa Dolce went the " +
+          "other way and made pieces bigger, betting on quality as the brand.",
       },
       {
         kind: "text",
-        label: "The challenge",
+        label: "Challenge",
         body:
           "Build the business case for how a premium chocolatier should navigate " +
-          "sustained cocoa inflation: pricing, product mix, sourcing, and hedging " +
+          "sustained cocoa inflation — pricing, product mix, sourcing, and hedging " +
           "— without eroding the brand promise.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
           "A verifiable market analysis of cocoa pricing and forward outlook",
           "A pricing and product-mix strategy with margin modeling",
           "An evaluation of sourcing and hedging levers realistic for a company this size",
-          "Clear guidance on what NOT to do — the moves that would damage the brand",
+          "Clear guidance on what NOT to do — moves that would damage the brand",
         ],
       },
       {
         kind: "text",
         label: "How Lovable helps",
         body:
-          "Turn your margin model into something the leadership team can play with: a " +
-          "Lovable pricing calculator where they adjust cocoa cost, piece size, and " +
-          "price, and watch margin and brand-positioning move together. A living model " +
-          "they can test their own scenarios in is far more persuasive than a static " +
-          "spreadsheet screenshot. Every team gets Lovable credits — use them to " +
-          "make your strategy interactive.",
+          "Build a pricing calculator where leadership can adjust cocoa cost, " +
+          "piece size, and price, and watch margin and brand-positioning move " +
+          "together — more persuasive than a static spreadsheet.",
       },
     ],
   },
   {
     id: "P-4",
     track: "pitch",
-    wildcard: true,
     title: "Wildcard — Pitch the Move They Haven’t Made",
-    teaser: "You see a bigger opportunity. This lane is for you.",
+    teaser: "The business case for a strategic move Cocoa Dolce could actually make.",
+    wildcard: true,
     blocks: [
       {
         kind: "text",
-        label: "The opening",
+        label: "Challenge",
         body:
-          "The prompts above came from one afternoon on Cocoa Dolce’s floor. You " +
-          "see a bigger opportunity, a risk they should get ahead of, or a strategic " +
-          "question none of these capture. This lane is for you.",
-      },
-      {
-        kind: "text",
-        label: "The challenge",
-        body:
-          "Build the business case for a strategic move Cocoa Dolce could actually " +
-          "make — a market to enter, a channel to open, a partnership, a pricing " +
-          "or positioning shift, an operational bet. Anything grounded in how their " +
-          "business actually runs and where it could go. It must be a decision Cocoa " +
-          "Dolce could imagine putting real money behind, not a generic strategy deck " +
-          "that happens to mention chocolate.",
+          "Build the business case for a strategic move Cocoa Dolce could " +
+          "actually make — a market to enter, a channel to open, a partnership, a " +
+          "pricing or positioning shift, an operational bet. It should be grounded " +
+          "in their actual business and a decision they could imagine funding, " +
+          "not a generic strategy deck with a chocolate label.",
       },
       {
         kind: "list",
-        label: "What a winning entry looks like",
+        label: "Winning entry includes",
         items: [
           "A clear, one-sentence answer to “what should Cocoa Dolce do, and why now?”",
           "A recommendation backed by real, sourced evidence — market data, costs, comparables, all verifiable",
-          "The math behind it: what it costs, what it returns, what the risk is",
-          "Evidence you understood their business, not a generic strategy with a chocolate label",
+          "The math behind it: cost, return, risk",
+          "Evidence you understood their business specifically",
         ],
       },
       {
         kind: "text",
         label: "The one rule",
         body:
-          "If a judge can’t tell why Cocoa Dolce specifically would act on this, it " +
-          "belongs in a different hackathon. Ground it in their floor.",
+          "If a judge can’t tell why Cocoa Dolce specifically would act on this, " +
+          "it belongs in a different hackathon.",
+      },
+      {
+        kind: "text",
+        label: "How Lovable helps",
+        body:
+          "Build an interactive model a judge can adjust, a clean visual " +
+          "one-pager of the proposed move, or a mock page that makes the concept " +
+          "real enough to sell from the stage.",
       },
     ],
   },
@@ -441,10 +400,11 @@ export type Section = {
   blocks: Block[];
 };
 
+/* No registration dates here on purpose: registration is handled off
+   this page, and this page must never contradict what the club announces
+   about it. */
 export const KEY_DATES: { date: string; what: string; done?: boolean }[] = [
-  { date: "Mon Aug 24", what: "Registration opens" },
-  { date: "Thu Sep 10", what: "Registration closes — teams lock, no late entries" },
-  { date: "Mon Sep 14", what: "Prompts release here. Build starts." },
+  { date: "Mon Sep 14", what: "Prompts release here, at midnight. Build starts." },
   { date: "Sat Sep 19", what: "The finale — Woolsey Hall, 8:30 AM to 5:00 PM" },
 ];
 
@@ -472,9 +432,9 @@ export const SECTIONS: Section[] = [
     nav: "Start here",
     title: "How this works",
     intro:
-      "You are registered. Everything you need to compete is on this page, and " +
-      "nothing on it is public. Read this section once and you will not be " +
-      "surprised on the 19th.",
+      "Everything you need to compete is on this page: the eight prompts, the " +
+      "rules, how you submit, and how you get judged. Read this section once " +
+      "and you will not be surprised on the 19th.",
     blocks: [
       {
         kind: "list",
@@ -570,7 +530,7 @@ export const SECTIONS: Section[] = [
         items: [
           "WSU students only — undergraduate, graduate, and doctoral. Any major.",
           "Teams of one to four. Solo is allowed and competes on the same terms.",
-          "Teams were LOCKED at registration. No adding, swapping, or merging members now, and no team formation on event day.",
+          "Teams lock at registration. No adding, swapping, or merging members after that, and no team formation on event day.",
           "You must attend the finale on September 19 to compete. No remote submissions.",
         ],
       },
@@ -710,7 +670,7 @@ export const SECTIONS: Section[] = [
         items: [
           "Can we switch tracks? Yes — you declare your track at submission, so you can change your mind right up to 2:15 PM on the 19th.",
           "Can we answer two prompts? No. One prompt, one submission, one track.",
-          "Can we change our team? No. Teams locked at registration on September 10.",
+          "Can we change our team? No. Teams lock at registration.",
           "Does our project have to use AI? No. Neither track requires it.",
           "Can we use code or research we wrote before September 14? Libraries, templates, and public tools yes. A project you had already built, no.",
           "Do we have to be there all day? You must be there to submit and, if you advance, to present. Come for the whole thing — the sessions and the food are part of it.",

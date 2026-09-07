@@ -1,18 +1,18 @@
-/* GET /api/hub — everything the competitor area renders.
+/* GET /api/hub — everything the prompts page renders.
 
-   This endpoint is the reason the gate is real. The prompt text is
-   assembled here, in the function, and only leaves the server when
-   BOTH conditions hold:
+   This endpoint is the reason the countdown is real. The prompt text is
+   assembled here, in the function, and only leaves the server when the
+   release clock has passed (or PROMPTS_UNLOCKED=true for a preview).
 
-     1. a valid session cookie (or HUB_PUBLIC=true, after the event)
-     2. the release clock has passed (or PROMPTS_UNLOCKED=true)
-
-   Logged out, the response carries no prompt text at all — not even
-   the titles. Before September 14, a logged-in team gets the full
+   Before that instant the response carries no prompt text at all — not
+   even the titles. The page is public (the team-code gate was dropped on
+   2026-09-06); what it shows before midnight on September 14 is the
    briefing and a countdown where the prompts will be.
 
-   Cache-Control is no-store on purpose: a CDN copy of a gated payload
-   is a leak waiting for a cache key collision. */
+   Cache-Control is no-store on purpose: a CDN copy of the pre-release
+   payload would keep serving "locked" after the clock turned over, and a
+   copy of the post-release payload is one cache-key collision from
+   appearing early. */
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
@@ -31,12 +31,7 @@ import {
   RUN_OF_DAY,
   SECTIONS,
 } from "./_content.js";
-import {
-  hubIsPublic,
-  promptsUnlocked,
-  readCookie,
-  releaseAt,
-} from "./_session.js";
+import { promptsUnlocked, releaseAt } from "./_release.js";
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store, private");
@@ -46,19 +41,9 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const isPublic = hubIsPublic();
-  const team = readCookie(req.headers.cookie);
-
-  if (team === null && !isPublic) {
-    return res.status(401).json({ authed: false });
-  }
-
   const unlocked = promptsUnlocked();
 
   return res.status(200).json({
-    authed: true,
-    isPublic,
-    team: team ?? "",
     promptsUnlocked: unlocked,
     releaseAt: releaseAt().toISOString(),
     /* The single most important line in this file: no prompts unless

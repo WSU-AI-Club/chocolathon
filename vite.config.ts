@@ -23,17 +23,13 @@ function devApi(): Plugin {
 
     /* The handlers read plain `process.env`, because that is what they get
        on Vercel. Vite does not put un-prefixed vars there, so load
-       `.env.local` in by hand — that is where COMPETITOR_CODES and
-       SESSION_SECRET go for local work. `*.local` is already gitignored,
-       so real codes cannot be committed by accident. */
+       `.env.local` in by hand — that is where PROMPTS_UNLOCKED goes for a
+       local preview. `*.local` is already gitignored. */
     config(_, { mode }) {
       const env = loadEnv(mode, process.cwd(), "");
       for (const key of [
-        "COMPETITOR_CODES",
-        "SESSION_SECRET",
         "PROMPTS_RELEASE_AT",
         "PROMPTS_UNLOCKED",
-        "HUB_PUBLIC",
       ]) {
         if (env[key] && !process.env[key]) process.env[key] = env[key];
       }

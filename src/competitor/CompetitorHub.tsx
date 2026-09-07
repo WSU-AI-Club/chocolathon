@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   COMPETITOR HUB — the logged-in page.
+   THE PROMPTS PAGE — public since 2026-09-06, no logins.
 
    Same palette, type and restraint as the public page (ink / gold /
    amber, Bodoni display, Archivo body, Space Mono eyebrows) so it reads
@@ -15,13 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { Block, HubData, Prompt, Section } from "./types";
 
-export default function CompetitorHub({
-  data,
-  onSignedOut,
-}: {
-  data: HubData;
-  onSignedOut: () => void;
-}) {
+export default function CompetitorHub({ data }: { data: HubData }) {
   const navItems = useMemo(
     () => [
       { id: "prompts", nav: "The prompts" },
@@ -33,11 +27,7 @@ export default function CompetitorHub({
 
   return (
     <div className="min-h-screen bg-white">
-      <HubBar
-        team={data.team}
-        isPublic={data.isPublic}
-        onSignedOut={onSignedOut}
-      />
+      <HubBar />
 
       <main className="mx-auto max-w-6xl px-5 pb-32 pt-28 sm:px-8">
         <HubHeader data={data} />
@@ -72,27 +62,7 @@ export default function CompetitorHub({
 
 /* ── top bar ──────────────────────────────────────────────────────── */
 
-function HubBar({
-  team,
-  isPublic,
-  onSignedOut,
-}: {
-  team: string;
-  isPublic: boolean;
-  onSignedOut: () => void;
-}) {
-  const [busy, setBusy] = useState(false);
-
-  async function signOut() {
-    setBusy(true);
-    try {
-      await fetch("/api/logout", { method: "POST" });
-    } catch {
-      /* Clearing the cookie is best-effort; reloading is what matters. */
-    }
-    onSignedOut();
-  }
-
+function HubBar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
@@ -101,26 +71,14 @@ function HubBar({
           className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-ink/75 no-underline"
         >
           Chocolathon
-          <span className="hidden text-ink/40 sm:inline"> · Competitor HQ</span>
+          <span className="hidden text-ink/40 sm:inline"> · The prompts</span>
         </a>
-
-        <div className="flex items-center gap-3">
-          {team ? (
-            <span className="hidden font-mono text-[10px] uppercase tracking-[0.14em] text-ink/45 sm:inline">
-              {team}
-            </span>
-          ) : null}
-          {isPublic ? null : (
-            <button
-              type="button"
-              onClick={signOut}
-              disabled={busy}
-              className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/45 underline decoration-ink/20 underline-offset-4 transition-colors hover:text-ink disabled:opacity-40"
-            >
-              Log out
-            </button>
-          )}
-        </div>
+        <a
+          href="/"
+          className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink/45 no-underline transition-colors hover:text-ink"
+        >
+          ← Event page
+        </a>
       </div>
     </header>
   );
@@ -131,19 +89,16 @@ function HubBar({
 function HubHeader({ data }: { data: HubData }) {
   return (
     <>
-      <p className="eyebrow mb-4">
-        {data.isPublic ? "The 2026 challenge" : "Competitors only · do not share"}
-      </p>
+      <p className="eyebrow mb-4">The 2026 challenge</p>
       <h1 className="font-display text-5xl font-semibold leading-[1.02] tracking-tight text-ink md:text-6xl">
-        {data.team ? `Welcome, ${data.team}.` : "Welcome in."}
+        The prompts.
       </h1>
       <p className="mt-5 max-w-xl text-base leading-relaxed text-ink/70">
-        This is everything you need to compete: the eight challenge prompts, the
-        rules, how you submit, and how you get judged. It is not linked from the
-        public page and it is not indexed.
+        Everything you need to compete: the eight challenge prompts, the rules,
+        how you submit, and how you get judged.
       </p>
 
-      <ol className="mt-10 grid gap-px overflow-hidden rounded-sm bg-ink/10 sm:grid-cols-4">
+      <ol className="mt-10 grid gap-px overflow-hidden rounded-sm bg-ink/10 sm:grid-cols-2">
         {data.keyDates.map((d) => (
           <li key={d.date} className="bg-white px-4 py-4">
             <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-gold">
@@ -303,28 +258,72 @@ function PromptsSection({ data }: { data: HubData }) {
   );
 }
 
+/* The countdown is the page until the clock turns over, so it gets the
+   same treatment as the landing page's: seconds shown so it reads as
+   live, tabular numerals and zero-padding so the row never twitches,
+   and the same stacked figures the mobile hero uses. It ticks every
+   second; the parent re-asks the server the moment it hits zero. */
 function PromptsLocked({ releaseAt }: { releaseAt: string }) {
   const left = useCountdown(releaseAt);
-  const when = new Date(releaseAt).toLocaleDateString(undefined, {
+  const when = new Date(releaseAt);
+  const dayLabel = when.toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
+    timeZone: "America/Chicago",
   });
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  const units: Array<[string, string]> = left
+    ? [
+        [String(left.days), left.days === 1 ? "Day" : "Days"],
+        [pad(left.hours), left.hours === 1 ? "Hour" : "Hours"],
+        [pad(left.minutes), left.minutes === 1 ? "Minute" : "Minutes"],
+        [pad(left.seconds), left.seconds === 1 ? "Second" : "Seconds"],
+      ]
+    : [];
 
   return (
-    <div className="mt-6 border-l-2 border-gold py-1 pl-6">
+    <div className="mt-8">
       <p className="max-w-xl text-base leading-relaxed text-ink/70">
-        The eight challenge prompts unlock on{" "}
-        <strong className="font-semibold text-ink">{when}</strong>. They are not
-        in this page yet — not hidden in it, not in the code behind it. Until
-        the clock turns over, they only exist on the server.
+        The eight challenge prompts release at{" "}
+        <strong className="font-semibold text-ink">
+          midnight on {dayLabel}
+        </strong>
+        , Wichita time. They are not in this page yet — not hidden in it, not
+        in the code behind it. Until the clock turns over, they only exist on
+        the server.
       </p>
+
       {left ? (
-        <p className="mt-5 font-mono text-[11px] uppercase tracking-[0.16em] text-ink/45">
-          {left} to go
+        <div className="mt-10 border-y border-ink/10 py-10" aria-live="off">
+          <p className="sr-only">
+            {left.days} days, {left.hours} hours and {left.minutes} minutes until
+            the prompts release.
+          </p>
+          <div aria-hidden="true" className="flex items-start gap-6 sm:gap-10">
+            {units.map(([value, label]) => (
+              <div key={label} className="min-w-[3ch] text-center">
+                <p className="font-display text-5xl font-semibold tabular-nums leading-none text-ink sm:text-7xl">
+                  {value}
+                </p>
+                <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.18em] text-ink/45 sm:text-[10px]">
+                  {label}
+                </p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+            Until the prompts release
+          </p>
+        </div>
+      ) : (
+        <p className="mt-8 font-mono text-[11px] uppercase tracking-[0.16em] text-gold">
+          Releasing now — one moment.
         </p>
-      ) : null}
-      <p className="mt-5 max-w-xl text-sm leading-relaxed text-ink/55">
+      )}
+
+      <p className="mt-8 max-w-xl text-sm leading-relaxed text-ink/55">
         Nothing below is on the clock. Read the rules, the submission process
         and the judging criteria now — the teams that place already know all
         three before they see a prompt.
@@ -333,26 +332,26 @@ function PromptsLocked({ releaseAt }: { releaseAt: string }) {
   );
 }
 
-/* Recomputes once a minute. Precision below that would be noise on a
-   countdown measured in days. */
-function useCountdown(iso: string): string | null {
+type Remaining = { days: number; hours: number; minutes: number; seconds: number };
+
+function useCountdown(iso: string): Remaining | null {
   const target = useMemo(() => new Date(iso).getTime(), [iso]);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 60_000);
+    const id = window.setInterval(() => setNow(Date.now()), 1_000);
     return () => window.clearInterval(id);
   }, []);
 
   const ms = target - now;
   if (!Number.isFinite(ms) || ms <= 0) return null;
-
-  const mins = Math.floor(ms / 60_000);
-  const days = Math.floor(mins / 1440);
-  const hours = Math.floor((mins % 1440) / 60);
-  if (days > 0) return `${days} day${days === 1 ? "" : "s"}, ${hours} hr`;
-  if (hours > 0) return `${hours} hr ${mins % 60} min`;
-  return `${mins} min`;
+  const total = Math.floor(ms / 1000);
+  return {
+    days: Math.floor(total / 86_400),
+    hours: Math.floor((total % 86_400) / 3_600),
+    minutes: Math.floor((total % 3_600) / 60),
+    seconds: total % 60,
+  };
 }
 
 function PromptCard({ prompt }: { prompt: Prompt }) {

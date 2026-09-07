@@ -1,11 +1,15 @@
-/* Persistent top bar: club badge, section jumps, and the Join-the-club
-   CTA. The Register button that used to sit here was removed 2026-09-06:
-   registration is a separate form that closed September 10, and the page
-   launches after that. */
+/* Persistent top bar: club badge, section jumps, the Join-the-club CTA,
+   and the Register CTA. Register is the single amber action up here
+   while it lasts; it hides itself on the date in ./links and Join stays. */
 
 import { useEffect, useState } from "react";
 
-import { CLUB_JOIN_URL } from "./links";
+import {
+  CLUB_JOIN_URL,
+  PROMPTS_PATH,
+  REGISTER_URL,
+  registrationOpen,
+} from "./links";
 
 export default function Masthead({
   deferSurface = false,
@@ -20,6 +24,7 @@ export default function Masthead({
   deferSurface?: boolean;
 }) {
   const [solid, setSolid] = useState(!deferSurface);
+  const showRegister = registrationOpen();
 
   useEffect(() => {
     const onScroll = () => {
@@ -68,9 +73,13 @@ export default function Masthead({
           <a href="#judges" className="masthead-link hidden md:inline-flex">
             Judges
           </a>
-          {/* Explicit white background rather than the transparent
-              btn-ghost, because this bar floats over the scrolling
-              photography and must stay legible. */}
+          <a href={PROMPTS_PATH} className="masthead-link hidden md:inline-flex">
+            Prompts
+          </a>
+          {/* White, not amber: Register has to stay the single primary
+              action up here. Explicit white background rather than the
+              transparent btn-ghost, because this bar floats over the
+              scrolling photography and must stay legible. */}
           {CLUB_JOIN_URL ? (
             <a
               href={CLUB_JOIN_URL}
@@ -80,6 +89,16 @@ export default function Masthead({
             >
               <span className="sm:hidden">Join Club</span>
               <span className="hidden sm:inline">Join the AI Club</span>
+            </a>
+          ) : null}
+          {showRegister ? (
+            <a
+              href={REGISTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-cta ml-2 !min-h-[38px] !px-4 !text-xs sm:!px-5"
+            >
+              Register
             </a>
           ) : null}
         </nav>

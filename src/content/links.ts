@@ -1,17 +1,24 @@
 /* ═══════════════════════════════════════════════════════════════════
-   LINKS — every outbound URL, in one place.
+   LINKS — every outbound URL and date-driven switch, in one place.
 
    Nothing else on the page hardcodes a URL, so changing a value here
    changes every button at once.
-
-   Registration is NOT on this page (decided 2026-09-06). It ran
-   August 24 – September 10 as a Microsoft Form circulated separately
-   (https://forms.cloud.microsoft/r/aCrbnM5Dys, owned in the club's
-   MS 365 group). The page launches when the competition starts, after
-   registration has closed, so it carries no register CTA and no
-   registration dates. The registration switch and form URL that used to
-   live here were removed with the buttons.
    ═══════════════════════════════════════════════════════════════════ */
+
+/* The REGISTRATION form — full team roster. Lives in the AI Club's
+   Microsoft 365 group; responses land in the club's Excel sheet. */
+export const REGISTER_URL = "https://forms.cloud.microsoft/r/aCrbnM5Dys";
+
+/* The Register buttons show until this instant and then disappear on
+   their own. Nothing on the page prints this date, and no copy anywhere
+   should. Explicit UTC offset so it reads the same in every timezone:
+   Central Daylight Time is UTC-5 in September. The form enforces its own
+   window in its own settings — keep the two in step by hand. */
+export const REGISTRATION_HIDE_AT = new Date("2026-09-16T23:59:00-05:00");
+
+export function registrationOpen(now: number = Date.now()): boolean {
+  return now < REGISTRATION_HIDE_AT.getTime();
+}
 
 /* ── AI Club (not Chocolathon-specific) ──────────────────────────────
    Any of the three URLs below may be left empty: the footer hides that
@@ -38,14 +45,14 @@ export const COCOA_DOLCE_ABOUT_URL =
    homepage is the canonical destination. */
 export const LOVABLE_URL = "https://lovable.dev";
 
-/* ── Competitor HQ ───────────────────────────────────────────────────
-   The gated area for registered teams: prompts, rules, submission and
-   judging. Same origin, not an outbound link — the App-level route
-   switch in `src/App.tsx` picks it up. It is deliberately reachable
-   only from the small footer line, never from the masthead: the
-   masthead's single primary action is Register, and 95% of visitors
-   before September 10 are not competitors yet.
+/* ── The prompts page ────────────────────────────────────────────────
+   Public (decided 2026-09-06, no logins): the eight challenge prompts,
+   the rules, submission, judging, and the run of finale day. Same
+   origin, not an outbound link — the App-level route switch in
+   `src/App.tsx` picks it up. /competitors still resolves to the same
+   page for anyone holding the old link.
 
-   The content behind it is served by /api/hub and gated server-side,
-   so linking to the path leaks nothing. */
-export const COMPETITOR_PATH = "/competitors";
+   The prompt text is served by /api/hub only after the release clock
+   (midnight, September 14, Wichita time); before that the page shows a
+   countdown and the prompts do not exist in the browser at all. */
+export const PROMPTS_PATH = "/prompts";

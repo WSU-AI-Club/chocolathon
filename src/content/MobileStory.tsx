@@ -1,11 +1,12 @@
 /* Mobile + reduced-motion fallback — the same story as normal scroll
    sections built on the real photography. No scroll-jacking.
 
-   The hero Register CTA was removed 2026-09-06: registration is a
-   separate form that closed September 10, and the page launches after
-   that. The masthead's Join-the-club button is the only CTA up top;
-   Competitor HQ is reachable from the footer. */
+   The hero CTA stays here (unlike the desktop film, where the masthead
+   carries it and the finale panel pays it off): there is no crown-arc
+   payoff on this path, so the ask has to be reachable immediately. It
+   hides itself on the date in ./links and the prompts link remains. */
 
+import { PROMPTS_PATH, REGISTER_URL, registrationOpen } from "./links";
 import Countdown from "./Countdown";
 
 const SPRITES = [
@@ -40,6 +41,21 @@ export default function MobileStory() {
           Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall
         </p>
         <Countdown className="mt-9" variant="stack" />
+        <div className="mt-6 flex flex-col items-center gap-3">
+          {registrationOpen() ? (
+            <a
+              className="btn-cta"
+              href={REGISTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Register your team
+            </a>
+          ) : null}
+          <a className="btn-ghost" href={PROMPTS_PATH}>
+            See the prompts
+          </a>
+        </div>
       </section>
 
       {/* What it is */}

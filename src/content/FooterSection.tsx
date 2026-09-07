@@ -22,7 +22,7 @@ import {
   CLUB_INSTAGRAM_URL,
   CLUB_JOIN_URL,
   CLUB_LINKEDIN_URL,
-  COMPETITOR_PATH,
+  PROMPTS_PATH,
 } from "./links";
 
 /* Full-colour brand marks. The earlier monochrome versions looked
@@ -144,16 +144,15 @@ export default function FooterSection() {
           ) : null}
         </div>
 
-        {/* Registered teams only. Kept quiet down here on purpose so it
-            never competes with the club ask above; the finale panel on
-            desktop carries the loud version. The gate itself explains
-            when codes go out. */}
+        {/* The prompts page. Kept quiet down here so it never competes
+            with the club ask above; the masthead and the finale panel
+            carry the louder versions. */}
         <div className="mt-14 border-t border-ink/10 pt-8">
           <a
-            href={COMPETITOR_PATH}
+            href={PROMPTS_PATH}
             className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/40 no-underline transition-colors hover:text-ink/70"
           >
-            Registered? Competitor HQ →
+            The challenge prompts, rules, and finale day →
           </a>
         </div>
       </div>

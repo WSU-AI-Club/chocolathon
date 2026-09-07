@@ -1,22 +1,24 @@
 /* ═══════════════════════════════════════════════════════════════════
-   COMPETITOR APP — gate or hub, decided by the server.
+   PROMPTS APP — the public prompts page, fed by the server.
 
-   The client never decides whether you are allowed in. It asks
-   /api/hub; a 401 means gate, a 200 means hub. That ordering matters:
-   if the client held the answer, the answer would be editable in
-   devtools, and so would the prompts.
+   The client never decides whether the prompts are out. It asks
+   /api/hub; before the release clock the answer carries no prompt text,
+   after it the answer carries all eight. If the client held the text,
+   View Source would too.
+
+   When the page is open across the release instant it asks again on
+   its own, so a team watching the countdown sees the prompts appear
+   without touching refresh.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useState } from "react";
 
-import CompetitorGate from "./CompetitorGate";
 import CompetitorHub from "./CompetitorHub";
 import type { HubData } from "./types";
 import "../chocolathon.css";
 
 type State =
   | { status: "loading" }
-  | { status: "locked" }
   | { status: "ready"; data: HubData }
   | { status: "error"; message: string };
 
@@ -25,18 +27,14 @@ export default function CompetitorApp() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/hub", { credentials: "same-origin" });
-      if (res.status === 401) {
-        setState({ status: "locked" });
-        return;
-      }
+      const res = await fetch("/api/hub", { cache: "no-store" });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setState({
           status: "error",
           message:
             body?.error ??
-            "The competitor area is having a problem. Try again in a minute.",
+            "The prompts page is having a problem. Try again in a minute.",
         });
         return;
       }
@@ -53,16 +51,26 @@ export default function CompetitorApp() {
     void load();
   }, [load]);
 
+  /* Ask again a beat after the release instant. The server is the
+     authority on the time, so the delay comes from its releaseAt, not
+     the device clock alone; the extra second covers clock skew. */
+  useEffect(() => {
+    if (state.status !== "ready" || state.data.promptsUnlocked) return;
+    const wait = new Date(state.data.releaseAt).getTime() - Date.now() + 1_500;
+    const id = window.setTimeout(() => void load(), Math.max(wait, 1_000));
+    return () => window.clearTimeout(id);
+  }, [state, load]);
+
   /* Belt and braces with the X-Robots-Tag header in vercel.json: that
      header covers crawlers that never run JS, this covers the ones that
-     do and only look at the DOM. */
+     do and only look at the DOM. Public, but not something to rank. */
   useEffect(() => {
     const tag = document.createElement("meta");
     tag.name = "robots";
     tag.content = "noindex, nofollow";
     document.head.appendChild(tag);
     const previousTitle = document.title;
-    document.title = "Chocolathon HQ — Competitors";
+    document.title = "Chocolathon — The Prompts";
     return () => {
       tag.remove();
       document.title = previousTitle;
@@ -77,8 +85,6 @@ export default function CompetitorApp() {
             Loading…
           </p>
         </Centered>
-      ) : state.status === "locked" ? (
-        <CompetitorGate onUnlocked={() => void load()} />
       ) : state.status === "error" ? (
         <Centered>
           <p className="max-w-sm text-base leading-relaxed text-ink/70">
@@ -96,10 +102,7 @@ export default function CompetitorApp() {
           </button>
         </Centered>
       ) : (
-        <CompetitorHub
-          data={state.data}
-          onSignedOut={() => setState({ status: "locked" })}
-        />
+        <CompetitorHub data={state.data} />
       )}
     </div>
   );

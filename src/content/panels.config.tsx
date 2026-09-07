@@ -13,7 +13,13 @@
 
 import type { ReactNode } from "react";
 import { BEATS, type BeatKey } from "../film/beats";
-import { COCOA_DOLCE_ABOUT_URL, COMPETITOR_PATH, LOVABLE_URL } from "./links";
+import {
+  COCOA_DOLCE_ABOUT_URL,
+  LOVABLE_URL,
+  PROMPTS_PATH,
+  REGISTER_URL,
+  registrationOpen,
+} from "./links";
 import Countdown from "./Countdown";
 
 export type Panel = {
@@ -262,23 +268,39 @@ const PANELS: Panel[] = [
     node: (
       <div className="flex h-full flex-col items-center justify-end pb-[7vh] text-center">
         <div className="panel-scrim flex flex-col items-center">
-          {/* The register CTA that closed the story was removed 2026-09-06:
-              registration is a separate form that closed September 10, and
-              the page launches after that. The ask is now the hub, since
-              every registered team holds a code by launch. */}
+          {/* Register is the amber action while it lasts (it hides itself on
+              the date in ./links, and no copy here names that date); the
+              prompts link is the quiet second door and becomes the only one
+              afterwards. No dates in the eyebrow on purpose. */}
           <p className="eyebrow mb-4">Finale September 19</p>
           <h2 className="font-display text-5xl font-semibold tracking-tight text-ink md:text-6xl">
-            Bring your best.
+            Pick your team.
           </h2>
           <p className="mt-4 max-w-md text-base text-ink/80">
             Local AI industry judges review every submission and advance the
             top teams. Finalists present live, where the Cocoa Dolce leadership
             picks the winners.
           </p>
-          <div className="mt-7">
-            <a className="btn-cta" href={COMPETITOR_PATH}>
-              Competitor HQ
-            </a>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            {registrationOpen() ? (
+              <>
+                <a
+                  className="btn-cta"
+                  href={REGISTER_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Register your team
+                </a>
+                <a className="btn-ghost" href={PROMPTS_PATH}>
+                  See the prompts
+                </a>
+              </>
+            ) : (
+              <a className="btn-cta" href={PROMPTS_PATH}>
+                See the prompts
+              </a>
+            )}
           </div>
         </div>
       </div>
