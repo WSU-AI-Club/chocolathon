@@ -14,10 +14,12 @@
 import { Suspense, lazy } from "react";
 
 import ChocolathonPage from "./ChocolathonPage";
+import { JUDGE_PATH } from "./content/links";
 
 /* Lazy so the landing page never downloads the hub. Not a security
    measure — the gate is server-side — just weight. */
 const CompetitorApp = lazy(() => import("./competitor/CompetitorApp"));
+const JudgePage = lazy(() => import("./judge/JudgePage"));
 
 /* Matches /hq, /hq/, a mounted prefix such as /chocolathon/hq, and the
    older /prompts and /competitors paths so any link sent out before
@@ -26,7 +28,19 @@ function isCompetitorRoute(pathname: string): boolean {
   return /(^|\/)(hq|prompts|competitors)\/?$/i.test(pathname);
 }
 
+/* The unlisted judge page; the token lives in links.ts. */
+function isJudgeRoute(pathname: string): boolean {
+  return new RegExp(`(^|/)${JUDGE_PATH.slice(1)}/?$`, "i").test(pathname);
+}
+
 export default function App() {
+  if (typeof window !== "undefined" && isJudgeRoute(window.location.pathname)) {
+    return (
+      <Suspense fallback={null}>
+        <JudgePage />
+      </Suspense>
+    );
+  }
   if (typeof window !== "undefined" && isCompetitorRoute(window.location.pathname)) {
     return (
       <Suspense fallback={null}>

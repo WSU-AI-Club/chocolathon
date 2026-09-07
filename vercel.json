@@ -8,7 +8,14 @@
   ],
   "headers": [
     {
-      "source": "/(hq|prompts|competitors)",
+      "source": "/judging/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/(hq|prompts|competitors|judge-c7m2x9)",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "Cache-Control", "value": "no-store" }

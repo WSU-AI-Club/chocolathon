@@ -72,3 +72,11 @@ export const PROMPTS_RELEASE_AT = new Date("2026-09-14T05:00:00.000Z");
    the instant — a missing URL can never ship a dead amber button. */
 export const SUBMISSION_URL = "https://forms.cloud.microsoft/r/kWpfJhLss4";
 export const SUBMISSIONS_OPEN_AT = new Date("2026-09-19T13:00:00-05:00");
+
+/* ── Judging ─────────────────────────────────────────────────────────
+   The judge page: every submission as a card, fed by
+   public/judging/submissions.json (see pipeline/make-judging.mjs). The
+   path is unlisted rather than gated; share it with the judges only.
+   JUDGE_FORM_URL is the small scoring form; empty hides the buttons. */
+export const JUDGE_PATH = "/judge-c7m2x9";
+export const JUDGE_FORM_URL = "";
