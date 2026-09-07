@@ -389,7 +389,7 @@ function BlockView({ block }: { block: Block }) {
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink/80">
           {block.body}
         </p>
-      ) : (
+      ) : block.kind === "list" ? (
         <ul className="mt-3 max-w-2xl space-y-2.5 border-l-2 border-gold pl-5">
           {block.items.map((item) => (
             <li key={item} className="text-base leading-relaxed text-ink/80">
@@ -397,6 +397,53 @@ function BlockView({ block }: { block: Block }) {
             </li>
           ))}
         </ul>
+      ) : block.kind === "steps" ? (
+        <ol className="mt-3 max-w-2xl space-y-3">
+          {block.items.map((item, i) => (
+            <li key={item} className="flex gap-4 text-base leading-relaxed text-ink/80">
+              <span className="font-display w-6 shrink-0 text-xl font-semibold leading-none text-goldink">
+                {i + 1}
+              </span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ol>
+      ) : block.kind === "links" ? (
+        <ul className="mt-3 max-w-2xl space-y-2.5 border-l-2 border-gold pl-5">
+          {block.items.map((item) => (
+            <li key={item.href} className="text-base leading-relaxed">
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink underline decoration-gold underline-offset-4 hover:decoration-ink"
+              >
+                {item.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        /* 16:9 embeds on the privacy-enhanced domain; two side by side
+           when there is room, stacked on a phone. */
+        <div className="mt-4 grid max-w-2xl gap-5 sm:grid-cols-2">
+          {block.items.map((v) => (
+            <figure key={v.id}>
+              <div className="relative aspect-video overflow-hidden rounded-sm bg-ink/5">
+                <iframe
+                  className="absolute inset-0 h-full w-full"
+                  src={`https://www.youtube-nocookie.com/embed/${v.id}`}
+                  title={v.title}
+                  loading="lazy"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allowFullScreen
+                />
+              </div>
+              <figcaption className="mt-2 text-sm text-ink/80">{v.title}</figcaption>
+            </figure>
+          ))}
+        </div>
       )}
     </div>
   );

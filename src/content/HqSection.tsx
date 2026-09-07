@@ -23,6 +23,11 @@ const ENTRIES: Array<{ id: string; title: string; line: string }> = [
     line: "Build a working tool, or pitch the case. Prizes, judging weight, what you submit.",
   },
   {
+    id: "lovable",
+    title: "Lovable credits",
+    line: "How to claim your build credits, and the fastest way to learn the tool.",
+  },
+  {
     id: "schedule",
     title: "Schedule",
     line: "Finale day at Woolsey Hall, hour by hour. Doors 8:30 AM, winners 4:45 PM.",

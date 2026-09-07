@@ -20,7 +20,13 @@
 
 export type Block =
   | { kind: "text"; label: string; body: string }
-  | { kind: "list"; label: string; items: string[] };
+  | { kind: "list"; label: string; items: string[] }
+  /* Ordered, for instructions a reader follows in sequence. */
+  | { kind: "steps"; label: string; items: string[] }
+  /* Outbound links rendered as real anchors, never bare URLs. */
+  | { kind: "links"; label: string; items: { text: string; href: string }[] }
+  /* YouTube embeds by video id, privacy-enhanced domain. */
+  | { kind: "videos"; label: string; items: { id: string; title: string }[] };
 
 export type Prompt = {
   id: string;
@@ -463,6 +469,47 @@ export const SECTIONS: Section[] = [
           "track takes home the same box of chocolates. $1,200 in scholarships, " +
           "four winning teams. AI is optional in both tracks; every team gets " +
           "Lovable credits because Lovable sponsors the event.",
+      },
+    ],
+  },
+  {
+    id: "lovable",
+    nav: "Lovable",
+    title: "Your Lovable credits.",
+    intro:
+      "Lovable sponsors the event and gives every team build credits. Neither " +
+      "track requires it; it is the fastest way to have something working by " +
+      "Saturday. The discount code arrives on September 14 with the prompts, " +
+      "emailed to every registered team and posted here.",
+    blocks: [
+      {
+        kind: "steps",
+        label: "Claiming your credits",
+        items: [
+          "Go to lovable.dev.",
+          "No account yet? Click Get started and create one. Already have one? Go to Settings, then Plans & Credits.",
+          "Select Pro Plan 1, and make sure you choose the monthly plan.",
+          "At checkout, enter the discount code from Lovable.",
+        ],
+      },
+      {
+        kind: "videos",
+        label: "Two short videos",
+        items: [
+          { id: "W92iTgxWyts", title: "Intro to Lovable" },
+          { id: "4NpUPggv3oU", title: "Ideas are everywhere" },
+        ],
+      },
+      {
+        kind: "links",
+        label: "Learn it fast",
+        items: [
+          { text: "Lovable Academy", href: "https://academy.lovable.app/academy" },
+          { text: "Docs: welcome", href: "https://docs.lovable.dev/introduction/welcome" },
+          { text: "Docs: prompting", href: "https://docs.lovable.dev/prompting/prompting-one" },
+          { text: "Templates to start from", href: "https://lovable.dev/templates" },
+          { text: "Docs: collaboration, for working as a team", href: "https://docs.lovable.dev/features/collaboration" },
+        ],
       },
     ],
   },
