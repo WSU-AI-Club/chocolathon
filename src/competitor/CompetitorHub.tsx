@@ -231,9 +231,13 @@ function PromptsLocked({ releaseAt }: { releaseAt: string }) {
             {left.days} days, {left.hours} hours and {left.minutes} minutes until
             the prompts release.
           </p>
-          <div aria-hidden="true" className="flex items-start gap-6 sm:gap-10">
+          {/* Fixed column widths: the digits are proportional in the
+              loaded Fraunces cut, so a "1" is narrower than a "4" and the
+              label under it would drift. Each column is as wide as two
+              of the widest digits. */}
+          <div aria-hidden="true" className="flex items-start gap-4 sm:gap-6">
             {units.map(([value, label]) => (
-              <div key={label} className="min-w-[3ch] text-center">
+              <div key={label} className="w-[4.25rem] text-center sm:w-24">
                 <p className="font-display text-5xl font-semibold tabular-nums leading-none text-ink sm:text-7xl">
                   {value}
                 </p>

@@ -79,10 +79,8 @@ const PANELS: Panel[] = [
         </h2>
         <p className="mt-4 text-base leading-relaxed text-ink/80">
           Cocoa Dolce is Wichita&rsquo;s artisan chocolate maker. Build them a
-          working prototype, or pitch them a business case. Either way it is a
-          real problem from inside a real company, not a case study someone
-          invented for a classroom, and the people who run the business decide
-          who wins.
+          working prototype, or pitch them a business case. Real problems from
+          inside a real company, judged by the people who run it.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <img src="/chocolathon/sponsors/cocoadolce.png" alt="Cocoa Dolce" className="h-4 w-auto" />
@@ -117,7 +115,7 @@ const PANELS: Panel[] = [
               Start building
             </p>
             <p className="mt-1 text-sm leading-relaxed text-ink/70">
-              Prompts release. Build on your own time, at your own pace.
+              Prompts unlock. Build on your own time.
             </p>
           </li>
           <li>
@@ -127,17 +125,9 @@ const PANELS: Panel[] = [
             <p className="text-lg font-semibold leading-snug text-ink">
               The finale
             </p>
-            <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-ink/70">
-              <li>
-                Two industry speaker sessions
-                <span className="block text-ink/70">
-                  including Cargill&rsquo;s AI Governance Lead
-                </span>
-              </li>
-              <li>Project submissions</li>
-              <li>Final presentations on stage</li>
-              <li>Winners announced</li>
-            </ul>
+            <p className="mt-1 text-sm leading-relaxed text-ink/70">
+              Industry speakers, submissions, live presentations, winners.
+            </p>
           </li>
         </ol>
       </div>
@@ -197,11 +187,8 @@ const PANELS: Panel[] = [
           </div>
         </dl>
         <p className="ml-auto mt-3 max-w-[240px] text-sm leading-relaxed text-ink/70">
-          To the winning team in each track, plus a big box of Cocoa Dolce
-          chocolates. Second place takes home the same box.
-        </p>
-        <p className="label label-accent ml-auto mt-4 max-w-[240px]">
-          Refreshments, lunch and two industry speaker sessions
+          Plus a big box of Cocoa Dolce chocolates. Second place takes the box
+          too.
         </p>
       </div>
     ),
@@ -218,9 +205,7 @@ const PANELS: Panel[] = [
           Any major. Any skill level.
         </h2>
         <p className="mt-4 text-base leading-relaxed text-ink/80">
-          Open to all WSU students. Cocoa Dolce&rsquo;s problems are not all
-          software problems: some are materials, some logistics, some data,
-          some strategy. Whatever you study, one is in your lane. You can build
+          Open to all WSU students. No coding experience needed: you can build
           with our sponsor Lovable, and every participant gets free credits.
         </p>
         <div className="mt-6 flex flex-wrap items-center gap-4">
@@ -254,10 +239,6 @@ const PANELS: Panel[] = [
           <img src="/chocolathon/sponsors/jimmyjohns.webp" alt="Jimmy John's Sandwiches" className="h-14 w-auto" />
           <img src="/chocolathon/sponsors/redbull.svg" alt="Red Bull" className="h-9 w-auto" />
         </div>
-        <p className="mt-5 text-sm leading-relaxed text-ink/70">
-          Morning refreshments and chocolates from Cocoa Dolce. AI build
-          credits from Lovable. Lunch by Jimmy John&rsquo;s. Red Bull all day.
-        </p>
       </div>
     ),
   },
@@ -277,11 +258,6 @@ const PANELS: Panel[] = [
           <h2 className="font-display text-5xl font-semibold tracking-tight text-ink md:text-6xl">
             Pick your team.
           </h2>
-          <p className="mt-4 max-w-md text-base text-ink/80">
-            Local AI industry judges review every submission and advance the
-            top teams. Finalists present live, where the Cocoa Dolce leadership
-            picks the winners.
-          </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             {registrationOpen() ? (
               <>
