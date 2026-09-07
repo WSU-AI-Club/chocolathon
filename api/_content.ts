@@ -407,8 +407,8 @@ export const PROMPTS_INTRO =
 
 export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: boolean }[] = [
   { time: "8:30 AM", what: "Doors open. Coffee, pastries, Cocoa Dolce chocolates." },
-  { time: "9:15 AM", what: "Opening ceremony" },
-  { time: "9:30 AM", what: "Teams work and refine" },
+  { time: "9:30 AM", what: "Opening ceremony" },
+  { time: "10:00 AM", what: "Networking. Teams work and refine." },
   {
     time: "11:30 AM",
     what: "Session 1: Open Source, Open Weights, Open Questions",
