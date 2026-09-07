@@ -63,3 +63,12 @@ export const PROMPTS_HREF = `${HQ_PATH}#prompts`;
    like; the server decides what the prompts PAGE contains. Keep the two
    identical. */
 export const PROMPTS_RELEASE_AT = new Date("2026-09-14T05:00:00.000Z");
+
+/* ── Submissions ─────────────────────────────────────────────────────
+   The finale-day Microsoft Form. The submissions button is locked until
+   1:00 PM on Saturday, September 19, Wichita time, then links here. The
+   form enforces its own 1:00–2:15 window in its own settings. Leave the
+   URL empty and the button stays locked with "Link coming" even after
+   the instant — a missing URL can never ship a dead amber button. */
+export const SUBMISSION_URL = "";
+export const SUBMISSIONS_OPEN_AT = new Date("2026-09-19T13:00:00-05:00");

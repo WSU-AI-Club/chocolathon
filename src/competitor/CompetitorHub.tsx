@@ -14,6 +14,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { REGISTER_URL, registrationOpen } from "../content/links";
+import SubmitButton from "../content/SubmitButton";
 import type { Block, HubData, Prompt, Section } from "./types";
 
 export default function CompetitorHub({ data }: { data: HubData }) {
@@ -330,6 +331,13 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
           <BlockView key={b.label} block={b} />
         ))}
       </div>
+
+      {/* The submissions button lives with the rules that govern it. */}
+      {section.id === "rules" ? (
+        <div className="mt-10">
+          <SubmitButton />
+        </div>
+      ) : null}
     </section>
   );
 }

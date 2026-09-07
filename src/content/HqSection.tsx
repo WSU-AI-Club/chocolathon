@@ -14,6 +14,7 @@
 
 import { HQ_PATH } from "./links";
 import PromptsButton from "./PromptsButton";
+import SubmitButton from "./SubmitButton";
 
 const ENTRIES: Array<{ id: string; title: string; line: string }> = [
   {
@@ -69,6 +70,18 @@ export default function HqSection() {
             </p>
           </div>
           <PromptsButton className="shrink-0" />
+        </div>
+
+        <div className="flex flex-col gap-5 border-t border-ink/15 py-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink">
+              Submissions
+            </h3>
+            <p className="mt-2 text-base leading-relaxed text-ink/80">
+              Saturday, 1:00 to 2:15 PM. Team, track, prompt, your demo link, your video.
+            </p>
+          </div>
+          <SubmitButton className="shrink-0" />
         </div>
 
         <ul className="grid gap-x-12 sm:grid-cols-2">
