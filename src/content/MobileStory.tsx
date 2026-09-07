@@ -80,7 +80,7 @@ export default function MobileStory() {
           Build ahead. Compete live.
         </h2>
         <ol className="mx-auto mt-5 max-w-md space-y-2 text-left text-base leading-relaxed text-ink/80">
-          <li><strong className="text-ink">1.</strong> Teams of one to four, any major.</li>
+          <li><strong className="text-ink">1.</strong> Teams of one to five, any major.</li>
           <li><strong className="text-ink">2.</strong> Prompts release September 14. Build on your own time, at your own pace.</li>
           <li><strong className="text-ink">3.</strong> Submit at the finale, September 19, at Woolsey Hall.</li>
           <li><strong className="text-ink">4.</strong> Finalists present live on stage.</li>
@@ -102,7 +102,7 @@ export default function MobileStory() {
             ["Finale", "Saturday, September 19"],
             ["Time", "8:30 AM – 5:00 PM"],
             ["Place", "Woolsey Hall, WSU"],
-            ["Teams", "1–4 people, every major"],
+            ["Teams", "1–5 people, every major"],
             ["Experience", "None required"],
             ["Cost", "Free, food provided"],
           ].map(([k, v]) => (

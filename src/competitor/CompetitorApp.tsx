@@ -61,6 +61,26 @@ export default function CompetitorApp() {
     return () => window.clearTimeout(id);
   }, [state, load]);
 
+  /* The sections do not exist until the data arrives, so the browser's
+     own hash scroll (from a /hq#tracks link on the landing page) fires
+     into an empty page and lands on the top. Redo it once the content
+     is rendered, and again whenever the hash changes in-page. */
+  useEffect(() => {
+    if (state.status !== "ready") return;
+    const go = () => {
+      const id = window.location.hash.slice(1);
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ block: "start" });
+    };
+    const raf = window.requestAnimationFrame(go);
+    window.addEventListener("hashchange", go);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("hashchange", go);
+    };
+  }, [state.status]);
+
   /* Belt and braces with the X-Robots-Tag header in vercel.json: that
      header covers crawlers that never run JS, this covers the ones that
      do and only look at the DOM. Public, but not something to rank. */

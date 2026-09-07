@@ -532,7 +532,7 @@ export const SECTIONS: Section[] = [
         label: "Teams",
         items: [
           "WSU students only. Any major, any level.",
-          "Teams of one to four. Solo competes on the same terms.",
+          "Teams of one to five. Solo competes on the same terms.",
           "Teams lock at registration. No changes after, no forming on the day.",
           "You must be at the finale to compete. No remote entries.",
         ],
