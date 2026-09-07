@@ -12,3 +12,4 @@ pipeline/clips/
 
 # Vercel CLI project link (contains project + org ids, machine-local)
 .vercel
+.env*
