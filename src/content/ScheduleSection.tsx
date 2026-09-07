@@ -105,15 +105,19 @@ export default function ScheduleSection() {
             side of the event, which is what OCPD exists for. Footer lists
             them too. Keep the claim narrow: they support the day; they do
             not run the sessions. */}
-        <div className="mx-auto mt-14 flex max-w-lg flex-col items-center gap-4 border-t border-ink/10 pt-10 text-center">
+        <div className="mx-auto mt-16 flex max-w-xl flex-col items-center border-t border-ink/10 pt-14 text-center">
           <img
             src="/chocolathon/sponsors/ocpd.png"
             alt="Office of Career and Professional Development, Barton School of Business"
-            className="h-12 w-auto"
+            className="h-28 w-auto md:h-32"
           />
-          <p className="text-sm leading-relaxed text-ink/60">
-            The day at Woolsey Hall is supported by the Barton School&rsquo;s
-            Office of Career and Professional Development.
+          <h3 className="mt-8 font-display text-2xl font-semibold leading-tight tracking-tight text-ink md:text-3xl">
+            Backed by the Barton School.
+          </h3>
+          <p className="mt-3 max-w-md text-base leading-relaxed text-ink/70">
+            The day at Woolsey Hall is supported by the Office of Career and
+            Professional Development, the Barton School&rsquo;s home for
+            careers and internships.
           </p>
         </div>
 
