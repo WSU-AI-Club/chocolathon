@@ -512,13 +512,32 @@ export const SECTIONS: Section[] = [
       },
       {
         kind: "list",
-        label: "What moves the needle",
+        label: "The rubric — Build Track, each 1 to 5",
         items: [
-          "Build: does it work, and would Cocoa Dolce actually use it?",
-          "Pitch: is the argument sound, and is the evidence real and verifiable?",
-          "Both: did you understand their business? A generic answer with a chocolate label scores badly.",
-          "Honesty about limits counts for you, not against you.",
+          "Works: it runs, end to end, on the link you gave.",
+          "Useful to Cocoa Dolce: they would actually put it to use.",
+          "Understood the business: specific to how they run, not generic with a chocolate label.",
+          "Honest about limits: documents where it breaks.",
         ],
+      },
+      {
+        kind: "list",
+        label: "The rubric — Pitch Track, each 1 to 5",
+        items: [
+          "Sound argument: the recommendation follows from the evidence.",
+          "Verifiable evidence: sourced, checkable numbers.",
+          "Understood the business: specific to how they run, not generic with a chocolate label.",
+          "Tangible demo: the artifact makes the idea real.",
+        ],
+      },
+      {
+        kind: "text",
+        label: "How the scores work",
+        body:
+          "Two judges per track score every submission in that track independently " +
+          "on the rubric above. The average ranks the track and the top three " +
+          "advance. Michael runs the day and breaks ties; he does not score. " +
+          "The rubric is public so every team is scored on the same lines.",
       },
     ],
   },
@@ -553,7 +572,7 @@ export const SECTIONS: Section[] = [
         label: "Submitting — 1:00 to 2:15 PM on the 19th",
         items: [
           "A Microsoft Form. The link is posted here on the day.",
-          "Team name, track, prompt, a link to your product or demo, a link to your video.",
+          "Team name, track, prompt, a link to your product or demo, a link to your video (three minutes maximum).",
           "Links must open without a login or an install. Test them in a private window first.",
           "Unlisted video is fine. Private is not.",
           "2:15 PM is a hard cutoff. Judging starts the moment the form closes.",
