@@ -131,7 +131,7 @@ export default function MobileStory() {
         <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink/70">
           Cocoa Dolce provides morning refreshments, coffee and chocolates.
           Jimmy John's provides lunch. Red Bull keeps the drinks coming all
-          day. You are fed all day, you get two industry speaker sessions,
+          day. You are fed all day, you get three industry speaker sessions,
           and a room of people to show your work to.
         </p>
         <p className="mx-auto mt-8 max-w-md text-base leading-relaxed text-ink/80">

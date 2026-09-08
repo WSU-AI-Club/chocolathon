@@ -413,18 +413,23 @@ export const PROMPTS_INTRO =
 
 export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: boolean }[] = [
   { time: "8:30 AM", what: "Doors open. Coffee, pastries, Cocoa Dolce chocolates." },
-  { time: "9:30 AM", what: "Opening ceremony" },
-  { time: "10:00 AM", what: "Networking. Teams work and refine." },
+  { time: "9:00 AM", what: "Opening ceremony" },
+  { time: "9:30 AM", what: "Networking. Teams work and refine." },
+  { time: "10:00 AM", what: "Session 1, subject to be announced. To 10:45.", who: "Cody Herrin" },
   {
     time: "11:30 AM",
-    what: "Session 1: Open Source, Open Weights, Open Questions",
+    what: "Session 2: Open Source, Open Weights, Open Questions",
     who: "Fareeha Amber Ansari, AI Governance Lead, Cargill",
   },
-  { time: "12:15 PM", what: "Lunch, by Jimmy John’s" },
+  { time: "12:30 PM", what: "Lunch, by Jimmy John’s" },
   { time: "1:00 PM", what: "Submissions open", flag: true },
   { time: "2:15 PM", what: "Submissions close. Hard cutoff.", flag: true },
-  { time: "2:30 PM", what: "Session 2, during preliminary judging", who: "Speaker to be announced" },
-  { time: "3:45 PM", what: "Final presentations. Open to the public.", flag: true },
+  {
+    time: "2:30 PM",
+    what: "Session 3: Orchestrating AI, during preliminary judging. To 3:15.",
+    who: "Ramsey Jamoul, Founder and CEO, Unified",
+  },
+  { time: "3:45 PM", what: "Final presentations, to 4:30. Open to the public.", flag: true },
   { time: "4:45 PM", what: "Winners announced" },
   { time: "5:00 PM", what: "Pictures and wrap" },
 ];
@@ -526,8 +531,9 @@ export const SECTIONS: Section[] = [
         label: "Backed by the Barton School",
         body:
           "The room at Woolsey Hall is supported by the Office of Career and " +
-          "Professional Development. Timing may shift by a few minutes; this " +
-          "page is the version of record.",
+          "Professional Development. The three sessions are open to everyone and " +
+          "optional; teams may keep working through them. Timing may shift by a " +
+          "few minutes; this page is the version of record.",
       },
     ],
   },
