@@ -415,7 +415,11 @@ export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: bool
   { time: "8:30 AM", what: "Doors open. Coffee, pastries, Cocoa Dolce chocolates." },
   { time: "9:00 AM", what: "Opening ceremony" },
   { time: "9:30 AM", what: "Networking. Teams work and refine." },
-  { time: "10:00 AM", what: "Session 1, subject to be announced. To 10:45.", who: "Cody Herrin" },
+  {
+    time: "10:00 AM",
+    what: "Session 1: AI in Manufacturing: Databricks at Capital III. To 10:45.",
+    who: "Cody Herrin, Continuous Improvement and Innovation Manager, Capital III",
+  },
   {
     time: "11:30 AM",
     what: "Session 2: Open Source, Open Weights, Open Questions",
