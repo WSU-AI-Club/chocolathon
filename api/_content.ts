@@ -455,6 +455,7 @@ export type Person = {
   name: string;
   role: string; // title and organisation, as they want it printed
   note?: string; // one short line, optional
+  linkedin?: string; // profile URL, supplied by the person or verified by Michael
   session?: { time: string; title: string }; // speakers only
 };
 
@@ -471,26 +472,44 @@ export const PEOPLE: People = {
     {
       name: "Cody Herrin",
       role: "Continuous Improvement and Innovation Manager, Capital III",
+      linkedin: "https://www.linkedin.com/in/codyherrin/",
       session: { time: "10:00 AM", title: "AI in Manufacturing: Databricks at Capital III" },
     },
     {
       name: "Fareeha Amber Ansari",
       role: "AI Governance Lead, Cargill",
+      linkedin: "https://www.linkedin.com/in/ansarifa/",
       session: { time: "11:30 AM", title: "Open Source, Open Weights, Open Questions" },
     },
     {
       name: "Ramsey Jamoul",
       role: "Founder and CEO, Unified",
+      linkedin: "https://www.linkedin.com/in/ramsey-jamoul-423682b8/",
       note: "Unified runs the National AI Prompt Championship.",
       session: { time: "2:30 PM", title: "Orchestrating AI" },
     },
   ],
   preliminary: [
-    { name: "Grant Johnson", role: "Creator of Chatterbox: Language Learning" },
-    { name: "Dane Laughlin", role: "Industries Lead, Squint", note: "WSU alum." },
+    {
+      name: "Grant Johnson",
+      role: "Creator of Chatterbox: Language Learning",
+      linkedin: "https://www.linkedin.com/in/grant-johnson15/",
+    },
+    {
+      name: "Dane Laughlin",
+      role: "Industries Lead, Squint",
+      note: "WSU alum.",
+      linkedin: "https://www.linkedin.com/in/danelaughlin/",
+    },
   ],
   preliminaryNote: "More local AI industry leaders, to be announced.",
-  finals: [{ name: "Ben Hesse", role: "Chief Operating Officer, Cocoa Dolce" }],
+  finals: [
+    {
+      name: "Ben Hesse",
+      role: "Chief Operating Officer, Cocoa Dolce",
+      linkedin: "https://www.linkedin.com/in/benjamin-hesse-420a551b/",
+    },
+  ],
   finalsNote: "More Cocoa Dolce leaders, to be announced.",
 };
 

@@ -39,6 +39,7 @@ export type Person = {
   name: string;
   role: string;
   note?: string;
+  linkedin?: string;
   session?: { time: string; title: string };
 };
 

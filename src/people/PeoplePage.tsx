@@ -10,6 +10,7 @@
 
 import { useEffect, useState } from "react";
 
+import { LinkedInIcon } from "../content/icons";
 import { HQ_PATH, REGISTER_URL, registrationOpen } from "../content/links";
 import type { HubData, Person } from "../competitor/types";
 import "../chocolathon.css";
@@ -220,12 +221,28 @@ function Panel({
   );
 }
 
-/* Name, then the role line, then the optional note. One shape for a
-   speaker and a judge so the page reads as one list of people. */
+/* Name with the LinkedIn mark beside it, then the role line, then the
+   optional note. One shape for a speaker and a judge so the page reads
+   as one list of people. The mark is the link (44px touch target,
+   labelled for screen readers); the name itself stays plain text so
+   the row does not read as one big link. */
 function PersonLine({ person, className = "" }: { person: Person; className?: string }) {
   return (
     <div className={className}>
-      <p className="text-lg font-semibold leading-snug text-ink">{person.name}</p>
+      <p className="flex items-center gap-1 text-lg font-semibold leading-snug text-ink">
+        {person.name}
+        {person.linkedin ? (
+          <a
+            href={person.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${person.name} on LinkedIn`}
+            className="-my-3 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-sm transition-opacity hover:opacity-70"
+          >
+            <LinkedInIcon className="h-5 w-5" />
+          </a>
+        ) : null}
+      </p>
       <p className="mt-1 text-base leading-relaxed text-ink/80">{person.role}</p>
       {person.note ? (
         <p className="mt-1 text-sm leading-relaxed text-ink/80">{person.note}</p>
