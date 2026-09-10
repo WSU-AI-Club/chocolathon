@@ -2,7 +2,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    make-judging — turn the submission form's export into the judge page.
 
-   ON THE DAY (2:15 PM, the moment the form closes):
+   ON THE DAY (2:00 PM, the moment the form closes):
 
      1. In Microsoft Forms, open the submission form → Responses →
         "Open in Excel". Save that workbook as CSV (File → Save As →
@@ -10,7 +10,7 @@
      2. From the repo root:
            node pipeline/make-judging.mjs responses.csv
         It writes public/judging/submissions.json.
-     3. git add public/judging && git commit -m "Judging: 2:15 export"
+     3. git add public/judging && git commit -m "Judging: 2:00 export"
         && git push
         The deploy takes about fifteen seconds. The judge page reads the
         JSON on load, so judges refresh once.

@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PEOPLE_PATH, REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
+import RubricView from "./RubricView";
 import type { Block, HubData, Prompt, ResultEntry, Section } from "./types";
 
 export default function CompetitorHub({ data }: { data: HubData }) {
@@ -572,6 +573,8 @@ function BlockView({ block, fold = false }: { block: Block; fold?: boolean }) {
             </li>
           ))}
         </ol>
+      ) : block.kind === "rubric" ? (
+        <RubricView rubric={block} />
       ) : block.kind === "qa" ? (
         <dl className="mt-3 max-w-2xl space-y-4">
           {block.items.map((item) => (

@@ -1,15 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
    JUDGE PAGE — every submission as a card, for the 90 minutes between
-   2:15 and 3:45 on September 19.
+   2:00 and 3:45 on September 19.
 
    Reads /api/judging, the set Michael publishes from the upload page at
-   2:15 (drag the Forms export in, publish). Falls back to the static
+   2:00 (drag the Forms export in, publish). Falls back to the static
    public/judging/submissions.json that pipeline/make-judging.mjs writes,
    which is also the rehearsal data. The rubric at the top comes from
    /api/hub so it is the same text the teams saw.
 
    Unlisted path, no login: the links on it are public at the finals
-   ninety minutes later, and a login that can fail at 2:15 is worse than
+   ninety minutes later, and a login that can fail at 2:00 is worse than
    an unguessable URL. noindex and no-store headers are in vercel.json.
 
    Each judge picks their track once; the cards for that track number
@@ -20,6 +20,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { JUDGE_FORM_URL } from "../content/links";
+import RubricView from "../competitor/RubricView";
 import type { Block, HubData } from "../competitor/types";
 import "../chocolathon.css";
 
@@ -93,7 +94,7 @@ export default function JudgePage() {
     if (!judges) return null;
     const want = track === "build" ? "Build Track" : "Pitch Track";
     return judges.blocks.find(
-      (b): b is Extract<Block, { kind: "list" }> => b.kind === "list" && b.label.includes(want),
+      (b): b is Extract<Block, { kind: "rubric" }> => b.kind === "rubric" && b.label.includes(want),
     ) ?? null;
   }, [state, track]);
 
@@ -168,7 +169,7 @@ function Body({
 }: {
   judging: Judging;
   track: "build" | "pitch";
-  rubric: Extract<Block, { kind: "list" }> | null;
+  rubric: Extract<Block, { kind: "rubric" }> | null;
   promptTitle: (id: string) => string;
 }) {
   const shown = judging.submissions.filter((s) => s.track === track);
@@ -179,7 +180,7 @@ function Body({
       {judging.sample ? (
         <p className="mb-8 border-l-2 border-gold pl-4 text-base text-ink">
           <strong className="font-semibold">Rehearsal data.</strong> These are sample rows.
-          The real export replaces them at 2:15 on the 19th.
+          The real export replaces them at 2:00 on the 19th.
         </p>
       ) : null}
 
@@ -196,19 +197,14 @@ function Body({
       {rubric ? (
         <div className="mt-8 border-y border-ink/15 py-6">
           <h2 className="label">{rubric.label}</h2>
-          <ol className="mt-3 grid gap-x-10 gap-y-2 sm:grid-cols-2">
-            {rubric.items.map((item, i) => (
-              <li key={item} className="flex gap-3 text-base leading-relaxed text-ink/80">
-                <span className="font-display w-5 shrink-0 text-lg font-semibold leading-relaxed text-goldink">
-                  {i + 1}
-                </span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-4 text-sm leading-relaxed text-ink/80">
-            Score every card in your track, 1 to 5 on each line, then mark advance yes or no.
-            The average ranks the track; the top three advance. Ties go to Michael.
+          <RubricView rubric={rubric} />
+          <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink/80">
+            Check the four gates first (link opens without a login, video three minutes or
+            under, one entry, started after the prompts). Then score every card in your
+            track, 1 to 10 on each line, and leave one comment. Sit out any team you know.
+            The average of the judges&rsquo; totals ranks the track and the top three
+            advance. Ties: first line, then second line, then median judge total, then
+            Michael.
           </p>
         </div>
       ) : null}

@@ -50,7 +50,7 @@ const ENTRIES: Array<{ id: string; title: string; line: string; href?: string }>
   {
     id: "submissions",
     title: "Submissions",
-    line: "What the form asks for on Saturday, 1:00 to 2:15 PM, so you have it ready.",
+    line: "What the form asks for on Saturday, 1:00 to 2:00 PM, so you have it ready.",
   },
   {
     id: "faq",

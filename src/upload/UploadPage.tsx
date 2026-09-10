@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    UPLOAD PAGE — drop the form export, publish it to the judges.
 
-   For Michael at 2:15 on September 19. Drag the Excel workbook (or a
+   For Michael at 2:00 on September 19. Drag the Excel workbook (or a
    CSV) that Microsoft Forms produced onto this page. It is parsed in the
    browser, the columns are matched the same way the command-line script
    matches them, a preview shows what the judges would see, and Publish
@@ -138,7 +138,7 @@ export default function UploadPage() {
           Drop the export here.
         </h1>
         <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink/80">
-          At 2:15: in Forms, Responses, "Open in Excel". Drag that workbook onto the box
+          At 2:00: in Forms, Responses, "Open in Excel". Drag that workbook onto the box
           below, check the preview, publish. The judge page updates on refresh.
         </p>
 

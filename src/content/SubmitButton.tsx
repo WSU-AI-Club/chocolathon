@@ -13,7 +13,7 @@ export default function SubmitButton({ className = "" }: { className?: string })
       href={SUBMISSION_URL}
       lockedLabel="Submissions open Sat 1:00 PM"
       openLabel="Submit your project"
-      title="Submissions open at 1:00 PM on Saturday, September 19, and close at 2:15."
+      title="Submissions open at 1:00 PM on Saturday, September 19, and close at 2:00."
       external
       className={className}
     />

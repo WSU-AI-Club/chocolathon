@@ -29,7 +29,14 @@ export type Block =
   | { kind: "videos"; label: string; items: { id: string; title: string }[] }
   /* Question and answer pairs; the question is set bold so a phone
      reader can find theirs without reading every line. */
-  | { kind: "qa"; label: string; items: { q: string; a: string }[] };
+  | { kind: "qa"; label: string; items: { q: string; a: string }[] }
+  /* A scoring rubric: criteria with what a 1, a 5, and a 10 look like.
+     Rendered by RubricView on HQ and on the judge page. */
+  | {
+      kind: "rubric";
+      label: string;
+      items: { name: string; low: string; mid: string; high: string }[];
+    };
 
 export type Prompt = {
   id: string;
@@ -430,7 +437,7 @@ export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: bool
   },
   { time: "12:30 PM", what: "Lunch, by Jimmy John’s" },
   { time: "1:00 PM", what: "Submissions open", flag: true },
-  { time: "2:15 PM", what: "Submissions close. Hard cutoff.", flag: true },
+  { time: "2:00 PM", what: "Submissions close. Hard cutoff.", flag: true },
   {
     time: "2:30 PM",
     what: "Session 3: Orchestrating AI, during preliminary judging. To 3:15.",
@@ -626,9 +633,11 @@ export const SECTIONS: Section[] = [
     nav: "Judges",
     title: "Who decides.",
     intro:
-      "Two rounds. Local AI industry judges review every submission and advance " +
-      "the top teams. Finalists present live at 3:45 PM, open to the public, " +
-      "and the Cocoa Dolce leadership picks the winners.",
+      "Two rounds. Local AI industry judges score every submission on the " +
+      "rubric below and the top three per track advance. Finalists present live " +
+      "at 3:45 PM, open to the public, and the Cocoa Dolce leadership picks the " +
+      "winners. No weights, no favourites: the score is the decision, and every " +
+      "line of it is printed here.",
     blocks: [
       {
         kind: "list",
@@ -648,32 +657,104 @@ export const SECTIONS: Section[] = [
       },
       {
         kind: "list",
-        label: "The rubric — Build Track, each 1 to 5",
+        label: "Before scoring: four gates",
         items: [
-          "Works: it runs, end to end, on the link you gave.",
-          "Useful to Cocoa Dolce: they would actually put it to use.",
-          "Understood the business: specific to how they run, not generic with a chocolate label.",
-          "Honest about limits: documents where it breaks.",
+          "The link opens without a login or an install.",
+          "The video is three minutes or under.",
+          "One submission, by one person, in one track.",
+          "The work started after the prompts unlocked.",
+          "An entry that fails a gate is not scored, and the team is told which gate.",
+        ],
+      },
+      {
+        kind: "rubric",
+        label: "The Build Track rubric — four lines, each 1 to 10",
+        items: [
+          {
+            name: "It runs.",
+            low: "Nothing to click.",
+            mid: "The main path runs; parts are stubbed.",
+            high: "Runs end to end on the link you gave.",
+          },
+          {
+            name: "Someone at Cocoa Dolce could operate it.",
+            low: "Needs the team standing next to it.",
+            mid: "Works with a walkthrough.",
+            high: "A staff member could use it on Monday.",
+          },
+          {
+            name: "It solves the prompt for Cocoa Dolce.",
+            low: "Generic, with a chocolate label.",
+            mid: "Solves the task, with gaps.",
+            high: "Solves it specifically for how they work.",
+          },
+          {
+            name: "Honest about limits.",
+            low: "Claims more than it does.",
+            mid: "Some limits named.",
+            high: "Says where it breaks and what fixing it takes.",
+          },
+        ],
+      },
+      {
+        kind: "rubric",
+        label: "The Pitch Track rubric — four lines, each 1 to 10",
+        items: [
+          {
+            name: "The recommendation is specific.",
+            low: "A theme.",
+            mid: "A direction.",
+            high: "What to do, by when, and what it costs.",
+          },
+          {
+            name: "The evidence holds up.",
+            low: "Unsourced numbers.",
+            mid: "Sourced, but thin.",
+            high: "Sourced, checkable, and the right sources.",
+          },
+          {
+            name: "The payoff is sized.",
+            low: "No number.",
+            mid: "A number without a basis.",
+            high: "What it is worth to Cocoa Dolce, and how you got there.",
+          },
+          {
+            name: "The artifact makes it real.",
+            low: "Slides only.",
+            mid: "A mock-up that shows the idea.",
+            high: "Something Cocoa Dolce could react to as if it existed.",
+          },
+        ],
+      },
+      {
+        kind: "steps",
+        label: "How teams advance",
+        items: [
+          "Every judge in a track scores every entry in that track, alone, 1 to 10 on each line: 4 to 40 per judge, plus one comment.",
+          "A team's score is the average of its judges' totals. A judge who knows a team sits that team out, and the others' average counts.",
+          "The top three per track go to the finals. The finals panel sees no preliminary scores; finalists start level.",
+          "Michael runs the day and does not score. After the event, any team can ask for its own scores and comments.",
+        ],
+      },
+      {
+        kind: "steps",
+        label: "If two teams tie",
+        items: [
+          "The higher total on the first line of their rubric.",
+          "Then the higher total on the second line.",
+          "Then the higher median judge total.",
+          "Then Michael decides, and the reason is written down.",
         ],
       },
       {
         kind: "list",
-        label: "The rubric — Pitch Track, each 1 to 5",
+        label: "The finals — three lines, each 1 to 10",
         items: [
-          "Sound argument: the recommendation follows from the evidence.",
-          "Verifiable evidence: sourced, checkable numbers.",
-          "Understood the business: specific to how they run, not generic with a chocolate label.",
-          "Tangible demo: the artifact makes the idea real.",
+          "We would use this (Build) or we would act on this (Pitch).",
+          "They understood our business.",
+          "The presentation: clear in the time given, honest under questions.",
+          "Each Cocoa Dolce judge scores alone during the presentation, then they confer and pick. One sentence per winner goes in the record.",
         ],
-      },
-      {
-        kind: "text",
-        label: "How the scores work",
-        body:
-          "Two judges per track score every submission in that track independently " +
-          "on the rubric above. The average ranks the track and the top three " +
-          "advance. Michael runs the day and breaks ties; he does not score. " +
-          "The rubric is public so every team is scored on the same lines.",
       },
     ],
   },
@@ -718,7 +799,7 @@ export const SECTIONS: Section[] = [
     nav: "Submissions",
     title: "Submitting.",
     intro:
-      "Saturday, September 19, 1:00 to 2:15 PM, through a Microsoft Form. The button " +
+      "Saturday, September 19, 1:00 to 2:00 PM, through a Microsoft Form. The button " +
       "below unlocks at 1:00. Have everything on this list ready before then.",
     blocks: [
       {
@@ -743,7 +824,7 @@ export const SECTIONS: Section[] = [
           "Links must open without a login or an install. Test them in a private window first.",
           "Unlisted video is fine. Private is not.",
           "One submission per team, by one person.",
-          "2:15 PM is a hard cutoff. Judging starts the moment the form closes.",
+          "2:00 PM is a hard cutoff. Judging starts the moment the form closes.",
         ],
       },
     ],
@@ -757,7 +838,7 @@ export const SECTIONS: Section[] = [
         kind: "qa",
         label: "Answers",
         items: [
-          { q: "Can we switch tracks?", a: "Yes, right up to 2:15 PM on the 19th. You declare at submission." },
+          { q: "Can we switch tracks?", a: "Yes, right up to 2:00 PM on the 19th. You declare at submission." },
           { q: "Can we answer two prompts?", a: "No. One prompt, one submission." },
           { q: "Can we change our team?", a: "No. Teams lock at registration." },
           { q: "Does the project have to use AI?", a: "No. Neither track requires it." },

@@ -16,7 +16,14 @@ export type Block =
   | { kind: "videos"; label: string; items: { id: string; title: string }[] }
   /* Question and answer pairs; the question is set bold so a phone
      reader can find theirs without reading every line. */
-  | { kind: "qa"; label: string; items: { q: string; a: string }[] };
+  | { kind: "qa"; label: string; items: { q: string; a: string }[] }
+  /* A scoring rubric: criteria with what a 1, a 5, and a 10 look like.
+     Rendered by RubricView on HQ and on the judge page. */
+  | {
+      kind: "rubric";
+      label: string;
+      items: { name: string; low: string; mid: string; high: string }[];
+    };
 
 export type Prompt = {
   id: string;
