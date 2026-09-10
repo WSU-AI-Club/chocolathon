@@ -1,33 +1,46 @@
-/* One rubric: numbered criteria, each with its 1 / 5 / 10 anchors.
-   Used by the HQ Judges section (public) and the judge page (the same
-   content, so a judge reads exactly what the teams read). Anchors stay
-   open on phones on purpose: they are what a team scans for. */
+/* One track's rubric: the track name as a heading, then the four
+   criteria in the display face, each with its 1 / 5 / 10 anchors set
+   small beneath. Two of these sit side by side on HQ (Build | Pitch)
+   and one at a time on the judge page. The criteria carry the size so a
+   team sees at a glance what it is judged on; the anchors explain. */
 
 import type { Block } from "./types";
 
 type Rubric = Extract<Block, { kind: "rubric" }>;
 
+const ANCHORS: Array<["low" | "mid" | "high", string]> = [
+  ["low", "1"],
+  ["mid", "5"],
+  ["high", "10"],
+];
+
 export default function RubricView({ rubric }: { rubric: Rubric }) {
   return (
-    <ol className="mt-3 max-w-2xl space-y-6">
-      {rubric.items.map((c, i) => (
-        <li key={c.name}>
-          <p className="flex gap-3 text-base font-semibold leading-snug text-ink">
-            <span className="font-display w-5 shrink-0 text-xl font-semibold leading-none text-goldink">
-              {i + 1}
-            </span>
-            <span>{c.name}</span>
-          </p>
-          <dl className="mt-2 grid grid-cols-[1.75rem_1fr] gap-x-3 gap-y-1 pl-8 text-sm leading-relaxed text-ink/80">
-            <dt className="label pt-0.5 !text-[11px] tabular-nums">1</dt>
-            <dd>{c.low}</dd>
-            <dt className="label pt-0.5 !text-[11px] tabular-nums">5</dt>
-            <dd>{c.mid}</dd>
-            <dt className="label pt-0.5 !text-[11px] tabular-nums">10</dt>
-            <dd>{c.high}</dd>
-          </dl>
-        </li>
-      ))}
-    </ol>
+    <div>
+      <h3 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink">
+        {rubric.label}
+      </h3>
+      <p className="label mt-2">Four lines · each scored 1 to 10</p>
+      <ol className="mt-5 divide-y divide-ink/10 border-y border-ink/10">
+        {rubric.items.map((c, i) => (
+          <li key={c.name} className="py-5">
+            <p className="flex gap-3 font-display text-xl font-semibold leading-snug tracking-tight text-ink sm:text-[1.375rem]">
+              <span className="w-5 shrink-0 text-goldink">{i + 1}</span>
+              <span>{c.name}</span>
+            </p>
+            <dl className="mt-3 space-y-1.5 pl-8">
+              {ANCHORS.map(([key, mark]) => (
+                <div key={key} className="flex gap-3 text-sm leading-snug text-ink/80">
+                  <dt className="label w-5 shrink-0 pt-px text-right !text-[11px] tabular-nums">
+                    {mark}
+                  </dt>
+                  <dd>{c[key]}</dd>
+                </div>
+              ))}
+            </dl>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }

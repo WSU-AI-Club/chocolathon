@@ -420,6 +420,10 @@ function PromptCard({ prompt }: { prompt: Prompt }) {
 
 function SectionBlock({ section, data }: { section: Section; data: HubData }) {
   const phone = usePhone();
+  const rubrics = section.blocks.filter(
+    (b): b is Extract<Block, { kind: "rubric" }> => b.kind === "rubric",
+  );
+  const rest = section.blocks.filter((b) => b.kind !== "rubric");
   return (
     <section id={section.id} className="mt-16 scroll-mt-20 sm:mt-24">
       <div className="border-t border-ink/15 pt-7">
@@ -448,11 +452,21 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
         </p>
       ) : null}
 
+      {/* Rubrics sit side by side (Build | Pitch) above everything else
+          in their section; on a phone they stack. */}
+      {rubrics.length ? (
+        <div className="mt-9 grid gap-12 sm:grid-cols-2 sm:gap-x-8">
+          {rubrics.map((r) => (
+            <RubricView key={r.label} rubric={r} />
+          ))}
+        </div>
+      ) : null}
+
       {/* Prose blocks fold behind their label on a phone (the label
           states the conclusion; the paragraph is the fine print). Lists,
           steps, and links stay open: they are what people scan for. */}
       <div className="mt-8 space-y-7 sm:mt-9 sm:space-y-8">
-        {section.blocks.map((b) => (
+        {rest.map((b) => (
           <BlockView key={b.label} block={b} fold={phone} />
         ))}
       </div>

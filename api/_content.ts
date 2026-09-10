@@ -700,19 +700,8 @@ export const SECTIONS: Section[] = [
       "is printed here. Judges read this same page.",
     blocks: [
       {
-        kind: "list",
-        label: "Before scoring: four gates",
-        items: [
-          "The link opens without a login or an install.",
-          "The video is three minutes or under.",
-          "One submission, by one person, in one track.",
-          "The work started after the prompts unlocked.",
-          "An entry that fails a gate is not scored, and the team is told which gate.",
-        ],
-      },
-      {
         kind: "rubric",
-        label: "The Build Track rubric — four lines, each 1 to 10",
+        label: "Build Track",
         items: [
           {
             name: "It runs.",
@@ -742,7 +731,7 @@ export const SECTIONS: Section[] = [
       },
       {
         kind: "rubric",
-        label: "The Pitch Track rubric — four lines, each 1 to 10",
+        label: "Pitch Track",
         items: [
           {
             name: "The recommendation is specific.",
@@ -768,6 +757,17 @@ export const SECTIONS: Section[] = [
             mid: "A mock-up that shows the idea.",
             high: "Something Cocoa Dolce could react to as if it existed.",
           },
+        ],
+      },
+      {
+        kind: "list",
+        label: "Before scoring: four gates",
+        items: [
+          "The link opens without a login or an install.",
+          "The video is three minutes or under.",
+          "One submission, by one person, in one track.",
+          "The work started after the prompts unlocked.",
+          "An entry that fails a gate is not scored, and the team is told which gate.",
         ],
       },
       {
