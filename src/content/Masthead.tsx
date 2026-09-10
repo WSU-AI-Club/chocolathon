@@ -1,18 +1,14 @@
-/* Persistent top bar. Three controls and nothing else (2026-09-06):
-   Competition HQ, Join the AI Club, and Register. The section jumps
-   that used to live here are gone; everything they pointed at now
-   lives in HQ, one click away. Register is the single amber action and
-   hides itself on the date in ./links. On a phone Join drops out (it is
-   in the footer) so HQ and Register never wrap. */
+/* Persistent top bar. Two controls and nothing else (2026-09-10):
+   Competition HQ and Register. The section jumps that used to live
+   here are gone; everything they pointed at now lives in HQ, one click
+   away. Join the AI Club left the bar on 2026-09-10; the footer's Join
+   button does that job. Register is the single amber action and hides
+   itself on the date in ./links. The bar spans the viewport (no
+   max-width) so the controls sit near the edges on a wide screen. */
 
 import { useEffect, useState } from "react";
 
-import {
-  CLUB_JOIN_URL,
-  HQ_PATH,
-  REGISTER_URL,
-  registrationOpen,
-} from "./links";
+import { HQ_PATH, REGISTER_URL, registrationOpen } from "./links";
 
 export default function Masthead({
   deferSurface = false,
@@ -52,7 +48,7 @@ export default function Masthead({
           : "border-b border-transparent bg-transparent")
       }
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 sm:px-8">
+      <div className="flex items-center justify-between gap-4 px-5 py-3 sm:px-8">
         {/* No club mark here: the current logo is a placeholder and read
             badly beside the professionally designed partner logos. Text
             only until a real mark exists. */}
@@ -71,16 +67,6 @@ export default function Masthead({
             <span className="sm:hidden">HQ</span>
             <span className="hidden sm:inline">Competition HQ</span>
           </a>
-          {CLUB_JOIN_URL ? (
-            <a
-              href={CLUB_JOIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-ghost !hidden !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs sm:!inline-flex"
-            >
-              Join the AI Club
-            </a>
-          ) : null}
           {showRegister ? (
             <a
               href={REGISTER_URL}
