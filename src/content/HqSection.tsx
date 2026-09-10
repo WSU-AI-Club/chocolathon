@@ -43,7 +43,7 @@ const ENTRIES: Array<{ id: string; title: string; line: string; href?: string }>
     href: PEOPLE_PATH,
   },
   {
-    id: "judges",
+    id: "rubric",
     title: "The rubric",
     line: "Four gates, four lines per track at 1 to 10, how teams advance, and how ties break.",
   },

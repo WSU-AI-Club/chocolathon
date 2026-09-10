@@ -90,10 +90,10 @@ export default function JudgePage() {
 
   const rubric = useMemo(() => {
     if (state.status !== "ready" || !state.hub) return null;
-    const judges = state.hub.sections.find((s) => s.id === "judges");
-    if (!judges) return null;
+    const section = state.hub.sections.find((s) => s.id === "rubric");
+    if (!section) return null;
     const want = track === "build" ? "Build Track" : "Pitch Track";
-    return judges.blocks.find(
+    return section.blocks.find(
       (b): b is Extract<Block, { kind: "rubric" }> => b.kind === "rubric" && b.label.includes(want),
     ) ?? null;
   }, [state, track]);

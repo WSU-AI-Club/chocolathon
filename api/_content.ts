@@ -630,14 +630,12 @@ export const SECTIONS: Section[] = [
   },
   {
     id: "judges",
-    nav: "Judging",
-    title: "Who decides, and how.",
+    nav: "Judges",
+    title: "Who decides.",
     intro:
-      "Two rounds. Local AI industry judges score every submission on the " +
-      "rubric below and the top three per track advance. Finalists present live " +
-      "at 3:45 PM, open to the public, and the Cocoa Dolce leadership picks the " +
-      "winners. No weights, no favourites: the score is the decision, and every " +
-      "line of it is printed here.",
+      "Two rounds. Local AI industry judges score every submission on the public " +
+      "rubric and the top three per track advance. Finalists present live at " +
+      "3:45 PM, open to the public, and the Cocoa Dolce leadership picks the winners.",
     blocks: [
       {
         kind: "list",
@@ -655,6 +653,52 @@ export const SECTIONS: Section[] = [
           ...(PEOPLE.finalsNote ? [PEOPLE.finalsNote] : []),
         ],
       },
+    ],
+  },
+  {
+    id: "rules",
+    nav: "Rules",
+    title: "The rules.",
+    blocks: [
+      {
+        kind: "list",
+        label: "Teams",
+        items: [
+          "WSU students only. Any major, any level.",
+          "Teams of one to five. Solo competes on the same terms.",
+          "Teams lock at registration. No changes after, no forming on the day.",
+          "You must be at the finale to compete. No remote entries.",
+        ],
+      },
+      {
+        kind: "list",
+        label: "The work",
+        items: [
+          "Answer one prompt. One submission, one track, chosen when you submit.",
+          "Start after the prompts unlock. A project you had already built is not an entry.",
+          "Any tools, any stack. AI is optional.",
+          "Your team’s own work. In the Pitch Track, cite your sources; an unsourced number is worth less than none.",
+          "The prompts describe a real business. Treat the detail as theirs, and do not contact Cocoa Dolce staff or suppliers for your entry.",
+        ],
+      },
+      {
+        kind: "text",
+        label: "You keep what you build",
+        body:
+          "You own everything you make. Cocoa Dolce gets a non-exclusive licence " +
+          "to use ideas presented to them, and the AI Club may feature your " +
+          "project in photos and recaps. Nothing is taken from you.",
+      },
+    ],
+  },
+  {
+    id: "rubric",
+    nav: "Rubric",
+    title: "How you are scored.",
+    intro:
+      "No weights, no favourites: the score is the decision, and every line of it " +
+      "is printed here. Judges read this same page.",
+    blocks: [
       {
         kind: "list",
         label: "Before scoring: four gates",
@@ -755,42 +799,6 @@ export const SECTIONS: Section[] = [
           "The presentation: clear in the time given, honest under questions.",
           "Each Cocoa Dolce judge scores alone during the presentation, then they confer and pick. One sentence per winner goes in the record.",
         ],
-      },
-    ],
-  },
-  {
-    id: "rules",
-    nav: "Rules",
-    title: "The rules.",
-    blocks: [
-      {
-        kind: "list",
-        label: "Teams",
-        items: [
-          "WSU students only. Any major, any level.",
-          "Teams of one to five. Solo competes on the same terms.",
-          "Teams lock at registration. No changes after, no forming on the day.",
-          "You must be at the finale to compete. No remote entries.",
-        ],
-      },
-      {
-        kind: "list",
-        label: "The work",
-        items: [
-          "Answer one prompt. One submission, one track, chosen when you submit.",
-          "Start after the prompts unlock. A project you had already built is not an entry.",
-          "Any tools, any stack. AI is optional.",
-          "Your team’s own work. In the Pitch Track, cite your sources; an unsourced number is worth less than none.",
-          "The prompts describe a real business. Treat the detail as theirs, and do not contact Cocoa Dolce staff or suppliers for your entry.",
-        ],
-      },
-      {
-        kind: "text",
-        label: "You keep what you build",
-        body:
-          "You own everything you make. Cocoa Dolce gets a non-exclusive licence " +
-          "to use ideas presented to them, and the AI Club may feature your " +
-          "project in photos and recaps. Nothing is taken from you.",
       },
     ],
   },

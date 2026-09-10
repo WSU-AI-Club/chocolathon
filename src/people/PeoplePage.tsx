@@ -148,7 +148,7 @@ function People({
         </p>
         <p className="mt-3">
           <a
-            href={`${HQ_PATH}#judges`}
+            href={`${HQ_PATH}#rubric`}
             className="text-base text-ink underline decoration-gold underline-offset-4 hover:decoration-ink"
           >
             The rubric they score on
