@@ -10,11 +10,15 @@
 export const REGISTER_URL = "https://forms.cloud.microsoft/r/aCrbnM5Dys";
 
 /* The Register buttons show until this instant and then disappear on
-   their own. Nothing on the page prints this date, and no copy anywhere
-   should. Explicit UTC offset so it reads the same in every timezone:
-   Central Daylight Time is UTC-5 in September. The form enforces its own
-   window in its own settings — keep the two in step by hand. */
-export const REGISTRATION_HIDE_AT = new Date("2026-09-16T23:59:00-05:00");
+   their own. Decided 2026-09-10: registration closes the minute before
+   the prompts unlock, so nobody registers after seeing them, and the
+   date IS printed now (REGISTRATION_CLOSE_LABEL) because the extension
+   is announced. Explicit UTC offset so it reads the same in every
+   timezone: Central Daylight Time is UTC-5 in September. The form
+   enforces its own window in its own settings — keep the two in step
+   by hand. */
+export const REGISTRATION_HIDE_AT = new Date("2026-09-13T23:59:00-05:00");
+export const REGISTRATION_CLOSE_LABEL = "Registration closes Sunday, September 13, 11:59 PM";
 
 export function registrationOpen(now: number = Date.now()): boolean {
   return now < REGISTRATION_HIDE_AT.getTime();
@@ -57,6 +61,10 @@ export const LOVABLE_URL = "https://lovable.dev";
    in the browser at all. */
 export const HQ_PATH = "/hq";
 export const PROMPTS_HREF = `${HQ_PATH}#prompts`;
+
+/* The judges-and-speakers page (2026-09-10). Public; its names come
+   from /api/hub so HQ and this page never disagree. */
+export const PEOPLE_PATH = "/people";
 
 /* The client's copy of the server clock in api/_release.ts: midnight on
    September 14, Wichita time. Decides what the prompts BUTTON looks

@@ -441,6 +441,64 @@ export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: bool
   { time: "5:00 PM", what: "Pictures and wrap" },
 ];
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   THE PEOPLE — speakers and judges, one list for the whole site.
+
+   /people renders this directly; the HQ Judges section builds its two
+   panel lists from the same arrays below. Add or change a person here
+   and both pages agree. Judges still to be confirmed are the two
+   "...Note" lines, never placeholder names.
+   ═══════════════════════════════════════════════════════════════════ */
+
+export type Person = {
+  name: string;
+  role: string; // title and organisation, as they want it printed
+  note?: string; // one short line, optional
+  session?: { time: string; title: string }; // speakers only
+};
+
+export type People = {
+  speakers: Person[];
+  preliminary: Person[];
+  preliminaryNote?: string;
+  finals: Person[];
+  finalsNote?: string;
+};
+
+export const PEOPLE: People = {
+  speakers: [
+    {
+      name: "Cody Herrin",
+      role: "Continuous Improvement and Innovation Manager, Capital III",
+      session: { time: "10:00 AM", title: "AI in Manufacturing: Databricks at Capital III" },
+    },
+    {
+      name: "Fareeha Amber Ansari",
+      role: "AI Governance Lead, Cargill",
+      session: { time: "11:30 AM", title: "Open Source, Open Weights, Open Questions" },
+    },
+    {
+      name: "Ramsey Jamoul",
+      role: "Founder and CEO, Unified",
+      note: "Unified runs the National AI Prompt Championship.",
+      session: { time: "2:30 PM", title: "Orchestrating AI" },
+    },
+  ],
+  preliminary: [
+    { name: "Grant Johnson", role: "Creator of Chatterbox: Language Learning" },
+    { name: "Dane Laughlin", role: "Industries Lead, Squint", note: "WSU alum." },
+  ],
+  preliminaryNote: "More local AI industry leaders, to be announced.",
+  finals: [{ name: "Ben Hesse", role: "Chief Operating Officer, Cocoa Dolce" }],
+  finalsNote: "More Cocoa Dolce leaders, to be announced.",
+};
+
+/* "Name — Role. Note." for the HQ lists. */
+function personLine(p: Person): string {
+  return `${p.name} — ${p.role}${p.note ? `. ${p.note}` : ""}`;
+}
+
 /* Every section is a budget: one intro line and the fewest bullets that
    answer the question. Anything genuinely undecided is marked "to be
    announced" rather than invented. */
@@ -557,17 +615,16 @@ export const SECTIONS: Section[] = [
         kind: "list",
         label: "Preliminary panel",
         items: [
-          "Grant Johnson — AI Software Engineering Leader, INVISTA. WSU alum.",
-          "Dane Laughlin — Industries Lead, Squint. WSU alum.",
-          "Two more local AI industry leaders, to be announced",
+          ...PEOPLE.preliminary.map(personLine),
+          ...(PEOPLE.preliminaryNote ? [PEOPLE.preliminaryNote] : []),
         ],
       },
       {
         kind: "list",
         label: "Finals panel",
         items: [
-          "Ben Hesse — Chief Operating Officer, Cocoa Dolce",
-          "Two more Cocoa Dolce leaders, to be announced",
+          ...PEOPLE.finals.map(personLine),
+          ...(PEOPLE.finalsNote ? [PEOPLE.finalsNote] : []),
         ],
       },
       {

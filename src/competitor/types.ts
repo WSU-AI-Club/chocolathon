@@ -35,6 +35,21 @@ export type Section = {
   blocks: Block[];
 };
 
+export type Person = {
+  name: string;
+  role: string;
+  note?: string;
+  session?: { time: string; title: string };
+};
+
+export type People = {
+  speakers: Person[];
+  preliminary: Person[];
+  preliminaryNote?: string;
+  finals: Person[];
+  finalsNote?: string;
+};
+
 export type ResultEntry = {
   team: string;
   prompt: string;
@@ -63,6 +78,7 @@ export type HubData = {
   prompts: Prompt[];
   sections: Section[];
   runOfDay: { time: string; what: string; who?: string; flag?: boolean }[];
+  people: People;
   results: Results;
   contactEmail: string;
 };

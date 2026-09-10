@@ -15,10 +15,12 @@
 
 import { useEffect, useState } from "react";
 
-import { HQ_PATH } from "./links";
+import { HQ_PATH, PEOPLE_PATH } from "./links";
 import PromptsButton from "./PromptsButton";
 
-const ENTRIES: Array<{ id: string; title: string; line: string }> = [
+/* `href` overrides the default HQ anchor; the people page is its own
+   route (2026-09-10). */
+const ENTRIES: Array<{ id: string; title: string; line: string; href?: string }> = [
   {
     id: "tracks",
     title: "Tracks",
@@ -35,9 +37,10 @@ const ENTRIES: Array<{ id: string; title: string; line: string }> = [
     line: "Finale day at Woolsey Hall, hour by hour. Doors 8:30 AM, winners 4:45 PM.",
   },
   {
-    id: "judges",
-    title: "Judges",
-    line: "Two rounds: local AI industry leaders, then the Cocoa Dolce leadership.",
+    id: "people",
+    title: "Judges and speakers",
+    line: "Three industry sessions, the preliminary panel, and the Cocoa Dolce leadership for the finals.",
+    href: PEOPLE_PATH,
   },
   {
     id: "rules",
@@ -125,7 +128,7 @@ export default function HqSection() {
               className={"border-t border-ink/15" + (i === ENTRIES.length - 1 && ENTRIES.length % 2 === 1 ? " sm:col-span-2" : "")}
             >
               <a
-                href={`${HQ_PATH}#${e.id}`}
+                href={e.href ?? `${HQ_PATH}#${e.id}`}
                 className="group flex items-start justify-between gap-6 py-5 no-underline sm:py-7"
               >
                 <span className="min-w-0">

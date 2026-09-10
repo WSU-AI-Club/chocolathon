@@ -13,7 +13,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { REGISTER_URL, registrationOpen } from "../content/links";
+import { PEOPLE_PATH, REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
 import type { Block, HubData, Prompt, ResultEntry, Section } from "./types";
 
@@ -434,6 +434,18 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
 
       {/* The run of day is the schedule section's body. */}
       {section.id === "schedule" ? <RunOfDay rows={data.runOfDay} /> : null}
+
+      {/* The people page carries the same names with the speakers. */}
+      {section.id === "judges" ? (
+        <p className="mt-3">
+          <a
+            href={PEOPLE_PATH}
+            className="text-base text-ink underline decoration-gold underline-offset-4 hover:decoration-ink"
+          >
+            Meet the judges and speakers
+          </a>
+        </p>
+      ) : null}
 
       {/* Prose blocks fold behind their label on a phone (the label
           states the conclusion; the paragraph is the fine print). Lists,

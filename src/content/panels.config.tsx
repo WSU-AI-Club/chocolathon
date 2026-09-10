@@ -18,6 +18,7 @@ import {
   HQ_PATH,
   LOVABLE_URL,
   REGISTER_URL,
+  REGISTRATION_CLOSE_LABEL,
   registrationOpen,
 } from "./links";
 import PromptsButton from "./PromptsButton";
@@ -251,9 +252,9 @@ const PANELS: Panel[] = [
       <div className="flex h-full flex-col items-center justify-end pb-[7vh] text-center">
         <div className="panel-scrim flex flex-col items-center">
           {/* Register is the amber action while it lasts (it hides itself on
-              the date in ./links, and no copy here names that date); the
-              prompts link is the quiet second door and becomes the only one
-              afterwards. No dates in the eyebrow on purpose. */}
+              the date in ./links, printed under the buttons since the
+              2026-09-10 extension); the prompts link is the quiet second
+              door and becomes the only one afterwards. */}
           <p className="eyebrow mb-4">Finale September 19</p>
           <h2 className="font-display text-5xl font-semibold tracking-tight text-ink md:text-6xl">
             Pick your team.
@@ -279,6 +280,9 @@ const PANELS: Panel[] = [
               </a>
             )}
           </div>
+          {registrationOpen() ? (
+            <p className="label mt-5">{REGISTRATION_CLOSE_LABEL}</p>
+          ) : null}
         </div>
       </div>
     ),

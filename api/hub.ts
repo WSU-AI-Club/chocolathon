@@ -26,6 +26,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 import {
   CONTACT_EMAIL,
+  PEOPLE,
   PROMPTS,
   PROMPTS_INTRO,
   RESULTS,
@@ -53,6 +54,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     prompts: unlocked ? PROMPTS : [],
     sections: SECTIONS,
     runOfDay: RUN_OF_DAY,
+    people: PEOPLE,
     results: RESULTS,
     contactEmail: CONTACT_EMAIL,
   });

@@ -14,13 +14,14 @@
 import { Suspense, lazy } from "react";
 
 import ChocolathonPage from "./ChocolathonPage";
-import { JUDGE_PATH, UPLOAD_PATH } from "./content/links";
+import { JUDGE_PATH, PEOPLE_PATH, UPLOAD_PATH } from "./content/links";
 
 /* Lazy so the landing page never downloads the hub. Not a security
    measure — the gate is server-side — just weight. */
 const CompetitorApp = lazy(() => import("./competitor/CompetitorApp"));
 const JudgePage = lazy(() => import("./judge/JudgePage"));
 const UploadPage = lazy(() => import("./upload/UploadPage"));
+const PeoplePage = lazy(() => import("./people/PeoplePage"));
 
 /* Matches /hq, /hq/, a mounted prefix such as /chocolathon/hq, and the
    older /prompts and /competitors paths so any link sent out before
@@ -36,6 +37,10 @@ function isJudgeRoute(pathname: string): boolean {
 function isUploadRoute(pathname: string): boolean {
   return new RegExp(`(^|/)${UPLOAD_PATH.slice(1)}/?$`, "i").test(pathname);
 }
+/* The public judges-and-speakers page (2026-09-10). */
+function isPeopleRoute(pathname: string): boolean {
+  return new RegExp(`(^|/)${PEOPLE_PATH.slice(1)}/?$`, "i").test(pathname);
+}
 
 export default function App() {
   if (typeof window !== "undefined" && isUploadRoute(window.location.pathname)) {
@@ -49,6 +54,13 @@ export default function App() {
     return (
       <Suspense fallback={null}>
         <JudgePage />
+      </Suspense>
+    );
+  }
+  if (typeof window !== "undefined" && isPeopleRoute(window.location.pathname)) {
+    return (
+      <Suspense fallback={null}>
+        <PeoplePage />
       </Suspense>
     );
   }
