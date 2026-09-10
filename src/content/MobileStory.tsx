@@ -66,9 +66,8 @@ export default function MobileStory() {
         </h2>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-ink/80">
           Cocoa Dolce is Wichita&rsquo;s artisan chocolate maker. Build them a
-          working prototype, or pitch them a business case. Either way it is a
-          real problem from inside a real company, not a case study someone
-          invented for a classroom, and the people who run the business decide
+          working prototype, or pitch them a business case. Not every problem
+          is a software problem, and the people who run the business decide
           who wins.
         </p>
       </section>
@@ -116,33 +115,31 @@ export default function MobileStory() {
         </dl>
       </section>
 
-      {/* Prizes + who */}
-      <section className="px-6 py-14 text-center">
-        <p className="eyebrow mb-3">Prizes</p>
-        <p className="font-display text-5xl font-semibold text-ink">$1,200</p>
-        <p className="mt-1 text-sm text-ink/80">
-          in scholarships across two tracks, four winning teams
-        </p>
-        <p className="mx-auto mt-4 max-w-xs text-sm leading-relaxed text-ink/70">
-          Build Track: a $700 scholarship to the winning team. Pitch Track: a
-          $500 scholarship to the winning team. Each winner also takes home a big box of Cocoa Dolce
-          chocolates, and second place in each track takes the same box.
-        </p>
-        <p className="mx-auto mt-4 max-w-sm text-sm leading-relaxed text-ink/70">
-          Cocoa Dolce provides morning refreshments, coffee and chocolates.
-          Jimmy John's provides lunch. Red Bull keeps the drinks coming all
-          day. You are fed all day, you get three industry speaker sessions,
-          and a room of people to show your work to.
-        </p>
-        <p className="mx-auto mt-8 max-w-md text-base leading-relaxed text-ink/80">
-          Open to all WSU students, any major, any skill level. Cocoa
-          Dolce&rsquo;s problems are not all software problems: some are about
-          materials and process, some about logistics and cost, some about data
-          they do not have yet.
-          You can build with our sponsor Lovable, an AI platform that turns
-          ideas into working software, and every participant gets free
-          credits. Local AI industry judges advance the top teams, and the
-          Cocoa Dolce leadership picks the winners live.
+      {/* Prizes. The same ruled list as the details above, so the money
+          scans in three lines instead of three paragraphs. Who may enter
+          is in the details (Teams, Experience); Lovable, the judges, and
+          the food are one line each in HQ, one tap below. */}
+      <section className="px-6 py-14">
+        <div className="text-center">
+          <p className="eyebrow mb-3">Prizes</p>
+          <p className="font-display text-5xl font-semibold text-ink">$1,200</p>
+          <p className="mt-1 text-sm text-ink/80">in scholarships, four winning teams</p>
+        </div>
+        <dl className="mx-auto mt-8 max-w-xs space-y-3 border-l-2 border-gold pl-5">
+          {[
+            ["Build Track", "$700 to the winning team"],
+            ["Pitch Track", "$500 to the winning team"],
+            ["Winners and runners-up", "A big box of Cocoa Dolce chocolates"],
+          ].map(([k, v]) => (
+            <div key={k}>
+              <dt className="label">{k}</dt>
+              <dd className="text-lg font-semibold leading-snug text-ink">{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="mx-auto mt-8 max-w-xs text-center text-sm leading-relaxed text-ink/70">
+          Fed all day by Cocoa Dolce, Jimmy John&rsquo;s, and Red Bull. Three
+          industry speaker sessions. Lovable credits for every team.
         </p>
       </section>
 

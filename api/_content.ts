@@ -26,7 +26,10 @@ export type Block =
   /* Outbound links rendered as real anchors, never bare URLs. */
   | { kind: "links"; label: string; items: { text: string; href: string }[] }
   /* YouTube embeds by video id, privacy-enhanced domain. */
-  | { kind: "videos"; label: string; items: { id: string; title: string }[] };
+  | { kind: "videos"; label: string; items: { id: string; title: string }[] }
+  /* Question and answer pairs; the question is set bold so a phone
+     reader can find theirs without reading every line. */
+  | { kind: "qa"; label: string; items: { q: string; a: string }[] };
 
 export type Prompt = {
   id: string;
@@ -675,16 +678,16 @@ export const SECTIONS: Section[] = [
     title: "Questions.",
     blocks: [
       {
-        kind: "list",
+        kind: "qa",
         label: "Answers",
         items: [
-          "Can we switch tracks? Yes, right up to 2:15 PM on the 19th. You declare at submission.",
-          "Can we answer two prompts? No. One prompt, one submission.",
-          "Can we change our team? No. Teams lock at registration.",
-          "Does the project have to use AI? No. Neither track requires it.",
-          "Can we use code or research from before the prompts unlocked? Libraries, templates, and public tools, yes. A project you had already built, no.",
-          "Do we have to be there all day? You must be there to submit and, if you advance, to present. Come for the whole thing.",
-          "Something is unclear? aiclub@wichita.edu.",
+          { q: "Can we switch tracks?", a: "Yes, right up to 2:15 PM on the 19th. You declare at submission." },
+          { q: "Can we answer two prompts?", a: "No. One prompt, one submission." },
+          { q: "Can we change our team?", a: "No. Teams lock at registration." },
+          { q: "Does the project have to use AI?", a: "No. Neither track requires it." },
+          { q: "Can we use code or research from before the prompts unlocked?", a: "Libraries, templates, and public tools, yes. A project you had already built, no." },
+          { q: "Do we have to be there all day?", a: "You must be there to submit and, if you advance, to present. Come for the whole thing." },
+          { q: "Something is unclear?", a: "aiclub@wichita.edu." },
         ],
       },
     ],

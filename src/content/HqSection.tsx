@@ -73,7 +73,7 @@ function useResultsPublished(): boolean {
 export default function HqSection() {
   const resultsPublished = useResultsPublished();
   return (
-    <section id="hq" className="border-t border-ink/10 bg-white px-5 py-24">
+    <section id="hq" className="border-t border-ink/10 bg-white px-5 py-16 sm:py-24">
       <div className="mx-auto max-w-4xl">
         <div className="max-w-2xl">
           <h2 className="font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
@@ -104,7 +104,7 @@ export default function HqSection() {
 
         {/* The prompts entry is the one that changes state, so it gets the
             full-width row and the button itself. */}
-        <div className={(resultsPublished ? "" : "mt-12 ") + "flex flex-col gap-5 border-t border-ink/15 py-8 sm:flex-row sm:items-center sm:justify-between"}>
+        <div className={(resultsPublished ? "" : "mt-10 sm:mt-12 ") + "flex flex-col gap-5 border-t border-ink/15 py-6 sm:flex-row sm:items-center sm:justify-between sm:py-8"}>
           <div>
             <h3 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink">
               The prompts
@@ -126,7 +126,7 @@ export default function HqSection() {
             >
               <a
                 href={`${HQ_PATH}#${e.id}`}
-                className="group flex items-start justify-between gap-6 py-7 no-underline"
+                className="group flex items-start justify-between gap-6 py-5 no-underline sm:py-7"
               >
                 <span className="min-w-0">
                   <span className="block font-display text-2xl font-semibold leading-tight tracking-tight text-ink">

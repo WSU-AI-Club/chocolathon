@@ -215,6 +215,53 @@
   background: rgb(35 42 77 / 0.06);
 }
 
+/* On a phone the HQ bar's section buttons overflow sideways. The fade
+   on both edges is the cue that they do, so a half-cut label reads as
+   "more this way" rather than as a defect. The leading padding keeps
+   the first button clear of the left fade at rest. Lifts at the sm
+   breakpoint, where the row fits and is centred. */
+@media (max-width: 639px) {
+  .choco-root .hq-nav {
+    padding-left: 1.5rem;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 1.25rem,
+      #000 calc(100% - 2.5rem),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 1.25rem,
+      #000 calc(100% - 2.5rem),
+      transparent
+    );
+  }
+}
+
+/* Folded prose in HQ (phones only; the component decides). The summary
+   is the block's label plus a drawn chevron; the browser's own marker
+   is removed so the label lines up with the unfolded blocks. */
+.choco-root .hq-fold > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.choco-root .hq-fold > summary::-webkit-details-marker {
+  display: none;
+}
+.choco-root .hq-fold .hq-fold-mark {
+  transition: transform 200ms ease;
+}
+.choco-root .hq-fold[open] .hq-fold-mark {
+  transform: rotate(180deg);
+}
+
 /* ── film scrim and hint ───────────────────────────────────────────── */
 
 /* Feathered white pool behind overlay text — invisible against the page,

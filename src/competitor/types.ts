@@ -13,7 +13,10 @@ export type Block =
   /* Outbound links rendered as real anchors, never bare URLs. */
   | { kind: "links"; label: string; items: { text: string; href: string }[] }
   /* YouTube embeds by video id, privacy-enhanced domain. */
-  | { kind: "videos"; label: string; items: { id: string; title: string }[] };
+  | { kind: "videos"; label: string; items: { id: string; title: string }[] }
+  /* Question and answer pairs; the question is set bold so a phone
+     reader can find theirs without reading every line. */
+  | { kind: "qa"; label: string; items: { q: string; a: string }[] };
 
 export type Prompt = {
   id: string;

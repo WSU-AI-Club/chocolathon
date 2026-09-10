@@ -11,7 +11,7 @@
    the Register CTA. Everything on this page arrives from /api/hub.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
@@ -66,6 +66,21 @@ function HqBar({
   active: string | null;
 }) {
   const showRegister = registrationOpen();
+  const navRef = useRef<HTMLElement>(null);
+
+  /* On a phone the bar scrolls sideways. Keep the current section's
+     button in view so the row always shows where the reader is, and so
+     the cut-off label at the edge reads as "more this way". Horizontal
+     only: scrollIntoView could also nudge the page. */
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav || !active) return;
+    const el = nav.querySelector<HTMLElement>(`a[href="#${active}"]`);
+    if (!el) return;
+    const left = el.offsetLeft - (nav.clientWidth - el.offsetWidth) / 2;
+    nav.scrollTo({ left, behavior: "smooth" });
+  }, [active]);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2.5 sm:px-8">
@@ -74,8 +89,12 @@ function HqBar({
         </a>
 
         {/* Horizontal scroll on a phone rather than wrapping: the bar
-            must stay one row tall or it eats the screen. */}
-        <nav className="-mx-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] sm:justify-center">
+            must stay one row tall or it eats the screen. .hq-nav fades
+            the right edge on phones so the overflow is visible. */}
+        <nav
+          ref={navRef}
+          className="hq-nav -mx-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] sm:justify-center"
+        >
           {items.map((item) => (
             <a
               key={item.id}
@@ -399,8 +418,9 @@ function PromptCard({ prompt }: { prompt: Prompt }) {
 /* ── generic sections ─────────────────────────────────────────────── */
 
 function SectionBlock({ section, data }: { section: Section; data: HubData }) {
+  const phone = usePhone();
   return (
-    <section id={section.id} className="mt-24 scroll-mt-20">
+    <section id={section.id} className="mt-16 scroll-mt-20 sm:mt-24">
       <div className="border-t border-ink/15 pt-7">
         <h2 className="font-display text-4xl font-semibold tracking-tight text-ink">
           {section.title}
@@ -415,9 +435,12 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
       {/* The run of day is the schedule section's body. */}
       {section.id === "schedule" ? <RunOfDay rows={data.runOfDay} /> : null}
 
-      <div className="mt-9 space-y-8">
+      {/* Prose blocks fold behind their label on a phone (the label
+          states the conclusion; the paragraph is the fine print). Lists,
+          steps, and links stay open: they are what people scan for. */}
+      <div className="mt-8 space-y-7 sm:mt-9 sm:space-y-8">
         {section.blocks.map((b) => (
-          <BlockView key={b.label} block={b} />
+          <BlockView key={b.label} block={b} fold={phone} />
         ))}
       </div>
 
@@ -470,7 +493,47 @@ function RunOfDay({ rows }: { rows: HubData["runOfDay"] }) {
   );
 }
 
-function BlockView({ block }: { block: Block }) {
+/* Below Tailwind's sm breakpoint. Used only for the HQ folds; the
+   layout itself is CSS. */
+function usePhone(): boolean {
+  const query = "(max-width: 639px)";
+  const [phone, setPhone] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const on = () => setPhone(mq.matches);
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, []);
+  return phone;
+}
+
+function BlockView({ block, fold = false }: { block: Block; fold?: boolean }) {
+  if (block.kind === "text" && fold) {
+    return (
+      <details className="hq-fold">
+        <summary className="label">
+          {block.label}
+          <svg
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            className="hq-fold-mark h-3.5 w-3.5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M4 6l4 4 4-4" />
+          </svg>
+        </summary>
+        <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink/80">
+          {block.body}
+        </p>
+      </details>
+    );
+  }
   return (
     <div>
       <h4 className="label">{block.label}</h4>
@@ -497,6 +560,15 @@ function BlockView({ block }: { block: Block }) {
             </li>
           ))}
         </ol>
+      ) : block.kind === "qa" ? (
+        <dl className="mt-3 max-w-2xl space-y-4">
+          {block.items.map((item) => (
+            <div key={item.q}>
+              <dt className="text-base font-semibold leading-snug text-ink">{item.q}</dt>
+              <dd className="mt-1 text-base leading-relaxed text-ink/80">{item.a}</dd>
+            </div>
+          ))}
+        </dl>
       ) : block.kind === "links" ? (
         <ul className="mt-3 max-w-2xl space-y-2.5 border-l-2 border-gold pl-5">
           {block.items.map((item) => (
