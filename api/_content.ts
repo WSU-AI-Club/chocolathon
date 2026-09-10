@@ -630,8 +630,8 @@ export const SECTIONS: Section[] = [
   },
   {
     id: "judges",
-    nav: "Judges",
-    title: "Who decides.",
+    nav: "Judging",
+    title: "Who decides, and how.",
     intro:
       "Two rounds. Local AI industry judges score every submission on the " +
       "rubric below and the top three per track advance. Finalists present live " +
