@@ -427,7 +427,7 @@ export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: bool
   { time: "9:30 AM", what: "Networking. Teams work and refine." },
   {
     time: "10:00 AM",
-    what: "Session 1: AI in Manufacturing: Databricks at Capital III. To 10:45.",
+    what: "Session 1: AI in Manufacturing: Databricks at Capital III",
     who: "Cody Herrin, Continuous Improvement and Innovation Manager, Capital III",
   },
   {
@@ -440,7 +440,7 @@ export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: bool
   { time: "2:00 PM", what: "Submissions close. Hard cutoff.", flag: true },
   {
     time: "2:30 PM",
-    what: "Session 3: Orchestrating AI, during preliminary judging. To 3:15.",
+    what: "Session 3: Orchestrating AI, during preliminary judging",
     who: "Ramsey Jamoul, Founder and CEO, Unified",
   },
   { time: "3:45 PM", what: "Final presentations, to 4:30. Open to the public.", flag: true },
@@ -514,10 +514,10 @@ export const PEOPLE: People = {
     {
       name: "Ben Hesse",
       role: "Chief Operating Officer, Cocoa Dolce",
+      note: "Judging with his leadership team.",
       linkedin: "https://www.linkedin.com/in/benjamin-hesse-420a551b/",
     },
   ],
-  finalsNote: "More Cocoa Dolce leaders, to be announced.",
 };
 
 /* "Name — Role. Note." for the HQ lists. */
@@ -534,8 +534,9 @@ export const SECTIONS: Section[] = [
     nav: "Tracks",
     title: "Build or Pitch.",
     intro:
-      "Same problems, two ways to answer. Each track is judged on its own; a " +
-      "product is never scored against a recommendation.",
+      "Four prompts on each side, and they are different problems. Build asks " +
+      "for something that works; Pitch asks for a decision. Pick one prompt, " +
+      "one track.",
     blocks: [
       {
         kind: "list",
@@ -613,18 +614,15 @@ export const SECTIONS: Section[] = [
     id: "schedule",
     nav: "Schedule",
     title: "Saturday, September 19.",
-    intro:
-      "Woolsey Hall, WSU. Doors at 8:30 AM, wrap at 5:00 PM, food all day. " +
-      "Bring your laptop, charger, student ID, and links already tested.",
+    intro: "Woolsey Hall, WSU. Doors open at 8:30 AM, wrap at 5:00 PM, food all day.",
     blocks: [
       {
         kind: "text",
         label: "Backed by the Barton School",
         body:
           "The room at Woolsey Hall is supported by the Office of Career and " +
-          "Professional Development. The three sessions are open to everyone and " +
-          "optional; teams may keep working through them. Timing may shift by a " +
-          "few minutes; this page is the version of record.",
+          "Professional Development. The three sessions are open to the public. " +
+          "Timing may shift by a few minutes.",
       },
     ],
   },
@@ -634,8 +632,8 @@ export const SECTIONS: Section[] = [
     title: "Who decides.",
     intro:
       "Two rounds. Local AI industry judges score every submission on the public " +
-      "rubric and the top three per track advance. Finalists present live at " +
-      "3:45 PM, open to the public, and the Cocoa Dolce leadership picks the winners.",
+      "rubric; the top three per track advance. Cocoa Dolce picks the winners " +
+      "from the live finals at 3:45 PM, open to the public.",
     blocks: [
       {
         kind: "list",
@@ -696,8 +694,8 @@ export const SECTIONS: Section[] = [
     nav: "Rubric",
     title: "How you are scored.",
     intro:
-      "No weights, no favourites: the score is the decision, and every line of it " +
-      "is printed here. Judges read this same page.",
+      "No weights and no secrets: the preliminary judges score these lines and " +
+      "read this same page. The finals are not scored — Cocoa Dolce picks.",
     blocks: [
       {
         kind: "rubric",
@@ -706,26 +704,26 @@ export const SECTIONS: Section[] = [
           {
             name: "It runs.",
             low: "Nothing to click.",
-            mid: "The main path runs; parts are stubbed.",
-            high: "Runs end to end on the link you gave.",
+            mid: "The main path runs, parts stubbed.",
+            high: "End to end, on your link.",
           },
           {
-            name: "Someone at Cocoa Dolce could operate it.",
-            low: "Needs the team standing next to it.",
+            name: "They could operate it.",
+            low: "Needs you standing next to it.",
             mid: "Works with a walkthrough.",
-            high: "A staff member could use it on Monday.",
+            high: "Staff could use it Monday.",
           },
           {
-            name: "It solves the prompt for Cocoa Dolce.",
+            name: "It answers the prompt.",
             low: "Generic, with a chocolate label.",
             mid: "Solves the task, with gaps.",
-            high: "Solves it specifically for how they work.",
+            high: "Built for how they actually work.",
           },
           {
             name: "Honest about limits.",
             low: "Claims more than it does.",
             mid: "Some limits named.",
-            high: "Says where it breaks and what fixing it takes.",
+            high: "Says where it breaks, and the fix.",
           },
         ],
       },
@@ -737,25 +735,25 @@ export const SECTIONS: Section[] = [
             name: "The recommendation is specific.",
             low: "A theme.",
             mid: "A direction.",
-            high: "What to do, by when, and what it costs.",
+            high: "What to do, by when, at what cost.",
           },
           {
             name: "The evidence holds up.",
             low: "Unsourced numbers.",
             mid: "Sourced, but thin.",
-            high: "Sourced, checkable, and the right sources.",
+            high: "Sourced, checkable, right.",
           },
           {
             name: "The payoff is sized.",
             low: "No number.",
-            mid: "A number without a basis.",
-            high: "What it is worth to Cocoa Dolce, and how you got there.",
+            mid: "A number with no basis.",
+            high: "What it is worth, and how you got there.",
           },
           {
             name: "The artifact makes it real.",
             low: "Slides only.",
-            mid: "A mock-up that shows the idea.",
-            high: "Something Cocoa Dolce could react to as if it existed.",
+            mid: "A mock-up of the idea.",
+            high: "Something they could react to as real.",
           },
         ],
       },
@@ -774,10 +772,10 @@ export const SECTIONS: Section[] = [
         kind: "steps",
         label: "How teams advance",
         items: [
-          "Every judge in a track scores every entry in that track, alone, 1 to 10 on each line: 4 to 40 per judge, plus one comment.",
-          "A team's score is the average of its judges' totals. A judge who knows a team sits that team out, and the others' average counts.",
-          "The top three per track go to the finals. The finals panel sees no preliminary scores; finalists start level.",
-          "Michael runs the day and does not score. After the event, any team can ask for its own scores and comments.",
+          "Each judge scores every entry in their track alone: 1 to 10 on each of the four lines, plus one comment.",
+          "A team's score is the average of its judges' totals. A judge who knows a team does not score it.",
+          "The top three teams in each track go to the finals. Scores do not carry forward; finalists start level.",
+          "AI Club leadership runs the day and does not score. After the event, any team can ask for its own scores and comments.",
         ],
       },
       {
@@ -787,18 +785,17 @@ export const SECTIONS: Section[] = [
           "The higher total on the first line of their rubric.",
           "Then the higher total on the second line.",
           "Then the higher median judge total.",
-          "Then Michael decides, and the reason is written down.",
+          "Still tied: AI Club leadership talks it through with the judges and decides how to proceed.",
         ],
       },
       {
-        kind: "list",
-        label: "The finals — three lines, each 1 to 10",
-        items: [
-          "We would use this (Build) or we would act on this (Pitch).",
-          "They understood our business.",
-          "The presentation: clear in the time given, honest under questions.",
-          "Each Cocoa Dolce judge scores alone during the presentation, then they confer and pick. One sentence per winner goes in the record.",
-        ],
+        kind: "text",
+        label: "The finals are not scored",
+        body:
+          "Finalists present live at 3:45. Ben Hesse and his Cocoa Dolce " +
+          "leadership team pick one winner in each track — the product they " +
+          "would use, or the recommendation they would act on. No rubric, no " +
+          "scores: it is their business and their call.",
       },
     ],
   },

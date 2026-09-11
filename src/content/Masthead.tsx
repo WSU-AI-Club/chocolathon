@@ -59,25 +59,37 @@ export default function Masthead({
           <span className="hidden sm:inline">WSU AI Club · </span>Sep 19
         </a>
 
-        <nav className="flex items-center gap-2 sm:gap-3">
-          <a
-            href={HQ_PATH}
-            className="btn-ghost !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs"
-          >
-            <span className="sm:hidden">HQ</span>
-            <span className="hidden sm:inline">Competition HQ</span>
-          </a>
-          {showRegister ? (
+        <div className="flex flex-col items-end gap-1.5">
+          <nav className="flex items-center gap-2 sm:gap-3">
             <a
-              href={REGISTER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-cta !min-h-[38px] !px-4 !text-xs sm:!px-5"
+              href={HQ_PATH}
+              className="btn-ghost !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs"
             >
-              Register
+              <span className="sm:hidden">HQ</span>
+              <span className="hidden sm:inline">Competition HQ</span>
             </a>
+            {showRegister ? (
+              <a
+                href={REGISTER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-cta !min-h-[38px] !px-4 !text-xs sm:!px-5"
+              >
+                Register
+              </a>
+            ) : null}
+          </nav>
+          {/* The 2026-09-10 extension, announced where the Register button
+              is. It leaves with the button on the 13th. */}
+          {showRegister ? (
+            <p className="label label-alert !text-[10.5px] sm:!text-[11px]">
+              <span className="sm:hidden">Deadline extended · Sep 13</span>
+              <span className="hidden sm:inline">
+                Registration deadline extended to September 13
+              </span>
+            </p>
           ) : null}
-        </nav>
+        </div>
       </div>
     </header>
   );

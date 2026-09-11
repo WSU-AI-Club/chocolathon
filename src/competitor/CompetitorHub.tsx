@@ -15,6 +15,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PEOPLE_PATH, REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
+import RubricPair from "./RubricPair";
 import RubricView from "./RubricView";
 import type { Block, HubData, Prompt, ResultEntry, Section } from "./types";
 
@@ -453,13 +454,18 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
       ) : null}
 
       {/* Rubrics sit side by side (Build | Pitch) above everything else
-          in their section; on a phone they stack. */}
+          in their section, rendered as one row-aligned grid so the two
+          tracks' numbers face each other; on a phone they stack. */}
       {rubrics.length ? (
-        <div className="mt-9 grid gap-12 sm:grid-cols-2 sm:gap-x-8">
-          {rubrics.map((r) => (
-            <RubricView key={r.label} rubric={r} />
-          ))}
-        </div>
+        phone ? (
+          <div className="mt-9 grid gap-12">
+            {rubrics.map((r) => (
+              <RubricView key={r.label} rubric={r} />
+            ))}
+          </div>
+        ) : (
+          <RubricPair rubrics={rubrics} />
+        )
       ) : null}
 
       {/* Prose blocks fold behind their label on a phone (the label

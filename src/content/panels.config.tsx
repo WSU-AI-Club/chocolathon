@@ -47,7 +47,7 @@ const PANELS: Panel[] = [
             The world&rsquo;s first chocolate hackathon.
           </p>
           <p className="label label-strong mt-5 !text-sm">
-            Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall, WSU
+            Finale Sat Sep 19, 2026 · 9 AM – 5 PM · Woolsey Hall, WSU
           </p>
         </div>
         {/* No sponsor marks in the hero (decided 2026-09-06 after trying a
@@ -104,33 +104,23 @@ const PANELS: Panel[] = [
     position: "right",
     node: (
       <div className="max-w-xs">
-        {/* Registration dates deliberately live on the countdown, not here.
-            This panel is about what the event actually IS. */}
-        <p className="eyebrow mb-3">How the event runs</p>
-        <ol className="space-y-6 border-l-2 border-gold pl-5 text-left">
-          <li>
-            <p className="label label-accent">
-              Sep 14
-            </p>
-            <p className="text-lg font-semibold leading-snug text-ink">
-              Start building
-            </p>
-            <p className="mt-1 text-sm leading-relaxed text-ink/70">
-              Prompts unlock. Build on your own time.
-            </p>
-          </li>
-          <li>
-            <p className="label label-accent">
-              Sep 19
-            </p>
-            <p className="text-lg font-semibold leading-snug text-ink">
-              The finale
-            </p>
-            <p className="mt-1 text-sm leading-relaxed text-ink/70">
-              Industry speakers, submissions, live presentations, winners.
-            </p>
-          </li>
-        </ol>
+        {/* Two dates and a room — nothing else. The mechanics are the
+            green "How it works" panel; the two used to say the same
+            thing twice (fixed 2026-09-10). */}
+        <p className="eyebrow mb-3">When &amp; where</p>
+        <dl className="space-y-3 border-l-2 border-gold pl-5 text-left">
+          {[
+            ["Prompts unlock", "Monday, September 14"],
+            ["The finale", "Saturday, September 19"],
+            ["Time", "9 AM – 5 PM"],
+            ["Place", "Woolsey Hall, WSU"],
+          ].map(([k, v]) => (
+            <div key={k}>
+              <dt className="label">{k}</dt>
+              <dd className="text-lg font-semibold leading-snug text-ink">{v}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     ),
   },
@@ -147,9 +137,9 @@ const PANELS: Panel[] = [
         </h2>
         <ol className="mt-4 space-y-2 text-base leading-relaxed text-ink/80">
           <li><strong className="text-ink">1.</strong> Teams of one to five, any major.</li>
-          <li><strong className="text-ink">2.</strong> Prompts release September 14. Build on your own time, at your own pace.</li>
-          <li><strong className="text-ink">3.</strong> Submit at the finale, September 19, at Woolsey Hall.</li>
-          <li><strong className="text-ink">4.</strong> Finalists present live on stage.</li>
+          <li><strong className="text-ink">2.</strong> Pick one of eight prompts, and build on your own time.</li>
+          <li><strong className="text-ink">3.</strong> Submit on finale day, then the top three per track present live.</li>
+          <li><strong className="text-ink">4.</strong> Cocoa Dolce picks a winner in each track.</li>
         </ol>
       </div>
     ),

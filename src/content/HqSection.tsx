@@ -24,7 +24,7 @@ const ENTRIES: Array<{ id: string; title: string; line: string; href?: string }>
   {
     id: "tracks",
     title: "Tracks",
-    line: "Build a working tool, or pitch the case. Prizes, judging weight, what you submit.",
+    line: "Build a working tool, or pitch the case. Different prompts on each side, and what each pays.",
   },
   {
     id: "lovable",
@@ -34,18 +34,18 @@ const ENTRIES: Array<{ id: string; title: string; line: string; href?: string }>
   {
     id: "schedule",
     title: "Schedule",
-    line: "Finale day at Woolsey Hall, hour by hour. Doors 8:30 AM, winners 4:45 PM.",
+    line: "Finale day at Woolsey Hall, hour by hour: sessions, submissions, finals, winners.",
   },
   {
     id: "people",
     title: "Judges and speakers",
-    line: "Three industry sessions, the preliminary panel, and the Cocoa Dolce leadership for the finals.",
+    line: "Three industry sessions, the preliminary panel, and the Cocoa Dolce leadership who pick the winners.",
     href: PEOPLE_PATH,
   },
   {
     id: "rubric",
     title: "The rubric",
-    line: "Four gates, four lines per track at 1 to 10, how teams advance, and how ties break.",
+    line: "Four gates, four lines per track at 1 to 10, how teams advance, and how the finals are decided.",
   },
   {
     id: "rules",

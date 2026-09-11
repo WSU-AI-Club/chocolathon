@@ -18,7 +18,8 @@ export const REGISTER_URL = "https://forms.cloud.microsoft/r/aCrbnM5Dys";
    enforces its own window in its own settings — keep the two in step
    by hand. */
 export const REGISTRATION_HIDE_AT = new Date("2026-09-13T23:59:00-05:00");
-export const REGISTRATION_CLOSE_LABEL = "Registration closes Sunday, September 13, 11:59 PM";
+export const REGISTRATION_CLOSE_LABEL =
+  "Deadline extended — registration closes Sunday, September 13, 11:59 PM";
 
 export function registrationOpen(now: number = Date.now()): boolean {
   return now < REGISTRATION_HIDE_AT.getTime();

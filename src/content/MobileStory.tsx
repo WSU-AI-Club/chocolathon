@@ -38,7 +38,7 @@ export default function MobileStory() {
           height={1000}
         />
         <p className="label label-strong">
-          Finale Sat Sep 19, 2026 · 8:30 AM – 5 PM · Woolsey Hall
+          Finale Sat Sep 19, 2026 · 9 AM – 5 PM · Woolsey Hall
         </p>
         <div className="mt-8 flex flex-col items-center gap-3">
           <PromptsButton />
@@ -83,9 +83,9 @@ export default function MobileStory() {
         </h2>
         <ol className="mx-auto mt-5 max-w-md space-y-2 text-left text-base leading-relaxed text-ink/80">
           <li><strong className="text-ink">1.</strong> Teams of one to five, any major.</li>
-          <li><strong className="text-ink">2.</strong> Prompts release September 14. Build on your own time, at your own pace.</li>
-          <li><strong className="text-ink">3.</strong> Submit at the finale, September 19, at Woolsey Hall.</li>
-          <li><strong className="text-ink">4.</strong> Finalists present live on stage.</li>
+          <li><strong className="text-ink">2.</strong> Pick one of eight prompts, and build on your own time.</li>
+          <li><strong className="text-ink">3.</strong> Submit on finale day, then the top three per track present live.</li>
+          <li><strong className="text-ink">4.</strong> Cocoa Dolce picks a winner in each track.</li>
         </ol>
       </section>
 
@@ -102,7 +102,7 @@ export default function MobileStory() {
           {[
             ["Prompts unlock", "Monday, September 14, midnight"],
             ["Finale", "Saturday, September 19"],
-            ["Time", "8:30 AM – 5:00 PM"],
+            ["Time", "9:00 AM – 5:00 PM"],
             ["Place", "Woolsey Hall, WSU"],
             ["Teams", "1–5 people, every major"],
             ["Experience", "None required"],
