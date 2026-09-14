@@ -518,6 +518,12 @@ export const PEOPLE: People = {
       note: "WSU alum.",
       linkedin: "https://www.linkedin.com/in/danelaughlin/",
     },
+    {
+      name: "Alexis Diaz",
+      role: "Software Engineer, Koch Ag & Energy Solutions",
+      note: "WSU computer science alum.",
+      linkedin: "https://www.linkedin.com/in/alexis-diaz-wsu/",
+    },
   ],
   preliminaryNote: "More local AI industry leaders, to be announced.",
   finals: [
