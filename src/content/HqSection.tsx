@@ -88,8 +88,8 @@ export default function HqSection() {
             Competition HQ.
           </h2>
           <p className="mt-4 text-lg leading-relaxed text-ink/80">
-            Everything a team needs, on one page. The prompts land here at
-            midnight on September 14.
+            Everything a team needs, on one page. The eight prompts are
+            live.
           </p>
         </div>
 

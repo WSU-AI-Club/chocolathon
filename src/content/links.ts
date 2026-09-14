@@ -67,11 +67,11 @@ export const PROMPTS_HREF = `${HQ_PATH}#prompts`;
    from /api/hub so HQ and this page never disagree. */
 export const PEOPLE_PATH = "/people";
 
-/* The client's copy of the server clock in api/_release.ts: midnight on
-   September 14, Wichita time. Decides what the prompts BUTTON looks
-   like; the server decides what the prompts PAGE contains. Keep the two
-   identical. */
-export const PROMPTS_RELEASE_AT = new Date("2026-09-14T05:00:00.000Z");
+/* The client's copy of the server clock in api/_release.ts: 9:30 PM on
+   September 13, Wichita time (moved up from midnight on 2026-09-13).
+   Decides what the prompts BUTTON looks like; the server decides what
+   the prompts PAGE contains. Keep the two identical. */
+export const PROMPTS_RELEASE_AT = new Date("2026-09-14T02:30:00.000Z");
 
 /* ── Submissions ─────────────────────────────────────────────────────
    The finale-day Microsoft Form. The submissions button is locked until
