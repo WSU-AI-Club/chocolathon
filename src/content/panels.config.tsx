@@ -110,7 +110,7 @@ const PANELS: Panel[] = [
         <p className="eyebrow mb-3">When &amp; where</p>
         <dl className="space-y-3 border-l-2 border-gold pl-5 text-left">
           {[
-            ["Prompts live", "Sunday, September 13"],
+            ["Prompts live", "Monday, September 14"],
             ["The finale", "Saturday, September 19"],
             ["Time", "9 AM – 5 PM"],
             ["Place", "Woolsey Hall, WSU"],

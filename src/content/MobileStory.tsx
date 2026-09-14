@@ -100,7 +100,7 @@ export default function MobileStory() {
       <section className="px-6 py-14">
         <dl className="mx-auto max-w-xs space-y-3 border-l-2 border-gold pl-5">
           {[
-            ["Prompts live", "Sunday, September 13"],
+            ["Prompts live", "Monday, September 14"],
             ["Finale", "Saturday, September 19"],
             ["Time", "9:00 AM – 5:00 PM"],
             ["Place", "Woolsey Hall, WSU"],
