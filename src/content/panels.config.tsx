@@ -154,7 +154,7 @@ const PANELS: Panel[] = [
         <p className="eyebrow mb-3">Prizes</p>
         <p className="font-display text-6xl font-semibold text-ink">$1,200</p>
         <p className="mt-1 text-sm text-ink/80">
-          in scholarships across two tracks, four winning teams
+          in scholarships, one for the winner of each track
         </p>
         {/* One scholarship per track (decided 2026-09-06): the winning team
             takes the scholarship and a big box of Cocoa Dolce chocolates; second
@@ -178,8 +178,8 @@ const PANELS: Panel[] = [
           </div>
         </dl>
         <p className="ml-auto mt-3 max-w-[240px] text-sm leading-relaxed text-ink/70">
-          Plus a big box of Cocoa Dolce chocolates. Second place takes the box
-          too.
+          Plus a big box of Cocoa Dolce chocolates for the top two teams in
+          each track.
         </p>
       </div>
     ),

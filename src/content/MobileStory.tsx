@@ -126,13 +126,13 @@ export default function MobileStory() {
         <div className="text-center">
           <p className="eyebrow mb-3">Prizes</p>
           <p className="font-display text-5xl font-semibold text-ink">$1,200</p>
-          <p className="mt-1 text-sm text-ink/80">in scholarships, four winning teams</p>
+          <p className="mt-1 text-sm text-ink/80">in scholarships, one for the winner of each track</p>
         </div>
         <dl className="mx-auto mt-8 max-w-xs space-y-3 border-l-2 border-gold pl-5">
           {[
             ["Build Track", "$700 to the winning team"],
             ["Pitch Track", "$500 to the winning team"],
-            ["Winners and runners-up", "A big box of Cocoa Dolce chocolates"],
+            ["Top two teams per track", "A big box of Cocoa Dolce chocolates"],
           ].map(([k, v]) => (
             <div key={k}>
               <dt className="label">{k}</dt>

@@ -573,10 +573,11 @@ export const SECTIONS: Section[] = [
         kind: "text",
         label: "Prizes",
         body:
-          "Build pays more because it is the heavier lift. Second place in each " +
-          "track takes home the same box of chocolates. $1,200 in scholarships, " +
-          "four winning teams. AI is optional in both tracks; every team gets " +
-          "Lovable credits because Lovable sponsors the event.",
+          "$1,200 in scholarships: $700 to the Build Track winner and $500 to the " +
+          "Pitch Track winner. Build pays more because it is the heavier lift. The " +
+          "top two teams in each track each take home a big box of Cocoa Dolce " +
+          "chocolates. AI is optional in both tracks; every team gets Lovable " +
+          "credits because Lovable sponsors the event.",
       },
     ],
   },
