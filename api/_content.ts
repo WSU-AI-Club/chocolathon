@@ -425,8 +425,8 @@ export const PROMPTS_INTRO =
   "submit on the 19th, so read both sides.";
 
 export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: boolean }[] = [
-  { time: "8:30 AM", what: "Doors open. Coffee, pastries, Cocoa Dolce chocolates." },
-  { time: "9:00 AM", what: "Opening ceremony" },
+  { time: "8:30 AM", what: "Doors open and check-in starts. Coffee, pastries, Cocoa Dolce chocolates." },
+  { time: "9:15 AM", what: "Opening ceremony" },
   { time: "9:30 AM", what: "Networking. Teams work and refine." },
   {
     time: "10:00 AM",
@@ -635,7 +635,7 @@ export const SECTIONS: Section[] = [
     id: "schedule",
     nav: "Schedule",
     title: "Saturday, September 19.",
-    intro: "Woolsey Hall, WSU. Doors open at 8:30 AM, wrap at 5:00 PM, food all day.",
+    intro: "Woolsey Hall, WSU. Doors and check-in open at 8:30 AM, wrap at 5:00 PM, food all day.",
     blocks: [
       {
         kind: "text",
