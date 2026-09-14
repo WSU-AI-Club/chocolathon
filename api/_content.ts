@@ -30,6 +30,9 @@ export type Block =
   /* Question and answer pairs; the question is set bold so a phone
      reader can find theirs without reading every line. */
   | { kind: "qa"; label: string; items: { q: string; a: string }[] }
+  /* A warning the reader must not miss, set bold in a ruled box. Money
+     and deadlines only. */
+  | { kind: "alert"; label: string; body: string }
   /* A scoring rubric: criteria with what a 1, a 5, and a 10 look like.
      Rendered by RubricView on HQ and on the judge page. */
   | {
@@ -574,20 +577,38 @@ export const SECTIONS: Section[] = [
     nav: "Lovable",
     title: "Your Lovable credits.",
     intro:
-      "Lovable sponsors the event and gives every team build credits. Neither " +
-      "track requires it; it is the fastest way to have something working by " +
-      "Saturday. The discount code arrives on September 14 with the prompts, " +
-      "emailed to every registered team and posted here.",
+      "Lovable sponsors the event and gives every competitor a month of Pro " +
+      "Plan 1 at no cost. Neither track requires it; it is the fastest way to " +
+      "have something working by Saturday.",
     blocks: [
       {
+        kind: "list",
+        label: "How it works",
+        items: [
+          "The code gives you Pro Plan 1 (100 credits) at no cost, with every Pro Plan 1 feature for the length of the plan.",
+          "We email the discount code to every registered competitor. It is not posted on this site.",
+          "Redeem it before the event ends: 5:00 PM, Saturday, September 19.",
+          "The code is for Chocolathon competitors only. Do not share it with anyone outside the event.",
+        ],
+      },
+      {
         kind: "steps",
-        label: "Claiming your credits",
+        label: "Redeeming your code",
         items: [
           "Go to lovable.dev.",
-          "No account yet? Click Get started and create one. Already have one? Go to Settings, then Plans & Credits.",
-          "Select Pro Plan 1, and make sure you choose the monthly plan.",
-          "At checkout, enter the discount code from Lovable.",
+          "No account yet? Click Get started and create one. Already have one? Go to Settings, then Plans & Credits. If that account is already on a paid plan, create a new workspace and redeem the code there.",
+          "Select Pro Plan 1 (100 credits), and make sure you choose the monthly plan.",
+          "At checkout, enter the discount code from our email.",
         ],
+      },
+      {
+        kind: "alert",
+        label: "Then cancel, right away",
+        body:
+          "Cancel your plan as soon as it is activated. You keep Pro Plan 1 and " +
+          "your 100 credits for the full month; cancelling only stops the charge " +
+          "for next month. Checkout may ask for payment details, which is why " +
+          "this step matters.",
       },
       {
         kind: "videos",

@@ -29,7 +29,7 @@
   --choco-ink: #232a4d;
   --choco-ink-soft: rgb(35 42 77 / 0.7); /* 5.3:1 — the floor for text */
   --choco-goldink: #8a6a16; /* 5.1:1 — small gold accents */
-  --choco-alert: #b3261e; /* 6.0:1 — the registration-extension line only */
+  --choco-alert: #b3261e; /* 6.0:1 — the extension line and the Lovable cancel warning only */
   --choco-rule: rgb(35 42 77 / 0.12);
   background: #ffffff;
   color: var(--choco-ink);
@@ -79,10 +79,17 @@
 .choco-root .label-strong {
   color: var(--choco-ink);
 }
-/* The one red on the site: the extension notice under Register. It
-   outranks a Tailwind text-* utility, which is why it lives here. */
+/* The one red on the site: the extension notice under Register and the
+   Lovable cancel warning. It outranks a Tailwind text-* utility, which is
+   why it lives here. */
 .choco-root .label-alert {
   color: var(--choco-alert);
+}
+/* The warning box: a red rule, a faint red wash, the text stays ink. */
+.choco-root .hq-alert {
+  border-left: 4px solid var(--choco-alert);
+  background: rgb(179 38 30 / 0.06);
+  padding: 0.875rem 1rem;
 }
 
 /* ── buttons ───────────────────────────────────────────────────────── */

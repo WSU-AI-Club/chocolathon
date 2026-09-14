@@ -569,9 +569,13 @@ function BlockView({ block, fold = false }: { block: Block; fold?: boolean }) {
   }
   return (
     <div>
-      <h4 className="label">{block.label}</h4>
+      <h4 className={block.kind === "alert" ? "label label-alert" : "label"}>{block.label}</h4>
       {block.kind === "text" ? (
         <p className="mt-3 max-w-2xl text-base leading-relaxed text-ink/80">
+          {block.body}
+        </p>
+      ) : block.kind === "alert" ? (
+        <p className="hq-alert mt-3 max-w-2xl text-base font-semibold leading-relaxed text-ink">
           {block.body}
         </p>
       ) : block.kind === "list" ? (

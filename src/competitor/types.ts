@@ -17,6 +17,9 @@ export type Block =
   /* Question and answer pairs; the question is set bold so a phone
      reader can find theirs without reading every line. */
   | { kind: "qa"; label: string; items: { q: string; a: string }[] }
+  /* A warning the reader must not miss, set bold in a ruled box. Money
+     and deadlines only. */
+  | { kind: "alert"; label: string; body: string }
   /* A scoring rubric: criteria with what a 1, a 5, and a 10 look like.
      Rendered by RubricView on HQ and on the judge page. */
   | {
