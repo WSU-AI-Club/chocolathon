@@ -462,9 +462,9 @@ export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: bool
 /* ═══════════════════════════════════════════════════════════════════
    THE PEOPLE — speakers and judges, one list for the whole site.
 
-   /people renders this directly; the HQ Judges section builds its two
-   panel lists from the same arrays below. Add or change a person here
-   and both pages agree. Judges still to be confirmed are the two
+   /people renders this directly (HQ's Judges section was replaced by a
+   People button on 2026-09-13). Add or change a person here and the
+   page follows. Judges still to be confirmed are the two
    "...Note" lines, never placeholder names.
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -535,11 +535,6 @@ export const PEOPLE: People = {
     },
   ],
 };
-
-/* "Name — Role. Note." for the HQ lists. */
-function personLine(p: Person): string {
-  return `${p.name} — ${p.role}${p.note ? `. ${p.note}` : ""}`;
-}
 
 /* Every section is a budget: one intro line and the fewest bullets that
    answer the question. Anything genuinely undecided is marked "to be
@@ -661,33 +656,6 @@ export const SECTIONS: Section[] = [
     ],
   },
   {
-    id: "judges",
-    nav: "Judges",
-    title: "Who decides.",
-    intro:
-      "Two rounds. Local AI industry judges score every submission on the public " +
-      "rubric; the top three per track advance. Cocoa Dolce picks the winners " +
-      "from the live finals at 3:45 PM, open to the public.",
-    blocks: [
-      {
-        kind: "list",
-        label: "Preliminary panel",
-        items: [
-          ...PEOPLE.preliminary.map(personLine),
-          ...(PEOPLE.preliminaryNote ? [PEOPLE.preliminaryNote] : []),
-        ],
-      },
-      {
-        kind: "list",
-        label: "Finals panel",
-        items: [
-          ...PEOPLE.finals.map(personLine),
-          ...(PEOPLE.finalsNote ? [PEOPLE.finalsNote] : []),
-        ],
-      },
-    ],
-  },
-  {
     id: "rules",
     nav: "Rules",
     title: "The rules.",
@@ -728,8 +696,10 @@ export const SECTIONS: Section[] = [
     nav: "Rubric",
     title: "How you are scored.",
     intro:
-      "No weights and no secrets: the preliminary judges score these lines and " +
-      "read this same page. The finals are not scored — Cocoa Dolce picks.",
+      "Two rounds. Local AI industry judges score every submission on these " +
+      "lines, with no weights and no secrets; the top three per track advance. " +
+      "The finals are not scored: Cocoa Dolce picks the winners from the live " +
+      "finals at 3:45 PM, open to the public.",
     blocks: [
       {
         kind: "rubric",

@@ -3,7 +3,7 @@
 
    Public, linked from the landing page's HQ band (2026-09-10). Every
    name and title arrives from /api/hub (`people`), the same source the
-   HQ Judges section reads, so a judge is never named two different
+   HQ bar's People button leads here, so a judge is never named two different
    ways. Same palette and type as the rest of the site; ruled rows, no
    cards; no photography until real headshots exist.
    ═══════════════════════════════════════════════════════════════════ */

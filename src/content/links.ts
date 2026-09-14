@@ -52,7 +52,7 @@ export const LOVABLE_URL = "https://lovable.dev";
 
 /* ── Competition HQ ──────────────────────────────────────────────────
    Public (decided 2026-09-06, no logins): the eight challenge prompts,
-   the tracks, the finale-day schedule, the judges, the rules, and the
+   the tracks, the finale-day schedule, the rules, and the
    FAQ, on one page. Same origin, not an outbound link — the App-level
    route switch in `src/App.tsx` picks it up. /prompts and /competitors
    resolve to the same page for anyone holding an older link.

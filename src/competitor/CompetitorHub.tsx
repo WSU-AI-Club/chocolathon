@@ -19,12 +19,18 @@ import RubricPair from "./RubricPair";
 import RubricView from "./RubricView";
 import type { Block, HubData, Prompt, ResultEntry, Section } from "./types";
 
+/* The people page is its own route, not an HQ section; its button sits
+   where the Judges section used to, after Schedule (2026-09-13). */
+const PEOPLE_NAV = { id: "people", nav: "People", href: PEOPLE_PATH };
+
 export default function CompetitorHub({ data }: { data: HubData }) {
   const navItems = useMemo(
     () => [
       ...(data.results.published ? [{ id: "results", nav: "Results" }] : []),
       { id: "prompts", nav: "Prompts" },
-      ...data.sections.map((s) => ({ id: s.id, nav: s.nav })),
+      ...data.sections.flatMap((s) =>
+        s.id === "schedule" ? [{ id: s.id, nav: s.nav }, PEOPLE_NAV] : [{ id: s.id, nav: s.nav }],
+      ),
     ],
     [data.sections, data.results.published],
   );
@@ -64,7 +70,7 @@ function HqBar({
   items,
   active,
 }: {
-  items: { id: string; nav: string }[];
+  items: { id: string; nav: string; href?: string }[];
   active: string | null;
 }) {
   const showRegister = registrationOpen();
@@ -100,7 +106,7 @@ function HqBar({
           {items.map((item) => (
             <a
               key={item.id}
-              href={`#${item.id}`}
+              href={item.href ?? `#${item.id}`}
               className="hq-link"
               aria-current={active === item.id ? "true" : undefined}
             >
@@ -440,18 +446,6 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
 
       {/* The run of day is the schedule section's body. */}
       {section.id === "schedule" ? <RunOfDay rows={data.runOfDay} /> : null}
-
-      {/* The people page carries the same names with the speakers. */}
-      {section.id === "judges" ? (
-        <p className="mt-3">
-          <a
-            href={PEOPLE_PATH}
-            className="text-base text-ink underline decoration-gold underline-offset-4 hover:decoration-ink"
-          >
-            Meet the judges and speakers
-          </a>
-        </p>
-      ) : null}
 
       {/* Rubrics sit side by side (Build | Pitch) above everything else
           in their section, rendered as one row-aligned grid so the two

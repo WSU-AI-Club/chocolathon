@@ -142,7 +142,7 @@ export default function FooterSection() {
             louder versions. */}
         <div className="mt-14 border-t border-ink/10 pt-8">
           <a href={HQ_PATH} className="label no-underline transition-colors hover:text-ink">
-            Competition HQ: prompts, tracks, schedule, judges, rules →
+            Competition HQ: prompts, tracks, schedule, rules →
           </a>
         </div>
       </div>
