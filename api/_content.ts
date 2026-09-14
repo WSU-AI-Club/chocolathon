@@ -58,42 +58,49 @@ const BUILD: Prompt[] = [
     id: "B-1",
     track: "build",
     title: "Chocolate Vision — Know Every Piece in Every Box",
-    teaser: "Identify truffle varieties from a photo and log what is in a box.",
+    teaser: "Capture which chocolates go into every box sold at the counter, without slowing the sale.",
     blocks: [
       {
         kind: "text",
         label: "Problem",
         body:
-          "Cocoa Dolce has no data on which truffles go into which box. Each " +
-          "variety is hand-painted with a distinct color palette (splatters, " +
-          "swirls, splashes), but no two pieces are identical.",
+          "At the chocolate bar in every Cocoa Dolce shop, the customer picks " +
+          "their pieces and the cashier assembles the box by hand. Nobody " +
+          "records which chocolates went in. The sale is logged; what was in " +
+          "the box is not. That is missing data, and Cocoa Dolce has no record " +
+          "of which pieces its customers actually choose.",
       },
       {
         kind: "text",
         label: "Challenge",
         body:
-          "Build a proof-of-concept that identifies truffle varieties from a " +
-          "photo and logs box contents. Start with color-palette matching on a " +
-          "handful of varieties under good lighting — reliably classifying 3–4 " +
-          "varieties is a win. This is the hardest, most research-heavy prompt " +
-          "on the board.",
+          "Build a fast, simple way to capture what goes into each box as it is " +
+          "sold, so every assembled box leaves with a record of the chocolates " +
+          "the customer chose. It has to fit a busy counter: a few seconds per " +
+          "box, nothing extra asked of the customer, and no slower line. How you " +
+          "capture it is up to you. It could be a tap-to-add screen, a scan, a " +
+          "photo, voice, or something else. No training data is provided. If " +
+          "you choose a camera, collecting your own examples is part of the " +
+          "work, and a simple method that works beats a clever one that does " +
+          "not. This is the hardest prompt on the board, and the one Cocoa " +
+          "Dolce needs most.",
       },
       {
         kind: "list",
         label: "Winning entry includes",
         items: [
-          "Working demo classifying at least a few varieties, with stated accuracy",
-          "Simple capture workflow a packer could realistically use (phone or fixed camera)",
-          "Structured output (JSON/CSV per box) that could feed Odoo inventory",
-          "Honest documentation of where accuracy breaks down (lighting, similar palettes, pattern overlap)",
+          "A working capture flow, demoed on a realistic box from the first piece to the saved record",
+          "How many seconds it adds per box at the counter, measured rather than guessed",
+          "One record per box (which pieces, how many) that the shop can export as CSV or JSON",
+          "Honest notes on where it breaks: a rush at the counter, a mis-tap, look-alike pieces, a large box",
         ],
       },
       {
         kind: "text",
         label: "Stretch goal",
         body:
-          "Pattern recognition beyond color, or flagging boxes that deviate from " +
-          "the expected assortment before shipping.",
+          "A simple view across many boxes: the most-picked pieces and the " +
+          "combinations customers keep coming back to.",
       },
     ],
   },
