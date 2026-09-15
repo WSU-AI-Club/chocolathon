@@ -104,9 +104,14 @@ const PANELS: Panel[] = [
     position: "right",
     node: (
       <div className="max-w-xs">
-        {/* Two dates and a room — nothing else. The mechanics are the
-            green "How it works" panel; the two used to say the same
-            thing twice (fixed 2026-09-10). */}
+        {/* Two dates and a room — nothing else in words. The mechanics
+            are the green "How it works" panel; the two used to say the
+            same thing twice (fixed 2026-09-10). Under the list, the three
+            marks backing the day itself (2026-09-15, Michael wants every
+            sponsor in the film and the food beat kept to food): OCPD gives
+            the room named just above, DTMedia films the day, the AI Prompt
+            Championship is the stage after it. Marks only, no line about
+            the championship: that stays an opening-ceremony reveal. */}
         <p className="eyebrow mb-3">When &amp; where</p>
         <dl className="space-y-3 border-l-2 border-gold pl-5 text-left">
           {[
@@ -121,6 +126,12 @@ const PANELS: Panel[] = [
             </div>
           ))}
         </dl>
+        <p className="eyebrow mt-7 mb-3">Backed by</p>
+        <div className="flex items-center gap-5">
+          <img src="/chocolathon/sponsors/ocpd.png" alt="Office of Career and Professional Development, Barton School of Business" className="h-11 w-auto" />
+          <img src="/chocolathon/sponsors/dtmedia.png" alt="DTMedia" className="h-10 w-auto" />
+          <img src="/chocolathon/sponsors/aipromptchamp.png" alt="AI Prompt Championship" className="h-8 w-auto rounded-md" />
+        </div>
       </div>
     ),
   },
@@ -220,24 +231,18 @@ const PANELS: Panel[] = [
     position: "right",
     node: (
       <div className="max-w-xs text-right">
-        <p className="eyebrow mb-3">Sponsored by</p>
+        <p className="eyebrow mb-3">Fueled by</p>
         <h2 className="font-display text-3xl font-semibold leading-tight text-ink">
           Good taste, all day.
         </h2>
-        {/* Every sponsor mark is on this beat (Michael, 2026-09-15): the
-            four that feed and equip the day stacked as before, then the
-            professional three in one row beneath, same order as the
-            footer. The DTMedia mark is the aperture icon alone. */}
+        {/* Food only (Michael, 2026-09-15): the chocolate, the lunch and
+            the drinks. Lovable already has its mark on the who beat, and
+            the professional three (AI Prompt Championship, OCPD, DTMedia)
+            sit on the when-and-where beat as the ones backing the day. */}
         <div className="mt-6 flex flex-col items-end gap-5">
           <img src="/chocolathon/sponsors/cocoadolce.png" alt="Cocoa Dolce" className="h-5 w-auto" />
-          <img src="/chocolathon/sponsors/lovable.png" alt="Lovable" className="h-7 w-auto" />
           <img src="/chocolathon/sponsors/jimmyjohns.webp" alt="Jimmy John's Sandwiches" className="h-14 w-auto" />
           <img src="/chocolathon/sponsors/redbull.svg" alt="Red Bull" className="h-9 w-auto" />
-          <div className="flex items-center justify-end gap-5">
-            <img src="/chocolathon/sponsors/aipromptchamp.png" alt="AI Prompt Championship" className="h-8 w-auto rounded-md" />
-            <img src="/chocolathon/sponsors/ocpd.png" alt="Office of Career and Professional Development, Barton School of Business" className="h-11 w-auto" />
-            <img src="/chocolathon/sponsors/dtmedia.png" alt="DTMedia" className="h-10 w-auto" />
-          </div>
         </div>
       </div>
     ),
