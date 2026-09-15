@@ -680,6 +680,7 @@ export const SECTIONS: Section[] = [
           "Any tools, any stack. AI is optional.",
           "Your team’s own work. In the Pitch Track, cite your sources; an unsourced number is worth less than none.",
           "The prompts describe a real business. Treat the detail as theirs, and do not contact Cocoa Dolce staff or suppliers for your entry.",
+          "Hardware is welcome in the Build Track. Preliminary judges score from your links and never handle a device, so your product link must prove it works on its own. Finalists demo live on stage.",
         ],
       },
       {
@@ -835,6 +836,7 @@ export const SECTIONS: Section[] = [
           "Unlisted video is fine. Private is not.",
           "One submission per team, by one person.",
           "2:00 PM is a hard cutoff. Judging starts the moment the form closes.",
+          "Building hardware? Your product link is a page that proves it: an unedited video of the device doing the real task, photos, and the software side if there is one. Bring the device on the 19th.",
         ],
       },
     ],
@@ -852,6 +854,7 @@ export const SECTIONS: Section[] = [
           { q: "Can we answer two prompts?", a: "No. One prompt, one submission." },
           { q: "Can we change our team?", a: "No. Teams lock at registration." },
           { q: "Does the project have to use AI?", a: "No. Neither track requires it." },
+          { q: "Can we build a physical hardware product?", a: "Yes, in the Build Track. Preliminary judges score from your links and never handle the device, so your product link must be a page that proves it works: an unedited video of it doing the real task, photos, and the software side if there is one. Bring it on the 19th; finalists demo live on stage." },
           { q: "Can we use code or research from before the prompts unlocked?", a: "Libraries, templates, and public tools, yes. A project you had already built, no." },
           { q: "Do we have to be there all day?", a: "You must be there to submit and, if you advance, to present. Come for the whole thing." },
           { q: "Something is unclear?", a: "aiclub@wichita.edu." },
