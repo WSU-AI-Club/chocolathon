@@ -2,18 +2,20 @@
    FOOTER — partners and sponsors, and the ways to stay in touch.
 
    One sponsor row (2026-09-06), in this order: Cocoa Dolce, Lovable,
-   Jimmy John's, Red Bull, AI Prompt Championship, OCPD. Red Bull
-   sponsors the drinks; the Barton School's Office of Career and
+   Jimmy John's, Red Bull, AI Prompt Championship, OCPD, DTMedia. Red
+   Bull sponsors the drinks; the Barton School's Office of Career and
    Professional Development covers the room. The AI Prompt Championship
    (added 2026-09-14) is Ramsey Jamoul's national competition at Groover
    Labs, December 11-13; each track winner earns a slot to compete
    there. That is announced at the opening ceremony, not on the page.
+   DTMedia (added 2026-09-15) is the student-run agency filming the day;
+   its own block above the footer carries the story and the link.
    The row is larger than it used to be on purpose: with the register
    CTA gone from the page, this is the last thing a visitor sees and
    it can afford the room.
 
    Logo heights are set per mark, not shared: the wordmarks (Cocoa Dolce,
-   Lovable) are wide and thin, the badges (Jimmy John's, OCPD) are tall,
+   Lovable, DTMedia) are wide and thin, the badges (Jimmy John's, OCPD) are tall,
    and Red Bull sits between. Equal heights would make the wordmarks
    read as banners and the badges as icons. The AI Prompt Championship
    mark is a crop of its social card (white type on a near-black
@@ -61,10 +63,12 @@ export default function FooterSection() {
 
   return (
     <footer className="border-t border-ink/10 bg-white px-5 py-20 text-center">
-      {/* The sponsor row sits outside the narrow footer column so six
+      {/* The sponsor row sits outside the narrow footer column so the
           marks fit on one line at desktop widths (widened from 5xl and the
-          gap tightened when the sixth arrived); on a phone they wrap. */}
-      <div className="mx-auto max-w-6xl">
+          gap tightened when the sixth arrived, widened again to 7xl with a
+          tighter gap when DTMedia made seven); below about 1250px and on
+          a phone they wrap. */}
+      <div className="mx-auto max-w-7xl">
         <p className="label">Hosted by</p>
         <img
           src="/chocolathon/club/ai-club-wide.png"
@@ -72,7 +76,7 @@ export default function FooterSection() {
           className="mx-auto mt-6 h-16 w-auto sm:h-20"
         />
         <p className="label mt-14">Sponsored by</p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-8">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-8">
           <img
             src="/chocolathon/sponsors/cocoadolce.png"
             alt="Cocoa Dolce"
@@ -95,6 +99,7 @@ export default function FooterSection() {
             alt="Office of Career and Professional Development, Barton School of Business"
             className="h-16 w-auto"
           />
+          <img src="/chocolathon/sponsors/dtmedia.png" alt="DTMedia" className="h-6 w-auto" />
         </div>
       </div>
 

@@ -20,6 +20,7 @@ import Overlay from "./content/Overlay";
 import Masthead from "./content/Masthead";
 import HqSection from "./content/HqSection";
 import BackedBySection from "./content/BackedBySection";
+import CoveredBySection from "./content/CoveredBySection";
 import FooterSection from "./content/FooterSection";
 import MobileStory from "./content/MobileStory";
 import "./chocolathon.css";
@@ -55,6 +56,7 @@ export default function ChocolathonPage() {
       )}
       <HqSection />
       <BackedBySection />
+      <CoveredBySection />
       <FooterSection />
     </div>
   );

@@ -50,6 +50,11 @@ export const COCOA_DOLCE_ABOUT_URL =
    homepage is the canonical destination. */
 export const LOVABLE_URL = "https://lovable.dev";
 
+/* DTMedia (2026-09-15): the student-run media agency covering the event.
+   The Covered-by block on the landing page links here; the footer mark
+   does not, so the sponsor row stays one plain row of marks. */
+export const DTMEDIA_URL = "https://dt-media.vercel.app/";
+
 /* ── Competition HQ ──────────────────────────────────────────────────
    Public (decided 2026-09-06, no logins): the eight challenge prompts,
    the tracks, the finale-day schedule, the rules, and the
