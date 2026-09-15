@@ -49,22 +49,21 @@ export default function Masthead({
       }
     >
       <div className="flex items-center justify-between gap-4 px-5 py-3 sm:px-8">
-        {/* The club's icon (the real mark, delivered 2026-09-14; the old
-            placeholder never sat here) next to the name. The icon carries
-            no wordmark, so the text stays. The wide logo is the footer's. */}
+        {/* The club's wide logo (the real mark, delivered 2026-09-14; the
+            old placeholder never sat here) and the date. The logo carries
+            the club's name, so the "WSU AI Club" text went with it
+            (Michael, 2026-09-14). The icon-only variant sat here for one
+            deploy. */}
         <a
           href="#chocolathon-top"
-          className="label label-strong flex shrink-0 items-center gap-2.5 no-underline"
+          className="label label-strong flex shrink-0 items-center gap-3 no-underline"
         >
           <img
-            src="/chocolathon/club/ai-club-icon.png"
-            alt=""
-            aria-hidden="true"
-            className="h-7 w-auto"
+            src="/chocolathon/club/ai-club-wide.png"
+            alt="WSU AI Club"
+            className="h-10 w-auto"
           />
-          <span>
-            <span className="hidden sm:inline">WSU AI Club · </span>Sep 19
-          </span>
+          <span>Sep 19</span>
         </a>
 
         <div className="flex flex-col items-end gap-1.5">
