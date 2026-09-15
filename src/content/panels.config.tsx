@@ -220,15 +220,24 @@ const PANELS: Panel[] = [
     position: "right",
     node: (
       <div className="max-w-xs text-right">
-        <p className="eyebrow mb-3">Fueled by</p>
+        <p className="eyebrow mb-3">Sponsored by</p>
         <h2 className="font-display text-3xl font-semibold leading-tight text-ink">
           Good taste, all day.
         </h2>
+        {/* Every sponsor mark is on this beat (Michael, 2026-09-15): the
+            four that feed and equip the day stacked as before, then the
+            professional three in one row beneath, same order as the
+            footer. The DTMedia mark is the aperture icon alone. */}
         <div className="mt-6 flex flex-col items-end gap-5">
           <img src="/chocolathon/sponsors/cocoadolce.png" alt="Cocoa Dolce" className="h-5 w-auto" />
           <img src="/chocolathon/sponsors/lovable.png" alt="Lovable" className="h-7 w-auto" />
           <img src="/chocolathon/sponsors/jimmyjohns.webp" alt="Jimmy John's Sandwiches" className="h-14 w-auto" />
           <img src="/chocolathon/sponsors/redbull.svg" alt="Red Bull" className="h-9 w-auto" />
+          <div className="flex items-center justify-end gap-5">
+            <img src="/chocolathon/sponsors/aipromptchamp.png" alt="AI Prompt Championship" className="h-8 w-auto rounded-md" />
+            <img src="/chocolathon/sponsors/ocpd.png" alt="Office of Career and Professional Development, Barton School of Business" className="h-11 w-auto" />
+            <img src="/chocolathon/sponsors/dtmedia.png" alt="DTMedia" className="h-10 w-auto" />
+          </div>
         </div>
       </div>
     ),

@@ -4,7 +4,9 @@
    right after OCPD's block because the two are the same shape, one mark
    plus two lines, and the point of this one is the line that says a
    student built it. The one difference from OCPD is the link out: the
-   block exists to send people to his site. Keep it that brief. */
+   block exists to send people to his site. Keep it that brief. The mark
+   is the aperture icon on its own: Michael pulled the "MEDIA" wordmark
+   (2026-09-15), so the name lives only in the copy. */
 
 import { DTMEDIA_URL } from "./links";
 
@@ -15,7 +17,7 @@ export default function CoveredBySection() {
         <img
           src="/chocolathon/sponsors/dtmedia.png"
           alt="DTMedia"
-          className="h-10 w-auto md:h-12"
+          className="h-24 w-auto md:h-28"
         />
         <h2 className="mt-8 font-display text-2xl font-semibold leading-tight tracking-tight text-ink md:text-3xl">
           Filmed by one of our own.

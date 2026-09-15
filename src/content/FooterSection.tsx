@@ -9,13 +9,16 @@
    Labs, December 11-13; each track winner earns a slot to compete
    there. That is announced at the opening ceremony, not on the page.
    DTMedia (added 2026-09-15) is the student-run agency filming the day;
-   its own block above the footer carries the story and the link.
+   its own block above the footer carries the story and the link. Its
+   mark is the aperture icon alone, never the "MEDIA" wordmark (Michael,
+   2026-09-15); the name appears only in copy.
    The row is larger than it used to be on purpose: with the register
    CTA gone from the page, this is the last thing a visitor sees and
    it can afford the room.
 
    Logo heights are set per mark, not shared: the wordmarks (Cocoa Dolce,
-   Lovable, DTMedia) are wide and thin, the badges (Jimmy John's, OCPD) are tall,
+   Lovable) are wide and thin, the badges (Jimmy John's, OCPD, DTMedia's
+   aperture) are tall,
    and Red Bull sits between. Equal heights would make the wordmarks
    read as banners and the badges as icons. The AI Prompt Championship
    mark is a crop of its social card (white type on a near-black
@@ -101,7 +104,7 @@ export default function FooterSection() {
             alt="Office of Career and Professional Development, Barton School of Business"
             className="h-16 w-auto"
           />
-          <img src="/chocolathon/sponsors/dtmedia.png" alt="DTMedia" className="h-6 w-auto" />
+          <img src="/chocolathon/sponsors/dtmedia.png" alt="DTMedia" className="h-14 w-auto" />
         </div>
       </div>
 
