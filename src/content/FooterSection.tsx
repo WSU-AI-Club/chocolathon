@@ -63,12 +63,12 @@ export default function FooterSection() {
 
   return (
     <footer className="border-t border-ink/10 bg-white px-5 py-20 text-center">
-      {/* The sponsor row sits outside the narrow footer column so the
-          marks fit on one line at desktop widths (widened from 5xl and the
-          gap tightened when the sixth arrived, widened again to 7xl with a
-          tighter gap when DTMedia made seven); below about 1250px and on
-          a phone they wrap. */}
-      <div className="mx-auto max-w-7xl">
+      {/* Two sponsor rows since 2026-09-15 (Michael's call when the
+          seventh mark made one line feel like a banner): the four that
+          feed and equip the day on top, the three on the professional
+          side under them. Three centred under four staggers on its own.
+          Each row wraps independently on a phone. */}
+      <div className="mx-auto max-w-6xl">
         <p className="label">Hosted by</p>
         <img
           src="/chocolathon/club/ai-club-wide.png"
@@ -76,7 +76,7 @@ export default function FooterSection() {
           className="mx-auto mt-6 h-16 w-auto sm:h-20"
         />
         <p className="label mt-14">Sponsored by</p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-8">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-8">
           <img
             src="/chocolathon/sponsors/cocoadolce.png"
             alt="Cocoa Dolce"
@@ -89,6 +89,8 @@ export default function FooterSection() {
             className="h-20 w-auto"
           />
           <img src="/chocolathon/sponsors/redbull.svg" alt="Red Bull" className="h-14 w-auto" />
+        </div>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-8">
           <img
             src="/chocolathon/sponsors/aipromptchamp.png"
             alt="AI Prompt Championship"
