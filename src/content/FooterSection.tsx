@@ -2,16 +2,23 @@
    FOOTER — partners and sponsors, and the ways to stay in touch.
 
    One sponsor row (2026-09-06), in this order: Cocoa Dolce, Lovable,
-   Jimmy John's, Red Bull, OCPD. Red Bull sponsors the drinks; the Barton
-   School's Office of Career and Professional Development covers the
-   room. The row is larger than it used to be on purpose: with the
-   register CTA gone from the page, this is the last thing a visitor
-   sees and it can afford the room.
+   Jimmy John's, Red Bull, AI Prompt Championship, OCPD. Red Bull
+   sponsors the drinks; the Barton School's Office of Career and
+   Professional Development covers the room. The AI Prompt Championship
+   (added 2026-09-14) is Ramsey Jamoul's national competition at Groover
+   Labs, December 11-13; each track winner earns a slot to compete
+   there. That is announced at the opening ceremony, not on the page.
+   The row is larger than it used to be on purpose: with the register
+   CTA gone from the page, this is the last thing a visitor sees and
+   it can afford the room.
 
    Logo heights are set per mark, not shared: the wordmarks (Cocoa Dolce,
    Lovable) are wide and thin, the badges (Jimmy John's, OCPD) are tall,
    and Red Bull sits between. Equal heights would make the wordmarks
-   read as banners and the badges as icons.
+   read as banners and the badges as icons. The AI Prompt Championship
+   mark is a crop of its social card (white type on a near-black
+   ground), so it ships as a small dark tile with rounded corners rather
+   than a cut-out wordmark, which would vanish on the white footer.
 
    No AI Club logo here (removed 2026-08-18). The current mark is a
    placeholder and sat badly next to the professionally designed partner
@@ -72,6 +79,11 @@ export default function FooterSection() {
             className="h-20 w-auto"
           />
           <img src="/chocolathon/sponsors/redbull.svg" alt="Red Bull" className="h-14 w-auto" />
+          <img
+            src="/chocolathon/sponsors/aipromptchamp.png"
+            alt="AI Prompt Championship"
+            className="h-12 w-auto rounded-md"
+          />
           <img
             src="/chocolathon/sponsors/ocpd.png"
             alt="Office of Career and Professional Development, Barton School of Business"
