@@ -20,9 +20,10 @@
    ground), so it ships as a small dark tile with rounded corners rather
    than a cut-out wordmark, which would vanish on the white footer.
 
-   No AI Club logo here (removed 2026-08-18). The current mark is a
-   placeholder and sat badly next to the professionally designed partner
-   logos; the club is named in text instead until a real mark exists.
+   The club's wide logo heads the footer as the host mark (2026-09-14,
+   the real mark; the placeholder was pulled 2026-08-18 because it sat
+   badly next to the partner logos). It sits above its own "Sponsored
+   by" label so it reads as the host, not as a sixth sponsor.
    ═══════════════════════════════════════════════════════════════════ */
 
 import {
@@ -60,13 +61,18 @@ export default function FooterSection() {
 
   return (
     <footer className="border-t border-ink/10 bg-white px-5 py-20 text-center">
-      {/* The sponsor row sits outside the narrow footer column so five
-          marks fit on one line at desktop widths; on a phone they wrap. */}
-      <div className="mx-auto max-w-5xl">
-        <p className="label">
-          Hosted by the WSU AI Club · Sponsored by
-        </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
+      {/* The sponsor row sits outside the narrow footer column so six
+          marks fit on one line at desktop widths (widened from 5xl and the
+          gap tightened when the sixth arrived); on a phone they wrap. */}
+      <div className="mx-auto max-w-6xl">
+        <p className="label">Hosted by</p>
+        <img
+          src="/chocolathon/club/ai-club-wide.png"
+          alt="WSU AI Club, Wichita State University"
+          className="mx-auto mt-6 h-16 w-auto sm:h-20"
+        />
+        <p className="label mt-14">Sponsored by</p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-8">
           <img
             src="/chocolathon/sponsors/cocoadolce.png"
             alt="Cocoa Dolce"
