@@ -11,12 +11,12 @@
    never gets a red refusal for something the page could have told them.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Block } from "../competitor/types";
 import { GATE_LABELS, type Gates, type Score } from "../judging/types";
 import type { Submission } from "./mapRows";
-import type { SaveState } from "./useScores";
+import type { SaveInput, SaveState } from "./useScores";
 import VideoEmbed from "./VideoEmbed";
 
 type Rubric = Extract<Block, { kind: "rubric" }>;
@@ -59,7 +59,7 @@ export default function ScoreCard({
   closed: boolean;
   judgeId: string;
   assigned: boolean;
-  onSave: (score: Omit<Score, "savedAt">) => void;
+  onSave: (score: SaveInput) => Score | null;
 }) {
   const s = submission;
   const [lines, setLines] = useState<(number | null)[]>(() => score?.lines ?? [null, null, null, null]);
@@ -67,14 +67,33 @@ export default function ScoreCard({
   const [gates, setGates] = useState<Gates>(() => score?.gates ?? ALL_GATES_PASS);
   const [recused, setRecused] = useState(() => score?.recused ?? false);
 
+  /* What the judge has typed since the last payload we sent, and the
+     stamp of that payload. A Score object arrives here every time one is
+     saved, retried, or adopted from the server, and an arriving object
+     must never take the keyboard away from a judge mid-sentence. */
+  const [dirty, setDirty] = useState(false);
+  const sentAt = useRef<string | null>(null);
+  const touched = () => {
+    setDirty(true);
+    /* Typed after Save: that payload's acknowledgement is no longer a
+       description of what is on this card. */
+    sentAt.current = null;
+  };
+
   /* A save (ours or one that arrived from the server) is the only thing
-     that resets the fields, and then only to what was actually stored. */
+     that resets the fields, and then only to what was actually stored,
+     and only when the judge is not mid-edit. The one edit it does
+     overwrite is the one it is the acknowledgement of. */
   useEffect(() => {
     if (!score) return;
+    const mine = Boolean(sentAt.current) && score.clientSavedAt === sentAt.current;
+    if (dirty && !mine) return;
     setLines(score.lines ?? [null, null, null, null]);
     setComment(score.comment);
     setGates(score.gates);
     setRecused(score.recused);
+    if (mine) setDirty(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- dirty is read, never a trigger
   }, [score]);
 
   const gateFailed = GATE_KEYS.some((g) => !gates[g]);
@@ -84,7 +103,9 @@ export default function ScoreCard({
   const total = linesDone ? (lines as number[]).reduce((a, b) => a + b, 0) : null;
   const valid = !locked && trimmed >= MIN_COMMENT && (gateFailed || linesDone);
 
-  const dirty = score
+  /* A different question from `dirty`: does the card differ from what is
+     stored, whoever changed it. This one only paints the status line. */
+  const changed = score
     ? recused !== score.recused ||
       comment !== score.comment ||
       !sameGates(gates, score.gates) ||
@@ -93,12 +114,12 @@ export default function ScoreCard({
 
   const criteria = rubric?.items ?? null;
 
-  const send = (over: Partial<Omit<Score, "savedAt">>) => {
+  const send = (over: Partial<SaveInput>) => {
     const useGates = over.gates ?? gates;
     const failed = GATE_KEYS.some((g) => !useGates[g]);
     const isRecused = over.recused ?? recused;
     const keep = !isRecused && !failed && linesDone;
-    onSave({
+    const sent = onSave({
       judgeId,
       teamKey: s.teamKey,
       track: s.track,
@@ -109,6 +130,9 @@ export default function ScoreCard({
       comment: isRecused ? "" : comment.trim(),
       ...over,
     });
+    /* Null when the page refused the save itself (a submission with no
+       team key): nothing was sent, so nothing acknowledges it. */
+    sentAt.current = sent?.clientSavedAt ?? null;
   };
 
   const recuse = () => {
@@ -134,7 +158,7 @@ export default function ScoreCard({
   } else if (state.kind === "refused") {
     statusText = state.message;
     statusClass = "label label-alert";
-  } else if (dirty && score) {
+  } else if (changed && score) {
     statusText = "Changed, not saved";
     statusClass = "label !text-goldink";
   } else if (state.kind === "saved") {
@@ -153,6 +177,9 @@ export default function ScoreCard({
         {s.prompt || s.promptRaw || "No prompt given"}
         {promptTitle ? ` · ${promptTitle}` : ""}
       </p>
+      {s.tested ? null : (
+        <p className="label label-alert mt-2">The team did not confirm testing its links signed out.</p>
+      )}
       {s.sentence ? <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink">{s.sentence}</p> : null}
 
       <VideoEmbed url={s.video} team={s.team} />
@@ -219,7 +246,10 @@ export default function ScoreCard({
                       aria-pressed={on}
                       aria-label={`${c ? c.name : fallback}: ${n}`}
                       disabled={locked || gateFailed}
-                      onClick={() => setLines((prev) => prev.map((v, k) => (k === i ? n : v)))}
+                      onClick={() => {
+                        touched();
+                        setLines((prev) => prev.map((v, k) => (k === i ? n : v)));
+                      }}
                       className={
                         "label inline-flex h-10 w-10 items-center justify-center rounded-sm border tabular-nums transition-colors disabled:cursor-not-allowed " +
                         (on
@@ -254,7 +284,10 @@ export default function ScoreCard({
           value={comment}
           disabled={locked}
           rows={4}
-          onChange={(e) => setComment(e.target.value)}
+          onChange={(e) => {
+            touched();
+            setComment(e.target.value);
+          }}
           className="mt-2 w-full rounded-sm border border-ink/25 bg-white p-3 text-base leading-relaxed text-ink disabled:bg-ink/[0.03]"
         />
         <p className={"label mt-1 " + (trimmed < MIN_COMMENT ? "!text-goldink" : "")}>
@@ -273,7 +306,10 @@ export default function ScoreCard({
                   type="checkbox"
                   checked={gates[g]}
                   disabled={locked}
-                  onChange={(e) => setGates((prev) => ({ ...prev, [g]: e.target.checked }))}
+                  onChange={(e) => {
+                    touched();
+                    setGates((prev) => ({ ...prev, [g]: e.target.checked }));
+                  }}
                   className="mt-1 h-5 w-5 shrink-0 accent-[#232a4d]"
                 />
                 <span>{GATE_LABELS[g]}</span>
@@ -288,7 +324,15 @@ export default function ScoreCard({
         {recused ? (
           <div className="flex flex-wrap items-center gap-3">
             <span className="label label-strong">You sat this one out.</span>
-            <button type="button" className="btn-ghost-sm" disabled={closed} onClick={() => setRecused(false)}>
+            <button
+              type="button"
+              className="btn-ghost-sm"
+              disabled={closed}
+              onClick={() => {
+                touched();
+                setRecused(false);
+              }}
+            >
               I can judge this after all
             </button>
           </div>

@@ -19,6 +19,14 @@ export type Score = {
   lines: [number, number, number, number] | null;
   total: number | null;
   comment: string;
+  /* The judge's own clock at the moment they pressed Save. It is what
+     decides a last-write-wins race, because savedAt is the server's
+     clock at the moment the request finally landed, which for a retried
+     save can be a quarter of an hour later. Optional in this type only
+     because scores written before 2026-09-15, and the rehearsal
+     fixtures, do not carry one; the judge page always sends it and the
+     server always echoes it. Read it through stampOf in useScores. */
+  clientSavedAt?: string;
   savedAt: string;
 };
 export const GATE_LABELS: Record<keyof Gates, string> = {

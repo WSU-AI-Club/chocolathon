@@ -16,21 +16,26 @@
    Three reads, all no-store: /api/judging (the published submissions),
    /api/judging-config (judges, assignments, the closed switch), and
    /api/hub (the rubric text and prompt titles, the same words the
-   teams saw). Only the last one is optional.
+   teams saw). The first two carry the judge token, because they carry
+   student work; a 401 from either says the same line as a 401 on a
+   score. Only the last one is optional.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Block, HubData } from "../competitor/types";
 import { scoreTotal, type JudgingConfig, type Score, type Track } from "../judging/types";
 import type { Judging, Submission } from "./mapRows";
 import ScoreCard from "./ScoreCard";
-import { useScores } from "./useScores";
+import { useScores, type SaveInput, type SaveState } from "./useScores";
 import "../chocolathon.css";
 
 type Rubric = Extract<Block, { kind: "rubric" }>;
 
 const BAD_LINK = "This link is not valid. Ask Michael for the judge link.";
+const PANEL_CHANGED = "Pick your name again; the panel changed.";
+const NO_TEAM_KEY = "This set was published before team keys existed. Ask Michael to publish again.";
+const SAMPLE_LINE = "These are sample rows. The real export replaces them at 2:00 on the 19th.";
 const TOKEN_KEY = "choco-judge-key";
 const JUDGE_KEY = "choco-judge-id";
 
@@ -89,6 +94,13 @@ export default function JudgePage() {
   });
   const [judge, setJudge] = useState<string | null>(() => readLocal(JUDGE_KEY));
   const [track, setTrack] = useState<Track>("build");
+  /* A 401 from any gated read means the same thing a 401 on a score
+     does: the token in the link is not the one the server wants. */
+  const [tokenRefused, setTokenRefused] = useState(false);
+  const [panelChanged, setPanelChanged] = useState(false);
+  /* Teams whose save the page refused itself, so no doomed POST goes
+     out. Keyed by the same fallback key the cards carry. */
+  const [noKey, setNoKey] = useState<Record<string, true>>({});
   const [load, setLoad] = useState<Load>({
     judging: null,
     judgingError: null,
@@ -118,15 +130,23 @@ export default function JudgePage() {
     if (!token) return;
     let cancelled = false;
     (async () => {
-      const get = async (path: string) => {
+      const get = async (path: string, gated = false) => {
         try {
-          return await fetch(path, { cache: "no-store" });
+          /* /api/judging and /api/judging-config take either key. They
+             answered without one before the judge token was added, so
+             sending it is safe against both deploys. */
+          return await fetch(path, { cache: "no-store", headers: gated ? { "x-judge-key": token } : undefined });
         } catch {
           return null;
         }
       };
-      const [j, c, h] = await Promise.all([get("/api/judging"), get("/api/judging-config"), get("/api/hub")]);
+      const [j, c, h] = await Promise.all([get("/api/judging", true), get("/api/judging-config", true), get("/api/hub")]);
       if (cancelled) return;
+
+      if ((j && j.status === 401) || (c && c.status === 401)) {
+        setTokenRefused(true);
+        return;
+      }
 
       let judging: Judging | null = null;
       let judgingError: string | null = null;
@@ -174,6 +194,21 @@ export default function JudgePage() {
 
   const { scores, states, loadError, unauthorized, save } = useScores(judge, token);
 
+  /* The panel is one list Michael publishes. A judge whose name is no
+     longer on it (a rename, a swap on the morning of) would otherwise
+     sit in front of an empty queue wondering why. */
+  useEffect(() => {
+    if (!load.config || !judge) return;
+    if (load.config.judges.some((x) => x.id === judge)) return;
+    try {
+      localStorage.removeItem(JUDGE_KEY);
+    } catch {
+      /* ignore */
+    }
+    setJudge(null);
+    setPanelChanged(true);
+  }, [load.config, judge]);
+
   const closed = load.config?.closed ?? false;
   const judges = load.config?.judges ?? [];
   const me = judges.find((x) => x.id === judge) ?? null;
@@ -190,7 +225,7 @@ export default function JudgePage() {
     const excluded = new Set(load.config?.excluded ?? []);
     return list
       .filter((s) => !s.duplicateOf)
-      .map((s) => ({ ...s, teamKey: teamKeyOf(s) }))
+      .map((s) => ({ ...s, teamKey: teamKeyOf(s), published: Boolean(s.teamKey) }))
       .filter((s) => !excluded.has(s.teamKey));
   }, [load.judging, load.config]);
 
@@ -219,6 +254,29 @@ export default function JudgePage() {
   const scoredCount = mine.filter((s) => scores[s.teamKey]).length;
   const firstUnscored = mine.find((s) => !scores[s.teamKey])?.teamKey ?? null;
 
+  /* A submissions blob published before teamKey existed gives the cards
+     a key this page invented. The server keys scores by the published
+     one and would refuse every save, so refuse here instead and say why,
+     rather than letting a judge score a card whose Save cannot land. */
+  const missingKey = useMemo(
+    () => new Set(subs.filter((s) => !s.published).map((s) => s.teamKey)),
+    [subs],
+  );
+
+  const guardedSave = useCallback(
+    (input: SaveInput): Score | null => {
+      if (missingKey.has(input.teamKey)) {
+        setNoKey((prev) => ({ ...prev, [input.teamKey]: true }));
+        return null;
+      }
+      return save(input);
+    },
+    [missingKey, save],
+  );
+
+  const cardState = (teamKey: string): SaveState =>
+    noKey[teamKey] ? { kind: "refused", message: NO_TEAM_KEY } : (states[teamKey] ?? { kind: "idle" });
+
   const jump = (teamKey: string) => {
     document.getElementById(`s-${teamKey}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -234,11 +292,12 @@ export default function JudgePage() {
 
   const pick = (id: string) => {
     writeLocal(JUDGE_KEY, id);
+    setPanelChanged(false);
     setJudge(id);
   };
 
   /* Nothing renders without the token, on purpose. */
-  if (!token || unauthorized) {
+  if (!token || unauthorized || tokenRefused) {
     return (
       <div className="choco-root min-h-screen bg-white">
         <main className="mx-auto max-w-2xl px-5 py-32 sm:px-8">
@@ -299,7 +358,7 @@ export default function JudgePage() {
               Who are you?
             </h1>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-ink/80">
-              Pick your name once. This device remembers it.
+              {panelChanged ? PANEL_CHANGED : "Pick your name once. This device remembers it."}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {[...judges.filter((x) => x.tracks !== "off"), ...judges.filter((x) => x.tracks === "off")].map((x) => (
@@ -324,6 +383,11 @@ export default function JudgePage() {
                 : `${(me?.name ?? "").split(" ")[0]} · ${track === "build" ? "Build" : "Pitch"} track · ${scoredCount} of ${mine.length} scored`}
             </h1>
             {loadError ? <p className="label mt-3 !text-goldink">{loadError}</p> : null}
+            {load.judging.sample ? (
+              <p className="mt-6 border-l-2 border-gold pl-4 text-base leading-relaxed text-ink">
+                <strong className="font-semibold">Rehearsal data.</strong> {SAMPLE_LINE}
+              </p>
+            ) : null}
 
             <div className="mt-8 border-y border-ink/15">
               {mine.length === 0 ? (
@@ -377,11 +441,11 @@ export default function JudgePage() {
                   rubric={rubric}
                   promptTitle={promptTitle(s.prompt)}
                   score={scores[s.teamKey]}
-                  state={states[s.teamKey] ?? { kind: "idle" }}
+                  state={cardState(s.teamKey)}
                   closed={closed}
                   judgeId={judge}
                   assigned
-                  onSave={save}
+                  onSave={guardedSave}
                 />
               ))}
             </ol>
@@ -398,11 +462,11 @@ export default function JudgePage() {
                     rubric={rubric}
                     promptTitle={promptTitle(s.prompt)}
                     score={scores[s.teamKey]}
-                    state={states[s.teamKey] ?? { kind: "idle" }}
+                    state={cardState(s.teamKey)}
                     closed={closed}
                     judgeId={judge}
                     assigned={false}
-                    onSave={save}
+                    onSave={guardedSave}
                   />
                 ))}
               </ol>
