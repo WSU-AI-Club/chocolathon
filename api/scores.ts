@@ -9,11 +9,14 @@ import { noStore, requireJudgeKey, requireUploadKey } from "./_auth.js";
 import type { JudgingConfig } from "./judging-config.js";
 
 type Gates = { linkOpens: boolean; videoUnderThree: boolean; oneSubmission: boolean; startedAfterUnlock: boolean };
-/* clientSavedAt is the judge's clock at the moment they pressed Save;
-   savedAt is this server's clock at the moment the write landed. A save
-   retried for a quarter of an hour carries an old clientSavedAt and a
-   new savedAt, which is exactly why the race below is decided on the
-   first one. Keep in step with src/judging/types.ts. */
+/* clientSavedAt is an opaque echo. The judge page stamps it when it
+   builds a payload and matches an acknowledgement to its own pending
+   save by comparing this exact string, so this file stores it and
+   returns it byte for byte and never compares it with anything. It is a
+   device clock, and a phone that is seven minutes fast would otherwise
+   beat a later correction from a laptop. savedAt is this server's clock
+   at the moment the write landed, which is the only clock every device
+   shares. Keep in step with src/judging/types.ts. */
 type Score = { judgeId: string; teamKey: string; track: "build" | "pitch"; gates: Gates; recused: boolean; lines: [number, number, number, number] | null; total: number | null; comment: string; clientSavedAt: string; savedAt: string };
 type Submission = { teamKey: string; track: "build" | "pitch"; duplicateOf?: number };
 type Judging = { submissions: Submission[] };
@@ -22,23 +25,17 @@ const GATES = ["linkOpens", "videoUnderThree", "oneSubmission", "startedAfterUnl
 const MIN_COMMENT = 20;
 const ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 
-/* Normalised to UTC so two devices in two timezones still compare. A
-   judge whose bundle predates the field gets this server's clock, which
-   is what the old build did; refusing them would cost a real score on
-   the day for nothing. */
+/* Checked for shape and length so nothing absurd is stored, then handed
+   back exactly as it arrived: the client matches its acknowledgement on
+   the string, so normalising it here would break that match. A judge
+   whose bundle predates the field gets this server's clock, which is
+   what the old build did; refusing them would cost a real score on the
+   day for nothing. */
 function clientStamp(raw: unknown): string | null {
   if (raw === undefined || raw === null || raw === "") return new Date().toISOString();
-  if (typeof raw !== "string" || !ISO.test(raw)) return null;
-  const t = Date.parse(raw);
-  if (Number.isNaN(t)) return null;
-  return new Date(t).toISOString();
-}
-
-function newer(a: string | undefined, b: string): boolean {
-  const ta = Date.parse(a ?? "");
-  const tb = Date.parse(b);
-  if (Number.isNaN(ta) || Number.isNaN(tb)) return false;
-  return ta > tb;
+  if (typeof raw !== "string" || raw.length > 40 || !ISO.test(raw)) return null;
+  if (Number.isNaN(Date.parse(raw))) return null;
+  return raw;
 }
 
 function validate(x: unknown, config: JudgingConfig, judging: Judging): Score | string {
@@ -88,17 +85,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try { body = typeof req.body === "string" ? JSON.parse(req.body) : req.body; } catch { return res.status(400).json({ error: "Body is not JSON." }); }
       const score = validate(body, config, judging);
       if (typeof score === "string") return res.status(400).json({ error: score });
-      /* Last write wins on the judge's clock, not on arrival order. A
-         save that sat in a phone's retry queue while the judge corrected
-         the card must not overwrite the correction when the wifi comes
-         back, so read what is there and refuse to go backwards. The
-         judge page adopts the answer (stale) as its own. */
-      const path = PATHS.score(score.judgeId, score.teamKey);
-      const existing = await readJson<Score>(path);
-      if (existing && newer(existing.clientSavedAt, score.clientSavedAt)) {
-        return res.status(200).json({ ok: true, stale: true, score: existing });
-      }
-      await writeJson(path, score);
+      /* Arrival order is truth: the score that gets here last is the one
+         this server holds. Device clocks disagree by minutes, so
+         deciding the race on clientSavedAt threw away real corrections
+         (a phone running fast beat a later fix from a laptop, and the
+         page then adopted the old copy under Saved). One device never
+         posts an older payload after a newer one, because the judge page
+         keeps one pending save per team and posts whatever that holds at
+         the moment it fires, so the only thing this rule can reorder is
+         two devices, where the later arrival is the later decision. */
+      await writeJson(PATHS.score(score.judgeId, score.teamKey), score);
       return res.status(200).json({ ok: true, score });
     }
     if (req.method === "DELETE") {
