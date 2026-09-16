@@ -17,6 +17,8 @@
 
    Columns are matched by keyword, not position, so reordering the form
    does not break this. If a column is missing the script says which.
+   Same keyword lists as src/judge/mapRows.ts (the browser upload path);
+   keep the two in step.
 
    Rehearsal: node pipeline/make-judging.mjs pipeline/sample-responses.csv
    writes the same file with `"sample": true`, and the judge page shows a
@@ -65,6 +67,51 @@ function parseCsv(text) {
   return rows;
 }
 
+/* "Team Name", "Team Name1" (Forms de-dupes a repeated question title
+   with a trailing digit) and "Team Name." all mean the same column;
+   never match "team name" as a substring — "Team name, if not listed."
+   contains it too. */
+function normalizeExactHeader(s) {
+  return s.trim().toLowerCase().replace(/[.\d]+$/, "").trim();
+}
+
+function slugify(s) {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+/* Forms writes completion/start time as "M/D/YY H:mm" or "M/D/YY
+   H:mm:ss", 24-hour, no timezone. Returns epoch ms in local time, or
+   null if it doesn't parse. */
+function parseFormsDate(s) {
+  const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  const [, mo, d, y, h, mi, sec] = m;
+  let year = parseInt(y, 10);
+  if (year < 100) year += 2000;
+  const dt = new Date(year, parseInt(mo, 10) - 1, parseInt(d, 10), parseInt(h, 10), parseInt(mi, 10), sec ? parseInt(sec, 10) : 0);
+  return Number.isNaN(dt.getTime()) ? null : dt.getTime();
+}
+
+const URL_RE = /^https?:\/\/\S+$/i;
+function linkWarning(label, teamName, raw) {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (!URL_RE.test(trimmed)) return `${teamName}: ${label} is not a web address ("${trimmed}").`;
+  const lower = trimmed.toLowerCase();
+  if (lower.includes("localhost") || lower.includes("127.0.0.1")) {
+    return `${teamName}: ${label} points at localhost, which judges cannot open.`;
+  }
+  if (lower.includes("sharepoint.com") || lower.includes("onedrive.live.com") || lower.includes("1drv.ms")) {
+    return `${teamName}: ${label} points at SharePoint/OneDrive, which external judges may not be able to open.`;
+  }
+  return null;
+}
+
 const raw = readFileSync(resolve(input), "utf8").replace(/^﻿/, "");
 const rows = parseCsv(raw);
 if (rows.length < 2) {
@@ -74,7 +121,7 @@ if (rows.length < 2) {
 const header = rows[0].map((h) => h.trim().toLowerCase());
 
 /* Find a column by the first keyword that matches; report the miss. */
-function col(name, ...keywords) {
+function col(...keywords) {
   for (const k of keywords) {
     const i = header.findIndex((h) => h.includes(k));
     if (i !== -1) return i;
@@ -82,21 +129,42 @@ function col(name, ...keywords) {
   return null;
 }
 const C = {
-  team: col("team name", "team name"),
-  submitter: col("submitter name", "submitter name"),
-  email: col("email", "wsu email", "email"),
-  track: col("track", "track"),
-  buildPrompt: col("build prompt", "build track prompt"),
-  pitchPrompt: col("pitch prompt", "pitch track prompt"),
-  sentence: col("one sentence", "one sentence", "describe what you built", "describe"),
-  product: col("product link", "link to your product"),
-  video: col("video link", "link to your video"),
-  clickFirst: col("click first", "click first"),
-  repo: col("repository", "repositor", "source link"),
-  tested: col("tested", "tested"),
-  notes: col("notes", "anything the judges", "need to run"),
-  time: col("completion time", "completion time", "start time"),
+  submitter: col("submitter name"),
+  email: col("wsu email", "email"),
+  track: col("track"),
+  buildPrompt: col("build track prompt", "build prompt"),
+  pitchPrompt: col("pitch track prompt", "pitch prompt"),
+  sentence: col("one sentence", "describe what you built", "describe", "recommending"),
+  product: col("link to your product", "product", "demo, or presentation"),
+  video: col("link to your video", "video"),
+  clickFirst: col("click first", "instructions for the judge", "instructions"),
+  repo: col("repositor", "source link"),
+  tested: col("tested", "confirmation"),
+  notes: col("anything the judges", "need to run", "additional comments", "comments for the judges"),
+  time: col("completion time", "start time"),
 };
+/* `track` must not match "build track prompt": prefer an exact header. */
+const exactTrack = header.findIndex((h) => h === "track");
+if (exactTrack !== -1) C.track = exactTrack;
+/* Email: Forms' own sign-in "Email" column wins over a typed "WSU
+   email" question. */
+const exactEmail = header.findIndex((h) => h === "email");
+if (exactEmail !== -1) C.email = exactEmail;
+/* Team: exact title only, never substring. */
+{
+  const i = header.findIndex((h) => normalizeExactHeader(h) === "team name");
+  C.team = i === -1 ? null : i;
+}
+{
+  const i = header.findIndex((h) => h.includes("not listed"));
+  C.teamFallback = i === -1 ? null : i;
+}
+/* Submitter: fall back to Forms' own sign-in "Name" column. */
+if (C.submitter === null) {
+  const i = header.findIndex((h) => h === "name");
+  if (i !== -1) C.submitter = i;
+}
+
 const required = ["team", "track", "product", "video"];
 const missing = required.filter((k) => C[k] === null);
 if (missing.length) {
@@ -104,23 +172,34 @@ if (missing.length) {
   console.error("headers seen:", rows[0].join(" | "));
   process.exit(1);
 }
-/* `track` must not match "build track prompt": prefer an exact header. */
-const exactTrack = header.findIndex((h) => h === "track");
-if (exactTrack !== -1) C.track = exactTrack;
+const optionalTracked = ["clickFirst", "repo", "tested", "notes", "email", "submitter", "teamFallback"];
+const optionalMissing = optionalTracked.filter((k) => C[k] === null);
+if (optionalMissing.length) {
+  console.error("not found in this export:", optionalMissing.join(", "));
+}
 
 const get = (r, k) => (C[k] === null ? "" : (r[C[k]] ?? "").trim());
+const NOT_LISTED_TEXT = "my team is not listed";
+const resolveTeam = (r) => {
+  const teamCell = get(r, "team");
+  if (!teamCell || teamCell.toLowerCase() === NOT_LISTED_TEXT) return get(r, "teamFallback");
+  return teamCell;
+};
 const promptId = (s) => {
   const m = s.match(/\b([BP])[\s-]?(\d)\b/i);
   return m ? `${m[1].toUpperCase()}-${m[2]}` : "";
 };
 
-const submissions = rows.slice(1).map((r, i) => {
+const allRaw = rows.slice(1).map((r, i) => {
   const trackRaw = get(r, "track").toLowerCase();
   const track = trackRaw.startsWith("pitch") ? "pitch" : "build";
   const promptRaw = track === "build" ? get(r, "buildPrompt") || get(r, "pitchPrompt") : get(r, "pitchPrompt") || get(r, "buildPrompt");
+  const team = resolveTeam(r);
+  const completionRaw = get(r, "time");
   return {
     n: i + 1,
-    team: get(r, "team"),
+    team,
+    teamKey: `${track}/${slugify(team)}`,
     submitter: get(r, "submitter"),
     email: get(r, "email"),
     track,
@@ -131,11 +210,63 @@ const submissions = rows.slice(1).map((r, i) => {
     video: get(r, "video"),
     clickFirst: get(r, "clickFirst"),
     repo: get(r, "repo"),
-    tested: /yes|true|1|✓|checked/i.test(get(r, "tested")),
+    tested: get(r, "tested").length > 0,
     notes: get(r, "notes"),
-    submittedAt: get(r, "time"),
+    submittedAt: completionRaw,
+    _rawIndex: i,
+    _completionMs: parseFormsDate(completionRaw),
   };
 });
+
+/* Duplicates: same team+track keeps the later completion time; if
+   either time doesn't parse, the later row in the export wins. */
+const groups = new Map();
+for (const s of allRaw) {
+  const arr = groups.get(s.teamKey);
+  if (arr) arr.push(s);
+  else groups.set(s.teamKey, [s]);
+}
+const droppedRaw = new Set();
+for (const group of groups.values()) {
+  if (group.length < 2) continue;
+  let winner = group[0];
+  for (const cur of group.slice(1)) {
+    const bothParse = winner._completionMs !== null && cur._completionMs !== null;
+    const curWins = bothParse ? cur._completionMs > winner._completionMs : cur._rawIndex > winner._rawIndex;
+    if (curWins) winner = cur;
+  }
+  for (const s of group) {
+    if (s !== winner) droppedRaw.add(s._rawIndex);
+  }
+}
+const strip = ({ _rawIndex, _completionMs, ...rest }) => rest;
+
+const submissions = allRaw
+  .filter((s) => !droppedRaw.has(s._rawIndex))
+  .map((s, i) => ({ ...strip(s), n: i + 1 }));
+
+const finalNByTeamKey = new Map();
+for (const s of submissions) finalNByTeamKey.set(s.teamKey, s.n);
+
+const dropped = allRaw
+  .filter((s) => droppedRaw.has(s._rawIndex))
+  .map((s, i) => ({ ...strip(s), n: i + 1, duplicateOf: finalNByTeamKey.get(s.teamKey) }));
+
+if (dropped.length) {
+  for (const d of dropped) {
+    const keptTime = submissions.find((s) => s.n === d.duplicateOf)?.submittedAt ?? "";
+    console.error(`${d.team} submitted twice; keeping the entry completed ${keptTime || "later"}.`);
+  }
+}
+
+const warnings = [];
+for (const s of submissions) {
+  const pw = linkWarning("product link", s.team, s.product);
+  if (pw) warnings.push(pw);
+  const vw = linkWarning("video link", s.team, s.video);
+  if (vw) warnings.push(vw);
+}
+for (const w of warnings) console.error(w);
 
 const out = {
   generatedAt: new Date().toISOString(),

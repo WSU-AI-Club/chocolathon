@@ -16,12 +16,38 @@ import { useCallback, useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 
 import { JUDGE_PATH } from "../content/links";
-import { mapRows, type Judging } from "../judge/mapRows";
+import { mapRows, type Judging, type Submission } from "../judge/mapRows";
 import "../chocolathon.css";
 
 const KEY_STORAGE = "choco-upload-key";
 
-type Parsed = { judging: Judging; missing: string[]; headers: string[] };
+type Parsed = {
+  judging: Judging;
+  missing: string[];
+  headers: string[];
+  dropped: Submission[];
+  warnings: string[];
+  optionalMissing: string[];
+};
+
+/* "Sugar Is Sweet submitted twice; keeping 9:09 PM." — built from the
+   loser's team name and the winning row's completion time, since that
+   is the row a duplicate note actually means "kept". */
+function describeDuplicate(loser: Submission, winnerSubmittedAt: string): string {
+  const ms = parseFormsTimeForDisplay(winnerSubmittedAt);
+  const time = ms === null ? winnerSubmittedAt : new Date(ms).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return `${loser.team} submitted twice; keeping ${time || "the later entry"}.`;
+}
+
+function parseFormsTimeForDisplay(s: string): number | null {
+  const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  const [, mo, d, y, h, mi, sec] = m;
+  let year = parseInt(y, 10);
+  if (year < 100) year += 2000;
+  const dt = new Date(year, parseInt(mo, 10) - 1, parseInt(d, 10), parseInt(h, 10), parseInt(mi, 10), sec ? parseInt(sec, 10) : 0);
+  return Number.isNaN(dt.getTime()) ? null : dt.getTime();
+}
 
 export default function UploadPage() {
   const [key, setKey] = useState("");
@@ -78,8 +104,12 @@ export default function UploadPage() {
         return;
       }
       const [header, ...data] = rows;
-      const { judging, missing } = mapRows(header.map(String), data.map((r) => r.map(String)), file.name);
-      setParsed({ judging, missing, headers: header.map(String) });
+      const { judging, missing, dropped, warnings, optionalMissing } = mapRows(
+        header.map(String),
+        data.map((r) => r.map(String)),
+        file.name,
+      );
+      setParsed({ judging, missing, headers: header.map(String), dropped, warnings, optionalMissing });
     } catch {
       setError("Could not read that file. It should be the Excel workbook from Forms, or a CSV.");
       setParsed(null);
@@ -202,6 +232,33 @@ export default function UploadPage() {
               <p role="alert" className="mt-5 border-l-2 border-gold pl-4 text-base text-ink">
                 Could not find a column for: {parsed.missing.join(", ")}. The headers in the file
                 are: {parsed.headers.join(" | ")}
+              </p>
+            ) : null}
+
+            {parsed.dropped.length ? (
+              <ul className="mt-5 space-y-1 border-l-2 border-gold pl-4 text-base text-ink">
+                {parsed.dropped.map((d) => {
+                  const winner = parsed.judging.submissions.find((s) => s.n === d.duplicateOf);
+                  return (
+                    <li key={`${d.team}-${d.n}`}>
+                      {describeDuplicate(d, winner?.submittedAt ?? d.submittedAt)}
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+
+            {parsed.warnings.length ? (
+              <ul className="mt-5 space-y-1 text-base text-amber-700">
+                {parsed.warnings.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            ) : null}
+
+            {parsed.optionalMissing.length ? (
+              <p className="mt-5 text-sm text-ink/50">
+                Not found in this export: {parsed.optionalMissing.join(", ")}.
               </p>
             ) : null}
 
