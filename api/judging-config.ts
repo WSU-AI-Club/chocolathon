@@ -37,6 +37,13 @@ function validatePatch(x: unknown): Partial<JudgingConfig> | string {
     const judges = c.judges as Judge[];
     if (!Array.isArray(judges) || judges.some((j) => !j || typeof j.id !== "string" || !/^[a-z0-9-]{1,60}$/.test(j.id) || typeof j.name !== "string" || !j.name.trim() || !TRACKS.has(j.tracks))) return "judges is malformed.";
     if (new Set(judges.map((j) => j.id)).size !== judges.length) return "Two judges share an id.";
+    /* A page that could not read the judge list must not be able to
+       write the absence of one. Nobody ever wants zero judges, and the
+       one caller that could send it (a first run whose seed came back
+       empty) has no business saving anything at all. Removing the last
+       judge by hand is not a thing this refuses to do so much as a
+       thing nobody does at 2:00 on the day. */
+    if (judges.length === 0) return "judges cannot be empty.";
     patch.judges = judges;
   }
   if (c.minPerTeam !== undefined) {

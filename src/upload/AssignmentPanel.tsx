@@ -6,6 +6,16 @@
    track, deals teams to judges with the least-loaded dealer, and hands
    the edited config to the parent's publish() to save with the upload
    key. Chips let Michael hand-edit any team after a deal.
+
+   Every control here goes dead while a config save is in flight. A save
+   is answered with the server's document, and an edit made while that
+   answer was on its way would be overwritten by it without ever having
+   been sent. Disabled for the second the POST takes is honest; silently
+   losing the edit is not.
+
+   Discard my edits, next to the not-published badge, is the only way
+   besides a successful publish to give up what is in this panel and go
+   back to the stored document.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useMemo, useState } from "react";
@@ -27,6 +37,7 @@ export default function AssignmentPanel({
   scoreCount,
   dirty,
   onChange,
+  onDiscard,
   publish,
   busy,
 }: {
@@ -37,7 +48,10 @@ export default function AssignmentPanel({
      every onChange and clears it when a save comes back 200. */
   dirty: boolean;
   onChange: (c: JudgingConfig) => void;
+  /* Throw away everything unpublished and go back to the stored config. */
+  onDiscard: () => void;
   publish: (c: JudgingConfig) => Promise<void>;
+  /* A config POST is in flight. Nothing in here may change until it lands. */
   busy: boolean;
 }) {
   const [newJudge, setNewJudge] = useState("");
@@ -46,13 +60,15 @@ export default function AssignmentPanel({
   const visible = useMemo(() => (judging?.submissions ?? []).filter((s) => !s.duplicateOf), [judging]);
   /* Without a live set, deal() has nothing to deal and would write an
      empty assignments map over a good one. */
-  const canGenerate = judging !== null && visible.length > 0;
+  const canGenerate = judging !== null && visible.length > 0 && !busy;
   const hasAssignments = Object.keys(config.assignments).length > 0;
 
   function setTracks(id: string, tracks: JudgeTracks) {
+    if (busy) return;
     onChange({ ...config, judges: config.judges.map((j) => (j.id === id ? { ...j, tracks } : j)) });
   }
   function addJudge() {
+    if (busy) return;
     const trimmed = newJudge.trim();
     if (!trimmed) return;
     const j: Judge = { id: judgeId(trimmed), name: trimmed, tracks: "off" };
@@ -74,6 +90,7 @@ export default function AssignmentPanel({
     onChange({ ...config, assignments: d.assignments });
   }
   function setTeamJudges(teamKey: string, ids: string[]) {
+    if (busy) return;
     onChange({ ...config, assignments: { ...config.assignments, [teamKey]: ids } });
   }
   const name = (id: string) => config.judges.find((j) => j.id === id)?.name ?? id;
@@ -91,9 +108,10 @@ export default function AssignmentPanel({
                   key={t.value}
                   type="button"
                   aria-pressed={j.tracks === t.value}
+                  disabled={busy}
                   onClick={() => setTracks(j.id, t.value)}
                   className={
-                    "label px-3 py-2 transition-colors " +
+                    "label px-3 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 " +
                     (j.tracks === t.value ? "bg-ink !text-white" : "bg-white hover:!text-ink")
                   }
                 >
@@ -112,6 +130,7 @@ export default function AssignmentPanel({
           <input
             type="text"
             value={newJudge}
+            disabled={busy}
             onChange={(e) => setNewJudge(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -119,10 +138,15 @@ export default function AssignmentPanel({
                 addJudge();
               }
             }}
-            className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
+            className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold disabled:opacity-40"
           />
         </label>
-        <button type="button" onClick={addJudge} className="btn-ghost-sm">
+        <button
+          type="button"
+          onClick={addJudge}
+          disabled={busy}
+          className="btn-ghost-sm disabled:cursor-not-allowed disabled:opacity-40"
+        >
           Add
         </button>
       </div>
@@ -134,8 +158,12 @@ export default function AssignmentPanel({
           min={1}
           max={6}
           value={config.minPerTeam}
-          onChange={(e) => onChange({ ...config, minPerTeam: Math.min(6, Math.max(1, Number(e.target.value) || 1)) })}
-          className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
+          disabled={busy}
+          onChange={(e) => {
+            if (busy) return;
+            onChange({ ...config, minPerTeam: Math.min(6, Math.max(1, Number(e.target.value) || 1)) });
+          }}
+          className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold disabled:opacity-40"
         />
       </label>
 
@@ -148,7 +176,7 @@ export default function AssignmentPanel({
         >
           Generate
         </button>
-        {!canGenerate ? <span className="label">Load the live set first.</span> : null}
+        {!canGenerate && !busy ? <span className="label">Load the live set first.</span> : null}
         {canGenerate && armed ? (
           <span className="label label-accent">
             This replaces the current assignments. Click again to confirm.
@@ -198,19 +226,21 @@ export default function AssignmentPanel({
                           <button
                             key={id}
                             type="button"
+                            disabled={busy}
                             onClick={() => setTeamJudges(s.teamKey, ids.filter((x) => x !== id))}
-                            className="btn-ghost-sm"
+                            className="btn-ghost-sm disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {name(id)} ✕
                           </button>
                         ))}
                         <select
                           value=""
+                          disabled={busy}
                           onChange={(e) => {
                             const id = e.target.value;
                             if (id) setTeamJudges(s.teamKey, [...ids, id]);
                           }}
-                          className="border border-ink/20 bg-transparent px-2 py-1.5 text-sm text-ink"
+                          className="border border-ink/20 bg-transparent px-2 py-1.5 text-sm text-ink disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <option value="">Add judge</option>
                           {eligible
@@ -241,7 +271,19 @@ export default function AssignmentPanel({
         >
           {busy ? "Publishing…" : "Publish assignments"}
         </button>
-        {dirty ? <span className="label label-accent">Assignments changed and not published.</span> : null}
+        {dirty ? (
+          <>
+            <span className="label label-accent">Assignments changed and not published.</span>
+            <button
+              type="button"
+              onClick={onDiscard}
+              disabled={busy}
+              className="btn-ghost-sm disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Discard my edits
+            </button>
+          </>
+        ) : null}
       </div>
     </div>
   );

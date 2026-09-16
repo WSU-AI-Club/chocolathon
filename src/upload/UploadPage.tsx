@@ -8,25 +8,47 @@
    sends it to /api/judging with the upload key. Nothing else on the site
    changes; the judge page reads the new set on refresh.
 
-   The upload key is asked for once and kept in this browser. It is what
-   protects the write and, since the reads carry team and student names,
-   the reads too. The key field does NOT load on every keystroke: press
-   Enter, leave the field, or click Load. Every load carries a sequence
-   number and a late answer from an older load is thrown away, so a 401
-   from a half-typed key can no longer land on top of a good one.
+   ── The state machine ──────────────────────────────────────────────
 
-   Only a 404 from /api/judging-config means "nobody has published a
-   config yet" and lets this page seed the judges from the public hub.
-   Any other refusal leaves the config null and says so: seeding an empty
-   config after a 500 and then saving it would write judges: [] over the
-   real one, and that is the whole panel gone.
+   liveStatus is the one answer to "is what this page is showing worth
+   acting on", and every other rule here reads from it:
 
-   Every write to the config sends only the fields this page owns, so
-   publishing assignments can no longer revert the close switch or the
-   exclusions the ranking page made a minute earlier. The one exception
-   is the first save of a run that found no stored config: that one
-   carries the whole seeded document, because a patch would merge into an
-   empty default and create a config with no judges in it.
+     needs-key  no key in the field. Nothing goes out.
+     loading    a load is in flight.
+     ready      the last load succeeded. The only state that publishes.
+     denied     the key was refused (401).
+     error      a load failed and there was never a good one to keep.
+     stale      a load failed and the last good one is still on screen.
+
+   ready → stale, never ready → nothing, is the whole of the third fix:
+   a reload that fails keeps the live set and the score count it already
+   had, so the orphan warning still knows which teams would lose their
+   scores. It blocks Publish instead (the button says so), because
+   publishing against a set this page could not re-read is the thing
+   that would actually hurt.
+
+   Nothing on this page is ever thrown away by a failure. The local
+   config is replaced in exactly three places: a load that succeeded
+   while the panel was clean, a save that came back 200, and Discard my
+   edits. A load that succeeds while the panel is dirty keeps the panel
+   and adopts the server's answer for everything else, and says so.
+
+   ── What the config writes send ────────────────────────────────────
+
+   Every write sends only the fields this page owns, so publishing
+   assignments can no longer revert the close switch or the exclusions
+   the ranking page made a minute earlier. The one exception is the
+   first save of a run that found no stored config: that one carries the
+   whole document, because a patch would merge into an empty default.
+   Before it does, it re-reads /api/judging-config, because "there is no
+   config" can be twenty minutes old — if another tab created one in the
+   meantime, the whole document would overwrite it, and this becomes a
+   patch after all.
+
+   A first run also refuses to seed itself from a hub that did not
+   answer, or from a hub with nobody in it: judges: [] saved over the
+   real list is the whole panel gone, and the server now refuses that
+   body too.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -40,6 +62,7 @@ import AssignmentPanel from "./AssignmentPanel";
 import "../chocolathon.css";
 
 const KEY_STORAGE = "choco-upload-key";
+const UNREACHABLE = "Could not reach the server. Nothing here is editable until it loads.";
 
 type Parsed = {
   judging: Judging;
@@ -50,7 +73,30 @@ type Parsed = {
   optionalMissing: string[];
 };
 
-type LiveStatus = "needs-key" | "loading" | "ready" | "denied" | "error";
+type LiveStatus = "needs-key" | "loading" | "ready" | "denied" | "error" | "stale";
+
+/* The three fields the assignment panel owns. Everything else in a
+   config (closed, excluded) belongs to the ranking page, and this page
+   always takes the server's word for those. */
+const PANEL_KEYS = ["judges", "minPerTeam", "assignments"] as const;
+type PanelKey = (typeof PANEL_KEYS)[number];
+
+/* What one read of the live set answers. "empty" is a 404: nothing is
+   published yet, which is a state, not a failure. */
+type LiveSet = {
+  judging: Judging | null;
+  scoreCount: number;
+  status: "ready" | "empty" | "denied" | "error";
+  message?: string;
+};
+
+/* The server's document wins for every field except the ones this tab
+   has edited and not published yet. */
+function withLocalEdits(prev: JudgingConfig, server: JudgingConfig, keep: readonly PanelKey[]): JudgingConfig {
+  const next: JudgingConfig = { ...server };
+  for (const k of keep) (next as Record<string, unknown>)[k] = prev[k];
+  return next;
+}
 
 export default function UploadPage() {
   const [key, setKey] = useState("");
@@ -65,10 +111,6 @@ export default function UploadPage() {
   const [dragging, setDragging] = useState(false);
 
   const [config, setConfig] = useState<JudgingConfig | null>(null);
-  /* True once a GET returned a stored config, or once any save came back
-     200. While it is false this page is holding a seeded document nobody
-     has saved yet, and a partial patch would lose most of it. */
-  const [storedConfigExists, setStoredConfigExists] = useState(false);
   const [configDirty, setConfigDirty] = useState(false);
   const [configBusy, setConfigBusy] = useState(false);
   const [configResult, setConfigResult] = useState<string | null>(null);
@@ -83,155 +125,222 @@ export default function UploadPage() {
      A response whose number is not the newest is dropped on the floor. */
   const seqRef = useRef(0);
   /* The key the last load ran with, so leaving the field does not refetch
-     (and throw away unsaved panel edits) when nothing was typed. */
+     when nothing was typed. */
   const loadedKey = useRef<string | null>(null);
+  /* A load has succeeded at least once, so there is a last good set on
+     screen that a later failure must keep rather than erase. */
+  const loadedOnce = useRef(false);
 
-  /* One load for everything behind the key: the published set, the
-     config, the saved score count, and the public judge list that seeds
-     a first run. None of it goes out before the key field has content,
-     because /api/judging and /api/judging-config now refuse a request
-     without one. */
-  const loadLive = useCallback(async (raw: string) => {
-    const k = raw.trim();
-    const seq = ++seqRef.current;
-    const stale = () => seq !== seqRef.current;
-    loadedKey.current = k;
+  /* The stored document as this page last saw it, from a GET or from the
+     answer to a POST. null means no config has ever been saved, which is
+     what makes a save a whole-document write instead of a patch. */
+  const storedRef = useRef<JudgingConfig | null>(null);
+  /* The document a first run seeded from the hub, so Discard has
+     something to go back to before anything has ever been saved. */
+  const seedRef = useRef<JudgingConfig | null>(null);
+  /* Which panel fields this tab has changed and not published, and when.
+     configDirty is this map's size, mirrored into state for rendering. */
+  const editsRef = useRef(new Map<PanelKey, number>());
+  const editSeqRef = useRef(0);
 
-    const forget = () => {
-      setLive(null);
-      setLiveJudging(null);
-      setConfig(null);
-      setStoredConfigExists(false);
-      setConfigDirty(false);
-      setScoreCount(0);
-    };
-
-    if (!k) {
-      setLiveStatus("needs-key");
-      setLoadError(null);
-      forget();
-      return;
-    }
-    setLiveStatus("loading");
-    setLoadError(null);
-    try {
-      const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
-      const [jRes, cRes, sRes, hubRes] = await Promise.all([
-        fetch("/api/judging", withKey),
-        fetch("/api/judging-config", withKey),
-        fetch("/api/scores?all=1", withKey),
-        fetch("/api/hub", { cache: "no-store" }),
-      ]);
-      if (stale()) return;
-
-      if (jRes.status === 401 || cRes.status === 401 || sRes.status === 401) {
-        setLiveStatus("denied");
-        setLoadError(null);
-        forget();
-        return;
-      }
-
-      /* A 404 is the quiet state before anything is published. Anything
-         else is a server that did not answer, and this page must not
-         invent a document to stand in for what it could not read. */
-      const refused = (what: string, status: number) => {
-        setLoadError(`Could not load the ${what} (${status}). Nothing here is editable until it loads.`);
-        setLiveStatus("error");
-        forget();
-      };
-
-      if (!jRes.ok && jRes.status !== 404) return refused("published submissions", jRes.status);
-      if (!cRes.ok && cRes.status !== 404) return refused("judging config", cRes.status);
-
-      const nextJudging = jRes.ok ? ((await jRes.json().catch(() => null)) as Judging | null) : null;
-      if (stale()) return;
-      if (jRes.ok && (!nextJudging || !Array.isArray(nextJudging.submissions))) {
-        return refused("published submissions", jRes.status);
-      }
-
-      const storedConfig = cRes.ok ? ((await cRes.json().catch(() => null)) as JudgingConfig | null) : null;
-      if (stale()) return;
-      if (cRes.ok && (!storedConfig || !Array.isArray(storedConfig.judges))) {
-        return refused("judging config", cRes.status);
-      }
-
-      let nextConfig = storedConfig;
-      if (!nextConfig) {
-        /* First run, and a real 404 proved it: no config yet, so seed the
-           judges from the public hub with every one of them switched off. */
-        const hub = hubRes.ok ? ((await hubRes.json().catch(() => null)) as HubData | null) : null;
-        if (stale()) return;
-        const judges: Judge[] = (hub?.people.preliminary ?? []).map((p) => ({
-          id: judgeId(p.name),
-          name: p.name,
-          tracks: "off",
-        }));
-        nextConfig = { judges, minPerTeam: 2, assignments: {}, excluded: [], closed: false };
-      }
-
-      let nextScoreCount = 0;
-      if (sRes.ok) {
-        const body = await sRes.json().catch(() => ({}));
-        if (stale()) return;
-        nextScoreCount = Array.isArray(body?.scores) ? body.scores.length : 0;
-      }
-
-      setLive(nextJudging ? { count: nextJudging.count, publishedAt: nextJudging.publishedAt } : null);
-      setLiveJudging(nextJudging);
-      setConfig(nextConfig);
-      setStoredConfigExists(!!storedConfig);
-      setConfigDirty(false);
-      setScoreCount(nextScoreCount);
-      setLoadError(null);
-      try {
-        localStorage.setItem(KEY_STORAGE, k);
-      } catch {
-        /* private window; he types it again next time */
-      }
-      setLiveStatus("ready");
-    } catch {
-      if (stale()) return;
-      setLoadError("Could not reach the server. Nothing here is editable until it loads.");
-      setLiveStatus("error");
-      forget();
-    }
+  const markEdits = useCallback((keys: readonly PanelKey[]) => {
+    for (const k of keys) editsRef.current.set(k, ++editSeqRef.current);
+    setConfigDirty(editsRef.current.size > 0);
   }, []);
 
-  /* What a finished publish needs: the new live set and the score count,
-     and nothing else. It must never touch the config, or publishing the
-     file would revert whatever is half-edited in the assignment panel. */
-  const refreshLiveSet = useCallback(async (raw: string) => {
-    const k = raw.trim();
-    if (!k) return;
-    const seq = ++seqRef.current;
+  const clearEdits = useCallback((keys?: readonly PanelKey[]) => {
+    if (keys) for (const k of keys) editsRef.current.delete(k);
+    else editsRef.current.clear();
+    setConfigDirty(editsRef.current.size > 0);
+  }, []);
+
+  /* Fold a server document into this page. `sent` is what the request
+     that produced it carried and `mark` is the edit counter as that
+     request left: a field this tab edited after that is still this
+     tab's, a field the request published is the server's again. A load
+     passes sent: [] — it published nothing, so every live edit stays. */
+  const settle = useCallback(
+    (server: JudgingConfig, sent: readonly (keyof JudgingConfig)[], mark: number) => {
+      const keep: PanelKey[] = [];
+      const published: PanelKey[] = [];
+      for (const [k, at] of editsRef.current) {
+        if (at <= mark && (sent as readonly string[]).includes(k)) published.push(k);
+        else keep.push(k);
+      }
+      setConfig((prev) => (prev ? withLocalEdits(prev, server, keep) : server));
+      if (published.length) clearEdits(published);
+    },
+    [clearEdits],
+  );
+
+  /* A load failed. Keep whatever was already good and say so; only a
+     page that never had a good set has nothing to show. */
+  const failLoad = useCallback((message: string) => {
+    setLoadError(message);
+    setLiveStatus(loadedOnce.current ? "stale" : "error");
+  }, []);
+
+  /* The published set and the saved score count, read once, by both
+     callers: the full load behind the key field and the refresh that
+     follows a file publish. Returns null when a newer request has
+     already started, so the caller drops this answer on the floor. */
+  const fetchLiveSet = useCallback(async (k: string, seq: number): Promise<LiveSet | null> => {
     const stale = () => seq !== seqRef.current;
+    const failed = (what: string, status: number): LiveSet => ({
+      judging: null,
+      scoreCount: 0,
+      status: "error",
+      message: `Could not load the ${what} (${status}). Nothing here is editable until it loads.`,
+    });
     try {
       const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
       const [jRes, sRes] = await Promise.all([
         fetch("/api/judging", withKey),
         fetch("/api/scores?all=1", withKey),
       ]);
-      if (stale()) return;
-      if (jRes.ok) {
-        const j = (await jRes.json().catch(() => null)) as Judging | null;
-        if (stale()) return;
-        if (j && Array.isArray(j.submissions)) {
-          setLive({ count: j.count, publishedAt: j.publishedAt });
-          setLiveJudging(j);
-        }
-      } else if (jRes.status === 404) {
-        setLive(null);
-        setLiveJudging(null);
+      if (stale()) return null;
+      if (jRes.status === 401 || sRes.status === 401) return { judging: null, scoreCount: 0, status: "denied" };
+
+      /* A 404 is the quiet state before anything is published. Anything
+         else is a server that did not answer, and this page must not
+         invent a set to stand in for what it could not read. */
+      if (!jRes.ok && jRes.status !== 404) return failed("published submissions", jRes.status);
+      if (!sRes.ok && sRes.status !== 404) return failed("saved scores", sRes.status);
+
+      const judging = jRes.ok ? ((await jRes.json().catch(() => null)) as Judging | null) : null;
+      if (stale()) return null;
+      if (jRes.ok && (!judging || !Array.isArray(judging.submissions))) {
+        return failed("published submissions", jRes.status);
       }
+
+      let scoreCount = 0;
       if (sRes.ok) {
-        const body = await sRes.json().catch(() => ({}));
-        if (stale()) return;
-        setScoreCount(Array.isArray(body?.scores) ? body.scores.length : 0);
+        const body = (await sRes.json().catch(() => null)) as { scores?: unknown[] } | null;
+        if (stale()) return null;
+        scoreCount = Array.isArray(body?.scores) ? (body?.scores as unknown[]).length : 0;
       }
+      return { judging, scoreCount, status: judging ? "ready" : "empty" };
     } catch {
-      /* The publish itself already said what happened. Leave the panel. */
+      if (stale()) return null;
+      return { judging: null, scoreCount: 0, status: "error", message: UNREACHABLE };
     }
   }, []);
+
+  /* One load for everything behind the key: the published set, the score
+     count, the config, and the public judge list that seeds a first run.
+     None of it goes out before the key field has content, because
+     /api/judging and /api/judging-config refuse a request without one. */
+  const loadLive = useCallback(
+    async (raw: string) => {
+      const k = raw.trim();
+      const seq = ++seqRef.current;
+      const stale = () => seq !== seqRef.current;
+      loadedKey.current = k;
+
+      if (!k) {
+        setLiveStatus("needs-key");
+        setLoadError(null);
+        return;
+      }
+      setLiveStatus("loading");
+      setLoadError(null);
+
+      const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
+      const [set, cRes, hubRes] = await Promise.all([
+        fetchLiveSet(k, seq),
+        fetch("/api/judging-config", withKey).then(
+          (r) => r,
+          () => null,
+        ),
+        fetch("/api/hub", { cache: "no-store" }).then(
+          (r) => r,
+          () => null,
+        ),
+      ]);
+      if (stale() || !set) return;
+
+      if (set.status === "denied" || cRes?.status === 401) {
+        setLoadError(null);
+        setLiveStatus("denied");
+        return;
+      }
+      if (set.status === "error") return failLoad(set.message ?? UNREACHABLE);
+      if (!cRes) return failLoad(UNREACHABLE);
+      const configRefused = `Could not load the judging config (${cRes.status}). Nothing here is editable until it loads.`;
+      if (!cRes.ok && cRes.status !== 404) return failLoad(configRefused);
+
+      const storedConfig = cRes.ok ? ((await cRes.json().catch(() => null)) as JudgingConfig | null) : null;
+      if (stale()) return;
+      if (cRes.ok && (!storedConfig || !Array.isArray(storedConfig.judges))) return failLoad(configRefused);
+
+      let next = storedConfig;
+      if (!next) {
+        /* First run, and a real 404 proved it: no config yet, so seed the
+           judges from the public hub with every one of them switched off.
+           A hub that refused, or a hub with nobody in it, is a failed
+           load and not an empty roster. */
+        const hub = hubRes?.ok ? ((await hubRes.json().catch(() => null)) as HubData | null) : null;
+        if (stale()) return;
+        const people = hub?.people?.preliminary ?? [];
+        if (!people.length) {
+          return failLoad(
+            `Could not load the judge list from /api/hub (${hubRes?.status ?? 0}). Nothing here is editable until it loads.`,
+          );
+        }
+        const judges: Judge[] = people.map((p) => ({ id: judgeId(p.name), name: p.name, tracks: "off" }));
+        next = { judges, minPerTeam: 2, assignments: {}, excluded: [], closed: false };
+        seedRef.current = next;
+      }
+
+      storedRef.current = storedConfig;
+      setLive(set.judging ? { count: set.judging.count, publishedAt: set.judging.publishedAt } : null);
+      setLiveJudging(set.judging);
+      setScoreCount(set.scoreCount);
+
+      /* Unpublished panel edits outrank the stored document. The load
+         still refreshed the live set, the score count, and every field
+         the panel does not own. */
+      const kept = editsRef.current.size > 0;
+      settle(next, [], editSeqRef.current);
+      setConfigResult(kept ? "Kept your unpublished assignment edits." : null);
+
+      setLoadError(null);
+      loadedOnce.current = true;
+      setLiveStatus("ready");
+      try {
+        localStorage.setItem(KEY_STORAGE, k);
+      } catch {
+        /* private window; he types it again next time */
+      }
+    },
+    [fetchLiveSet, failLoad, settle],
+  );
+
+  /* What a finished file publish needs: the new live set and the score
+     count, and nothing else. It never touches the config, or publishing
+     the file would revert whatever is half-edited in the panel. */
+  const refreshLiveSet = useCallback(
+    async (raw: string) => {
+      const k = raw.trim();
+      if (!k) return;
+      const seq = ++seqRef.current;
+      const set = await fetchLiveSet(k, seq);
+      if (!set) return;
+      if (set.status === "denied") {
+        setLoadError(null);
+        setLiveStatus("denied");
+        return;
+      }
+      if (set.status === "error") return failLoad(set.message ?? UNREACHABLE);
+      setLive(set.judging ? { count: set.judging.count, publishedAt: set.judging.publishedAt } : null);
+      setLiveJudging(set.judging);
+      setScoreCount(set.scoreCount);
+      setLoadError(null);
+      loadedOnce.current = true;
+      setLiveStatus("ready");
+    },
+    [fetchLiveSet, failLoad],
+  );
 
   useEffect(() => {
     document.title = "Chocolathon — Publish submissions";
@@ -259,29 +368,64 @@ export default function UploadPage() {
   }, []);
 
   /* Sends only the fields named in the patch. The server merges them
-     into the stored config and returns the whole thing, which becomes
-     this page's copy, so a value another page changed survives.
+     into the stored config and returns the whole thing, and this page
+     adopts that answer for everything except what it has edited since
+     the request left.
 
-     Until a stored config exists there is nothing to merge into, and a
-     patch would leave every other field at its empty default. So the
-     first save carries the whole document `base` is holding. */
+     Until a stored config exists there is nothing to merge into, so the
+     first save carries the whole document `base` is holding — after one
+     more GET, because another tab may have published one while this one
+     sat on a twenty-minute-old 404. */
   const postConfig = useCallback(
-    async (patch: Partial<JudgingConfig>, base: JudgingConfig | null): Promise<JudgingConfig | null> => {
-      const body: Partial<JudgingConfig> =
-        storedConfigExists || !base
-          ? patch
-          : {
-              judges: base.judges,
-              minPerTeam: base.minPerTeam,
-              assignments: base.assignments,
-              excluded: base.excluded,
-              closed: base.closed,
-              ...patch,
-            };
+    async (patch: Partial<JudgingConfig>, base: JudgingConfig): Promise<JudgingConfig | null> => {
+      const k = key.trim();
+      const mark = editSeqRef.current;
+
+      if (!storedRef.current) {
+        let check: Response | null = null;
+        try {
+          check = await fetch("/api/judging-config", { cache: "no-store", headers: { "x-upload-key": k } });
+        } catch {
+          check = null;
+        }
+        if (!check) {
+          setConfigError("Could not reach the server. Check your connection and try again.");
+          return null;
+        }
+        if (check.status === 401) {
+          setConfigError("That upload key is not right.");
+          return null;
+        }
+        if (check.ok) {
+          const found = (await check.json().catch(() => null)) as JudgingConfig | null;
+          if (found && Array.isArray(found.judges)) {
+            /* It exists after all. This is a patch, and the fields this
+               tab has not edited are the other tab's now. */
+            storedRef.current = found;
+            settle(found, [], mark);
+          }
+        } else if (check.status !== 404) {
+          setConfigError(`Could not read the stored config (${check.status}). Try again.`);
+          return null;
+        }
+      }
+
+      const stored = storedRef.current;
+      const body: Partial<JudgingConfig> = stored
+        ? patch
+        : {
+            judges: base.judges,
+            minPerTeam: base.minPerTeam,
+            assignments: base.assignments,
+            excluded: base.excluded,
+            closed: base.closed,
+            ...patch,
+          };
+
       try {
         const r = await fetch("/api/judging-config", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-upload-key": key.trim() },
+          headers: { "Content-Type": "application/json", "x-upload-key": k },
           body: JSON.stringify(body),
         });
         const j = (await r.json().catch(() => null)) as (JudgingConfig & { error?: string }) | null;
@@ -293,27 +437,15 @@ export default function UploadPage() {
           setConfigError("The server saved it but sent back something unexpected. Reload the page.");
           return null;
         }
-        /* Adopt the server's copy only for the fields this POST sent, so a
-           Close or Reopen never drops assignment edits the panel has not
-           published yet. A first-run POST carried the whole document, so
-           the whole answer is ours to adopt. */
-        const sentKeys = Object.keys(body) as (keyof JudgingConfig)[];
-        const touchesPanel = sentKeys.some((k) => k === "judges" || k === "minPerTeam" || k === "assignments");
-        setConfig((prev) => {
-          if (!prev || !storedConfigExists) return j;
-          const next: JudgingConfig = { ...prev };
-          for (const k of sentKeys) (next as Record<string, unknown>)[k] = (j as Record<string, unknown>)[k];
-          return next;
-        });
-        setStoredConfigExists(true);
-        if (touchesPanel || !storedConfigExists) setConfigDirty(false);
+        storedRef.current = j;
+        settle(j, Object.keys(body) as (keyof JudgingConfig)[], mark);
         return j;
       } catch {
         setConfigError("Could not reach the server. Check your connection and try again.");
         return null;
       }
     },
-    [key, storedConfigExists],
+    [key, settle],
   );
 
   const publishConfig = useCallback(
@@ -329,19 +461,40 @@ export default function UploadPage() {
   );
 
   /* Optimistic, because the switch should move under the finger, but it
-     moves back if the server refused. */
+     moves back if the server refused — the closed field, and only that
+     field, so a rollback cannot take assignment edits with it. */
   async function toggleClosed() {
     if (!config || configBusy) return;
-    const previous = config;
+    /* On a first run this write carries the whole document, assignments
+       and all. Half-dealt assignments are not something to publish by
+       pressing Close, and Michael would not close before assigning. */
+    if (!storedRef.current && editsRef.current.size > 0) {
+      setConfigResult(null);
+      setConfigError("Publish the assignments first, then close.");
+      return;
+    }
+    const wasClosed = config.closed;
     const next = !config.closed;
     setConfig({ ...config, closed: next });
     setConfigBusy(true);
     setConfigError(null);
     setConfigResult(null);
-    const merged = await postConfig({ closed: next }, previous);
+    const merged = await postConfig(
+      { closed: next },
+      { ...config, assignments: {}, excluded: [], closed: next },
+    );
     if (merged) setConfigResult(next ? "Judging is closed. Judges can read, not save." : "Judging is open again.");
-    else setConfig(previous);
+    else setConfig((prev) => (prev ? { ...prev, closed: wasClosed } : prev));
     setConfigBusy(false);
+  }
+
+  function discardEdits() {
+    const base = storedRef.current ?? seedRef.current;
+    if (!base || configBusy) return;
+    setConfig(base);
+    clearEdits();
+    setConfigError(null);
+    setConfigResult("Discarded your unpublished edits.");
   }
 
   function clearScores() {
@@ -439,7 +592,10 @@ export default function UploadPage() {
 
   const build = parsed?.judging.submissions.filter((s) => s.track === "build") ?? [];
   const pitch = parsed?.judging.submissions.filter((s) => s.track === "pitch") ?? [];
-  const canPublish = !!parsed && parsed.missing.length === 0 && key.trim().length > 0 && !busy;
+  /* Only a set this page has actually re-read can be published over. A
+     stale one still shows, and still warns about orphans, but the write
+     waits for a load that worked. */
+  const canPublish = !!parsed && parsed.missing.length === 0 && liveStatus === "ready" && !busy;
 
   /* Teams the judges can see now that this file does not contain. Their
      scores are keyed by teamKey, so publishing without them leaves those
@@ -467,17 +623,30 @@ export default function UploadPage() {
     void publish();
   }
 
-  /* What the page says when nothing is loaded. Shown under the key field
-     and again where the panel would be, so neither place can claim
-     something is ready to edit. */
+  const publishLabel = busy
+    ? "Publishing…"
+    : liveStatus === "needs-key"
+      ? "Enter the upload key first"
+      : liveStatus === "loading"
+        ? "Loading the live set…"
+        : liveStatus !== "ready"
+          ? "Reload the live set first"
+          : publishArmed
+            ? "Publish anyway"
+            : "Publish to the judges";
+
+  /* What the page says when nothing loaded. Shown under the key field and
+     again where the panel would be, so neither place can claim something
+     is ready to edit. */
   const waitingLine =
     liveStatus === "needs-key"
       ? "Enter the upload key and press Enter to load the live set."
       : liveStatus === "denied"
         ? "That upload key is not right."
-        : liveStatus === "error"
-          ? (loadError ?? "Could not reach the server. Check your connection and try again.")
+        : liveStatus === "error" || liveStatus === "stale"
+          ? (loadError ?? UNREACHABLE)
           : "Loading…";
+  const loadFailed = liveStatus === "error" || liveStatus === "stale";
 
   return (
     <div className="choco-root min-h-screen bg-white">
@@ -516,7 +685,7 @@ export default function UploadPage() {
           </button>
         </div>
 
-        {liveStatus === "error" ? (
+        {loadFailed ? (
           <p role="alert" className="mt-6 border-l-2 border-gold pl-4 text-base text-ink">
             {waitingLine}
           </p>
@@ -655,9 +824,9 @@ export default function UploadPage() {
                 disabled={!canPublish}
                 className="btn-cta disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {busy ? "Publishing…" : publishArmed ? "Publish anyway" : "Publish to the judges"}
+                {publishLabel}
               </button>
-              {key.trim() ? null : <span className="label">Enter the upload key above first.</span>}
+              {liveStatus === "ready" ? null : <span className="label">{waitingLine}</span>}
             </div>
 
             {result ? (
@@ -687,21 +856,21 @@ export default function UploadPage() {
               scoreCount={scoreCount}
               dirty={configDirty}
               onChange={(c) => {
+                const changed = PANEL_KEYS.filter((k) => !config || c[k] !== config[k]);
+                if (changed.length) markEdits(changed);
                 setConfig(c);
-                setConfigDirty(true);
               }}
+              onDiscard={discardEdits}
               publish={publishConfig}
               busy={configBusy}
             />
           ) : (
-            <p
-              className={
-                liveStatus === "error" ? "mt-6 border-l-2 border-gold pl-4 text-base text-ink" : "label mt-6"
-              }
-            >
+            <p className={loadFailed ? "mt-6 border-l-2 border-gold pl-4 text-base text-ink" : "label mt-6"}>
               {waitingLine}
             </p>
           )}
+
+          {config && loadFailed ? <p className="label mt-6">{waitingLine}</p> : null}
 
           {configError ? (
             <p role="alert" className="mt-6 border-l-2 border-gold pl-4 text-base text-ink">
