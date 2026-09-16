@@ -77,7 +77,7 @@ and pushes the vault on its own (`git add -A`). **Never run git in the vault.**
 HTML/JS/CSS prototype, dead as a build target since the 2026-08-17 decision
 (registration runs on a Microsoft Form). Visual reference only.
 
-The unguessable routes (`/judge-c7m2x9`, `/upload-k4n8pq`, `/hq`, `/judging`)
+The unguessable routes (`/judge-c7m2x9`, `/upload-k4n8pq`, `/results-m3v8tq`, `/hq`)
 are the soft gate. They carry `X-Robots-Tag: noindex` in `vercel.json` — keep
 them out of links, sitemaps, and public copy.
 

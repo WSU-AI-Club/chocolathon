@@ -293,9 +293,20 @@ export default function UploadPage() {
           setConfigError("The server saved it but sent back something unexpected. Reload the page.");
           return null;
         }
-        setConfig(j);
+        /* Adopt the server's copy only for the fields this POST sent, so a
+           Close or Reopen never drops assignment edits the panel has not
+           published yet. A first-run POST carried the whole document, so
+           the whole answer is ours to adopt. */
+        const sentKeys = Object.keys(body) as (keyof JudgingConfig)[];
+        const touchesPanel = sentKeys.some((k) => k === "judges" || k === "minPerTeam" || k === "assignments");
+        setConfig((prev) => {
+          if (!prev || !storedConfigExists) return j;
+          const next: JudgingConfig = { ...prev };
+          for (const k of sentKeys) (next as Record<string, unknown>)[k] = (j as Record<string, unknown>)[k];
+          return next;
+        });
         setStoredConfigExists(true);
-        setConfigDirty(false);
+        if (touchesPanel || !storedConfigExists) setConfigDirty(false);
         return j;
       } catch {
         setConfigError("Could not reach the server. Check your connection and try again.");

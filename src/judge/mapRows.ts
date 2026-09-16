@@ -3,8 +3,9 @@
 
    Columns are matched by keyword, not position, so reordering or lightly
    renaming a question does not break it. Missing required columns are
-   reported by name. The same logic lives in pipeline/make-judging.mjs
-   for the command-line fallback; keep the keyword lists in step. */
+   reported by name. The same logic lives in pipeline/make-judging.mjs,
+   the command-line inspector (it no longer feeds the judge page); keep
+   the keyword lists in step. */
 
 export type Submission = {
   n: number;
