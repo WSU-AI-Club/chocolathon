@@ -25,6 +25,7 @@ export default function AssignmentPanel({
   judging,
   config,
   scoreCount,
+  dirty,
   onChange,
   publish,
   busy,
@@ -32,6 +33,9 @@ export default function AssignmentPanel({
   judging: Judging | null;
   config: JudgingConfig;
   scoreCount: number;
+  /* Something here changed and has not been saved. The parent sets it on
+     every onChange and clears it when a save comes back 200. */
+  dirty: boolean;
   onChange: (c: JudgingConfig) => void;
   publish: (c: JudgingConfig) => Promise<void>;
   busy: boolean;
@@ -228,14 +232,17 @@ export default function AssignmentPanel({
         {visible.length === 0 ? <p className="text-base text-ink/80">Nothing published yet to assign.</p> : null}
       </div>
 
-      <button
-        type="button"
-        onClick={() => void publish(config)}
-        disabled={busy}
-        className="btn-cta mt-8 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {busy ? "Publishing…" : "Publish assignments"}
-      </button>
+      <div className="mt-8 flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={() => void publish(config)}
+          disabled={busy}
+          className="btn-cta disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {busy ? "Publishing…" : "Publish assignments"}
+        </button>
+        {dirty ? <span className="label label-accent">Assignments changed and not published.</span> : null}
+      </div>
     </div>
   );
 }

@@ -92,11 +92,26 @@ export default function ResultsPage() {
       if (!sRes.ok) return fail(String(sRes.status));
       if (!jRes.ok && jRes.status !== 404) return fail(String(jRes.status));
       if (!cRes.ok && cRes.status !== 404) return fail(String(cRes.status));
+
+      /* Read and check all three bodies BEFORE anything reaches the
+         screen. Committing the scores first and then failing on the
+         submissions left new scores ranked against the old team list,
+         with a stamp that said the page was current. Either all four
+         values move together or none of them do. */
       const scoreBody = (await sRes.json().catch(() => null)) as { scores?: Score[] } | null;
-      if (!scoreBody || !Array.isArray(scoreBody.scores)) return fail(String(sRes.status));
+      if (!scoreBody || !Array.isArray(scoreBody.scores)) return fail("unreadable scores");
+      const nextJudging = jRes.ok ? ((await jRes.json().catch(() => null)) as Judging | null) : null;
+      if (jRes.ok && (!nextJudging || !Array.isArray(nextJudging.submissions))) {
+        return fail("unreadable submissions");
+      }
+      const nextConfig = cRes.ok ? ((await cRes.json().catch(() => null)) as JudgingConfig | null) : null;
+      if (cRes.ok && (!nextConfig || !Array.isArray(nextConfig.judges))) {
+        return fail("unreadable config");
+      }
+
       setScores(scoreBody.scores);
-      setJudging(jRes.ok ? ((await jRes.json()) as Judging) : null);
-      setConfig(cRes.ok ? ((await cRes.json()) as JudgingConfig) : null);
+      setJudging(nextJudging);
+      setConfig(nextConfig);
       setLoadError(null);
       const now = new Date();
       updatedAtRef.current = now;

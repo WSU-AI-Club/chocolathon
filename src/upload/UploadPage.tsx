@@ -10,11 +10,23 @@
 
    The upload key is asked for once and kept in this browser. It is what
    protects the write and, since the reads carry team and student names,
-   the reads too: nothing loads until the key field has something in it.
+   the reads too. The key field does NOT load on every keystroke: press
+   Enter, leave the field, or click Load. Every load carries a sequence
+   number and a late answer from an older load is thrown away, so a 401
+   from a half-typed key can no longer land on top of a good one.
+
+   Only a 404 from /api/judging-config means "nobody has published a
+   config yet" and lets this page seed the judges from the public hub.
+   Any other refusal leaves the config null and says so: seeding an empty
+   config after a 500 and then saving it would write judges: [] over the
+   real one, and that is the whole panel gone.
 
    Every write to the config sends only the fields this page owns, so
    publishing assignments can no longer revert the close switch or the
-   exclusions the ranking page made a minute earlier.
+   exclusions the ranking page made a minute earlier. The one exception
+   is the first save of a run that found no stored config: that one
+   carries the whole seeded document, because a patch would merge into an
+   empty default and create a config with no judges in it.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -40,37 +52,6 @@ type Parsed = {
 
 type LiveStatus = "needs-key" | "loading" | "ready" | "denied" | "error";
 
-/* "Sugar Is Sweet submitted twice; keeping 9:09 PM." — built from the
-   loser's team name and the winning row's completion time, since that
-   is the row a duplicate note actually means "kept". Used only when the
-   parser did not supply its own reason. */
-function describeDuplicate(loser: Submission, winnerSubmittedAt: string): string {
-  const ms = parseFormsTimeForDisplay(winnerSubmittedAt);
-  const time = ms === null ? winnerSubmittedAt : new Date(ms).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  return `${loser.team} submitted twice; keeping ${time || "the later entry"}.`;
-}
-
-function parseFormsTimeForDisplay(s: string): number | null {
-  const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-  if (!m) return null;
-  const [, mo, d, y, h, mi, sec] = m;
-  let year = parseInt(y, 10);
-  if (year < 100) year += 2000;
-  const dt = new Date(year, parseInt(mo, 10) - 1, parseInt(d, 10), parseInt(h, 10), parseInt(mi, 10), sec ? parseInt(sec, 10) : 0);
-  return Number.isNaN(dt.getTime()) ? null : dt.getTime();
-}
-
-/* The parser flags a team that entered both tracks in its warnings, and
-   every warning is printed above. This is the belt to that braces: if
-   the warning text does not mention it, the row says so itself. */
-function bothTracksNote(s: Submission, warnings: string[]): string | null {
-  const alsoIn = s.alsoIn;
-  if (!alsoIn) return null;
-  const team = s.team || s.teamKey;
-  if (warnings.some((w) => w.includes(team) && /both tracks/i.test(w))) return null;
-  return `${team} is entered in both tracks`;
-}
-
 export default function UploadPage() {
   const [key, setKey] = useState("");
   const [parsed, setParsed] = useState<Parsed | null>(null);
@@ -80,9 +61,15 @@ export default function UploadPage() {
   const [result, setResult] = useState<string | null>(null);
   const [live, setLive] = useState<{ count: number; publishedAt?: string } | null>(null);
   const [liveStatus, setLiveStatus] = useState<LiveStatus>("needs-key");
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
 
   const [config, setConfig] = useState<JudgingConfig | null>(null);
+  /* True once a GET returned a stored config, or once any save came back
+     200. While it is false this page is holding a seeded document nobody
+     has saved yet, and a partial patch would lose most of it. */
+  const [storedConfigExists, setStoredConfigExists] = useState(false);
+  const [configDirty, setConfigDirty] = useState(false);
   const [configBusy, setConfigBusy] = useState(false);
   const [configResult, setConfigResult] = useState<string | null>(null);
   const [configError, setConfigError] = useState<string | null>(null);
@@ -92,19 +79,12 @@ export default function UploadPage() {
   const [clearResult, setClearResult] = useState<string | null>(null);
   const clearTimer = useRef<number | null>(null);
 
-  useEffect(() => {
-    document.title = "Chocolathon — Publish submissions";
-    const tag = document.createElement("meta");
-    tag.name = "robots";
-    tag.content = "noindex, nofollow";
-    document.head.appendChild(tag);
-    try {
-      setKey(localStorage.getItem(KEY_STORAGE) ?? "");
-    } catch {
-      /* private window; the field starts empty */
-    }
-    return () => tag.remove();
-  }, []);
+  /* Every request that writes to the live-set state carries one of these.
+     A response whose number is not the newest is dropped on the floor. */
+  const seqRef = useRef(0);
+  /* The key the last load ran with, so leaving the field does not refetch
+     (and throw away unsaved panel edits) when nothing was typed. */
+  const loadedKey = useRef<string | null>(null);
 
   /* One load for everything behind the key: the published set, the
      config, the saved score count, and the public judge list that seeds
@@ -113,15 +93,27 @@ export default function UploadPage() {
      without one. */
   const loadLive = useCallback(async (raw: string) => {
     const k = raw.trim();
-    if (!k) {
-      setLiveStatus("needs-key");
+    const seq = ++seqRef.current;
+    const stale = () => seq !== seqRef.current;
+    loadedKey.current = k;
+
+    const forget = () => {
       setLive(null);
       setLiveJudging(null);
       setConfig(null);
+      setStoredConfigExists(false);
+      setConfigDirty(false);
       setScoreCount(0);
+    };
+
+    if (!k) {
+      setLiveStatus("needs-key");
+      setLoadError(null);
+      forget();
       return;
     }
     setLiveStatus("loading");
+    setLoadError(null);
     try {
       const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
       const [jRes, cRes, sRes, hubRes] = await Promise.all([
@@ -130,55 +122,135 @@ export default function UploadPage() {
         fetch("/api/scores?all=1", withKey),
         fetch("/api/hub", { cache: "no-store" }),
       ]);
+      if (stale()) return;
 
       if (jRes.status === 401 || cRes.status === 401 || sRes.status === 401) {
         setLiveStatus("denied");
-        setLive(null);
-        setLiveJudging(null);
-        setConfig(null);
-        setScoreCount(0);
+        setLoadError(null);
+        forget();
         return;
       }
 
-      if (jRes.ok) {
-        const j = (await jRes.json()) as Judging;
-        setLive({ count: j.count, publishedAt: j.publishedAt });
-        setLiveJudging(j);
-      } else {
-        setLive(null);
-        setLiveJudging(null);
+      /* A 404 is the quiet state before anything is published. Anything
+         else is a server that did not answer, and this page must not
+         invent a document to stand in for what it could not read. */
+      const refused = (what: string, status: number) => {
+        setLoadError(`Could not load the ${what} (${status}). Nothing here is editable until it loads.`);
+        setLiveStatus("error");
+        forget();
+      };
+
+      if (!jRes.ok && jRes.status !== 404) return refused("published submissions", jRes.status);
+      if (!cRes.ok && cRes.status !== 404) return refused("judging config", cRes.status);
+
+      const nextJudging = jRes.ok ? ((await jRes.json().catch(() => null)) as Judging | null) : null;
+      if (stale()) return;
+      if (jRes.ok && (!nextJudging || !Array.isArray(nextJudging.submissions))) {
+        return refused("published submissions", jRes.status);
       }
 
-      const stored = cRes.ok ? ((await cRes.json()) as JudgingConfig) : null;
-      if (stored) {
-        setConfig(stored);
-      } else {
-        /* First run: no config yet, so seed the judges from the public
-           hub with every one of them switched off. */
-        const hub = hubRes.ok ? ((await hubRes.json()) as HubData) : null;
+      const storedConfig = cRes.ok ? ((await cRes.json().catch(() => null)) as JudgingConfig | null) : null;
+      if (stale()) return;
+      if (cRes.ok && (!storedConfig || !Array.isArray(storedConfig.judges))) {
+        return refused("judging config", cRes.status);
+      }
+
+      let nextConfig = storedConfig;
+      if (!nextConfig) {
+        /* First run, and a real 404 proved it: no config yet, so seed the
+           judges from the public hub with every one of them switched off. */
+        const hub = hubRes.ok ? ((await hubRes.json().catch(() => null)) as HubData | null) : null;
+        if (stale()) return;
         const judges: Judge[] = (hub?.people.preliminary ?? []).map((p) => ({
           id: judgeId(p.name),
           name: p.name,
           tracks: "off",
         }));
-        setConfig({ judges, minPerTeam: 2, assignments: {}, excluded: [], closed: false });
+        nextConfig = { judges, minPerTeam: 2, assignments: {}, excluded: [], closed: false };
       }
 
+      let nextScoreCount = 0;
       if (sRes.ok) {
         const body = await sRes.json().catch(() => ({}));
-        setScoreCount(Array.isArray(body?.scores) ? body.scores.length : 0);
-      } else {
-        setScoreCount(0);
+        if (stale()) return;
+        nextScoreCount = Array.isArray(body?.scores) ? body.scores.length : 0;
+      }
+
+      setLive(nextJudging ? { count: nextJudging.count, publishedAt: nextJudging.publishedAt } : null);
+      setLiveJudging(nextJudging);
+      setConfig(nextConfig);
+      setStoredConfigExists(!!storedConfig);
+      setConfigDirty(false);
+      setScoreCount(nextScoreCount);
+      setLoadError(null);
+      try {
+        localStorage.setItem(KEY_STORAGE, k);
+      } catch {
+        /* private window; he types it again next time */
       }
       setLiveStatus("ready");
     } catch {
+      if (stale()) return;
+      setLoadError("Could not reach the server. Nothing here is editable until it loads.");
       setLiveStatus("error");
+      forget();
+    }
+  }, []);
+
+  /* What a finished publish needs: the new live set and the score count,
+     and nothing else. It must never touch the config, or publishing the
+     file would revert whatever is half-edited in the assignment panel. */
+  const refreshLiveSet = useCallback(async (raw: string) => {
+    const k = raw.trim();
+    if (!k) return;
+    const seq = ++seqRef.current;
+    const stale = () => seq !== seqRef.current;
+    try {
+      const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
+      const [jRes, sRes] = await Promise.all([
+        fetch("/api/judging", withKey),
+        fetch("/api/scores?all=1", withKey),
+      ]);
+      if (stale()) return;
+      if (jRes.ok) {
+        const j = (await jRes.json().catch(() => null)) as Judging | null;
+        if (stale()) return;
+        if (j && Array.isArray(j.submissions)) {
+          setLive({ count: j.count, publishedAt: j.publishedAt });
+          setLiveJudging(j);
+        }
+      } else if (jRes.status === 404) {
+        setLive(null);
+        setLiveJudging(null);
+      }
+      if (sRes.ok) {
+        const body = await sRes.json().catch(() => ({}));
+        if (stale()) return;
+        setScoreCount(Array.isArray(body?.scores) ? body.scores.length : 0);
+      }
+    } catch {
+      /* The publish itself already said what happened. Leave the panel. */
     }
   }, []);
 
   useEffect(() => {
-    void loadLive(key);
-  }, [key, loadLive]);
+    document.title = "Chocolathon — Publish submissions";
+    const tag = document.createElement("meta");
+    tag.name = "robots";
+    tag.content = "noindex, nofollow";
+    document.head.appendChild(tag);
+    let stored = "";
+    try {
+      stored = localStorage.getItem(KEY_STORAGE) ?? "";
+    } catch {
+      /* private window; the field starts empty */
+    }
+    if (stored) {
+      setKey(stored);
+      void loadLive(stored);
+    }
+    return () => tag.remove();
+  }, [loadLive]);
 
   useEffect(() => {
     return () => {
@@ -188,14 +260,29 @@ export default function UploadPage() {
 
   /* Sends only the fields named in the patch. The server merges them
      into the stored config and returns the whole thing, which becomes
-     this page's copy, so a value another page changed survives. */
+     this page's copy, so a value another page changed survives.
+
+     Until a stored config exists there is nothing to merge into, and a
+     patch would leave every other field at its empty default. So the
+     first save carries the whole document `base` is holding. */
   const postConfig = useCallback(
-    async (patch: Partial<JudgingConfig>): Promise<JudgingConfig | null> => {
+    async (patch: Partial<JudgingConfig>, base: JudgingConfig | null): Promise<JudgingConfig | null> => {
+      const body: Partial<JudgingConfig> =
+        storedConfigExists || !base
+          ? patch
+          : {
+              judges: base.judges,
+              minPerTeam: base.minPerTeam,
+              assignments: base.assignments,
+              excluded: base.excluded,
+              closed: base.closed,
+              ...patch,
+            };
       try {
         const r = await fetch("/api/judging-config", {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-upload-key": key.trim() },
-          body: JSON.stringify(patch),
+          body: JSON.stringify(body),
         });
         const j = (await r.json().catch(() => null)) as (JudgingConfig & { error?: string }) | null;
         if (!r.ok) {
@@ -207,13 +294,15 @@ export default function UploadPage() {
           return null;
         }
         setConfig(j);
+        setStoredConfigExists(true);
+        setConfigDirty(false);
         return j;
       } catch {
         setConfigError("Could not reach the server. Check your connection and try again.");
         return null;
       }
     },
-    [key],
+    [key, storedConfigExists],
   );
 
   const publishConfig = useCallback(
@@ -221,7 +310,7 @@ export default function UploadPage() {
       setConfigBusy(true);
       setConfigError(null);
       setConfigResult(null);
-      const merged = await postConfig({ judges: c.judges, minPerTeam: c.minPerTeam, assignments: c.assignments });
+      const merged = await postConfig({ judges: c.judges, minPerTeam: c.minPerTeam, assignments: c.assignments }, c);
       if (merged) setConfigResult("Assignments published. Judges see them on refresh.");
       setConfigBusy(false);
     },
@@ -238,7 +327,7 @@ export default function UploadPage() {
     setConfigBusy(true);
     setConfigError(null);
     setConfigResult(null);
-    const merged = await postConfig({ closed: next });
+    const merged = await postConfig({ closed: next }, previous);
     if (merged) setConfigResult(next ? "Judging is closed. Judges can read, not save." : "Judging is open again.");
     else setConfig(previous);
     setConfigBusy(false);
@@ -328,7 +417,7 @@ export default function UploadPage() {
       } else {
         setResult(`Published ${j.count} submissions. Judges refresh and they are there.`);
         setPublishArmed(false);
-        void loadLive(key);
+        void refreshLiveSet(key);
       }
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
@@ -367,6 +456,18 @@ export default function UploadPage() {
     void publish();
   }
 
+  /* What the page says when nothing is loaded. Shown under the key field
+     and again where the panel would be, so neither place can claim
+     something is ready to edit. */
+  const waitingLine =
+    liveStatus === "needs-key"
+      ? "Enter the upload key and press Enter to load the live set."
+      : liveStatus === "denied"
+        ? "That upload key is not right."
+        : liveStatus === "error"
+          ? (loadError ?? "Could not reach the server. Check your connection and try again.")
+          : "Loading…";
+
   return (
     <div className="choco-root min-h-screen bg-white">
       <main className="mx-auto max-w-3xl px-5 pb-32 pt-16 sm:px-8">
@@ -379,26 +480,43 @@ export default function UploadPage() {
           below, check the preview, publish. The judge page updates on refresh.
         </p>
 
-        <label className="mt-8 block max-w-xs">
-          <span className="label">Upload key</span>
-          <input
-            type="password"
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            autoComplete="off"
-            className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
-          />
-        </label>
+        <div className="mt-8 flex max-w-md flex-wrap items-end gap-3">
+          <label className="min-w-[12rem] flex-1">
+            <span className="label">Upload key</span>
+            <input
+              type="password"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  void loadLive(key);
+                }
+              }}
+              onBlur={() => {
+                if (key.trim() !== loadedKey.current) void loadLive(key);
+              }}
+              autoComplete="off"
+              className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
+            />
+          </label>
+          <button type="button" onClick={() => void loadLive(key)} className="btn-ghost-sm">
+            Load
+          </button>
+        </div>
 
-        <p className="label mt-6">
-          {liveStatus === "needs-key"
-            ? "Enter the upload key to load the live set."
-            : liveStatus === "loading"
-              ? "Loading the live set…"
-              : liveStatus === "denied"
-                ? "That upload key is not right."
-                : liveStatus === "error"
-                  ? "Could not reach the server. Check your connection and try again."
+        {liveStatus === "error" ? (
+          <p role="alert" className="mt-6 border-l-2 border-gold pl-4 text-base text-ink">
+            {waitingLine}
+          </p>
+        ) : (
+          <p className="label mt-6">
+            {liveStatus === "needs-key"
+              ? "Enter the upload key and press Enter to load the live set."
+              : liveStatus === "loading"
+                ? "Loading the live set…"
+                : liveStatus === "denied"
+                  ? "That upload key is not right."
                   : live
                     ? `Judges currently see ${live.count} submissions` +
                       (live.publishedAt
@@ -409,7 +527,8 @@ export default function UploadPage() {
                           })}`
                         : "")
                     : "Judges currently see nothing published"}
-        </p>
+          </p>
+        )}
 
         <label
           onDragOver={(e) => {
@@ -463,14 +582,9 @@ export default function UploadPage() {
 
             {parsed.dropped.length ? (
               <ul className="mt-5 space-y-1 border-l-2 border-gold pl-4 text-base text-ink">
-                {parsed.dropped.map((d) => {
-                  const winner = parsed.judging.submissions.find((s) => s.n === d.duplicateOf);
-                  return (
-                    <li key={`${d.team}-${d.n}`}>
-                      {d.duplicateReason ?? describeDuplicate(d, winner?.submittedAt ?? d.submittedAt)}
-                    </li>
-                  );
-                })}
+                {parsed.dropped.map((d) => (
+                  <li key={`${d.team}-${d.n}`}>{d.duplicateReason}</li>
+                ))}
               </ul>
             ) : null}
 
@@ -504,29 +618,23 @@ export default function UploadPage() {
             ) : null}
 
             <ol className="mt-6 divide-y divide-ink/10 border-y border-ink/10">
-              {parsed.judging.submissions.map((s) => {
-                const bothTracks = bothTracksNote(s, parsed.warnings);
-                return (
-                  <li key={s.n} className="grid gap-1 py-3 sm:grid-cols-[3rem_1fr] sm:gap-4">
-                    <span className="label">{s.track === "build" ? "Build" : "Pitch"}</span>
-                    <span className="min-w-0">
-                      <span className="block text-base font-semibold text-ink">
-                        {s.team || <em className="font-normal text-ink/80">no team name</em>}
-                        {s.prompt ? <span className="label ml-3">{s.prompt}</span> : null}
-                      </span>
-                      <span className="block truncate text-sm text-ink/80">
-                        {s.sentence || s.product}
-                      </span>
-                      {bothTracks ? (
-                        <span className="block text-sm text-amber-700">{bothTracks}</span>
-                      ) : null}
-                      {!s.product || !s.video ? (
-                        <span className="label label-accent block">missing a link</span>
-                      ) : null}
+              {parsed.judging.submissions.map((s) => (
+                <li key={s.n} className="grid gap-1 py-3 sm:grid-cols-[3rem_1fr] sm:gap-4">
+                  <span className="label">{s.track === "build" ? "Build" : "Pitch"}</span>
+                  <span className="min-w-0">
+                    <span className="block text-base font-semibold text-ink">
+                      {s.team || <em className="font-normal text-ink/80">no team name</em>}
+                      {s.prompt ? <span className="label ml-3">{s.prompt}</span> : null}
                     </span>
-                  </li>
-                );
-              })}
+                    <span className="block truncate text-sm text-ink/80">
+                      {s.sentence || s.product}
+                    </span>
+                    {!s.product || !s.video ? (
+                      <span className="label label-accent block">missing a link</span>
+                    ) : null}
+                  </span>
+                </li>
+              ))}
             </ol>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -566,19 +674,21 @@ export default function UploadPage() {
               judging={liveJudging}
               config={config}
               scoreCount={scoreCount}
-              onChange={setConfig}
+              dirty={configDirty}
+              onChange={(c) => {
+                setConfig(c);
+                setConfigDirty(true);
+              }}
               publish={publishConfig}
               busy={configBusy}
             />
           ) : (
-            <p className="label mt-6">
-              {liveStatus === "needs-key"
-                ? "Enter the upload key to load the live set."
-                : liveStatus === "denied"
-                  ? "That upload key is not right."
-                  : liveStatus === "error"
-                    ? "Could not reach the server. Check your connection and try again."
-                    : "Loading…"}
+            <p
+              className={
+                liveStatus === "error" ? "mt-6 border-l-2 border-gold pl-4 text-base text-ink" : "label mt-6"
+              }
+            >
+              {waitingLine}
             </p>
           )}
 
@@ -613,7 +723,12 @@ export default function UploadPage() {
           <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
             Clear all scores.
           </h2>
-          <button type="button" onClick={clearScores} className="btn-ghost mt-4">
+          <button
+            type="button"
+            onClick={clearScores}
+            disabled={!config}
+            className="btn-ghost mt-4 disabled:cursor-not-allowed disabled:opacity-40"
+          >
             {clearArmed ? `Click again to delete ${scoreCount} scores` : "Clear every score"}
           </button>
           <p className="label mt-3">Only for rehearsal. This deletes every saved score.</p>

@@ -1,36 +1,54 @@
 #!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════════════════
-   make-judging — turn the submission form's export into the judge page.
+   make-judging — turn a submission-form export into the judging JSON,
+   from the command line.
 
-   ON THE DAY (2:00 PM, the moment the form closes):
+   THE DAY-OF PATH IS THE UPLOAD PAGE, NOT THIS SCRIPT. At 2:00 Michael
+   opens /upload-k4n8pq, drags the workbook Microsoft Forms produced onto
+   it, checks the preview and clicks Publish. That posts the set to
+   /api/judging, which keeps it in the private blob store behind the
+   upload key, and the judges see it on refresh. Nothing is committed,
+   nothing is deployed, and no student names land in this repo.
 
-     1. In Microsoft Forms, open the submission form → Responses →
-        "Open in Excel". Save that workbook as CSV (File → Save As →
-        CSV UTF-8). Call it responses.csv.
-     2. From the repo root:
-           node pipeline/make-judging.mjs responses.csv
-        It writes public/judging/submissions.json.
-     3. git add public/judging && git commit -m "Judging: 2:00 export"
-        && git push
-        The deploy takes about fifteen seconds. The judge page reads the
-        JSON on load, so judges refresh once.
+   This script is the backstop. It exists for two things:
+
+     1. Inspecting an export without a browser. Save the workbook as CSV
+        (File → Save As → CSV UTF-8), then:
+           node pipeline/make-judging.mjs responses.csv out.json
+        It writes out.json and prints every warning the upload page would
+        have shown.
+
+     2. Publishing by hand if the upload page is unavailable:
+           curl -X POST -H "x-upload-key: ..." \
+             -H "content-type: application/json" \
+             --data-binary @out.json \
+             https://chocolathon.vercel.app/api/judging
+
+   The output path is a required argument and there is no default. This
+   script used to write public/judging/submissions.json, which the site
+   served to anyone who guessed the URL: every team name, every student
+   name, every email address, no key. Keep the output out of public/ and
+   out of git.
 
    Columns are matched by keyword, not position, so reordering the form
    does not break this. If a column is missing the script says which.
    Same keyword lists as src/judge/mapRows.ts (the browser upload path);
    keep the two in step.
 
-   Rehearsal: node pipeline/make-judging.mjs pipeline/sample-responses.csv
-   writes the same file with `"sample": true`, and the judge page shows a
-   "rehearsal data" banner. Replace it with the real export on the day.
+   Rehearsal data comes from pipeline/make-rehearsal.mjs, which writes a
+   fictional 30-team workbook. Feeding this script a file whose name
+   contains "sample" marks the output `"sample": true`, and the judge
+   page shows a rehearsal banner.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { resolve, basename } from "node:path";
+import { resolve, basename, dirname } from "node:path";
 
 const input = process.argv[2];
-if (!input) {
-  console.error("usage: node pipeline/make-judging.mjs responses.csv");
+const output = process.argv[3];
+if (!input || !output) {
+  console.error("usage: node pipeline/make-judging.mjs <responses.csv> <out.json>");
+  console.error("the output path is required; this script never writes into public/");
   process.exit(1);
 }
 
@@ -315,10 +333,11 @@ const out = {
   count: submissions.length,
   submissions,
 };
-mkdirSync(resolve("public/judging"), { recursive: true });
-writeFileSync(resolve("public/judging/submissions.json"), JSON.stringify(out, null, 2) + "\n");
+const outPath = resolve(output);
+mkdirSync(dirname(outPath), { recursive: true });
+writeFileSync(outPath, JSON.stringify(out, null, 2) + "\n");
 console.log(
-  `wrote public/judging/submissions.json: ${submissions.length} submissions ` +
+  `wrote ${output}: ${submissions.length} submissions ` +
     `(${submissions.filter((s) => s.track === "build").length} build, ` +
     `${submissions.filter((s) => s.track === "pitch").length} pitch)` +
     (out.sample ? " [SAMPLE]" : ""),
