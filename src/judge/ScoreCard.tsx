@@ -9,12 +9,17 @@
    or the judge recused, and twenty characters of feedback unless it is
    a recusal. Save stays disabled until the card is valid, so a judge
    never gets a red refusal for something the page could have told them.
+
+   One card is on the screen at a time now (JudgePage's stepper), and
+   the card tells the page whether it differs from what is stored, so
+   the page can hold Back, Next and the pills until it does not. Every
+   other rule below is unchanged.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useRef, useState } from "react";
 
 import type { Block } from "../competitor/types";
-import { GATE_LABELS, type Gates, type Score } from "../judging/types";
+import { GATE_LABELS, scoreTotal, type Gates, type Score } from "../judging/types";
 import type { Submission } from "./mapRows";
 import { stampOf, type SaveInput, type SaveState } from "./useScores";
 import VideoEmbed from "./VideoEmbed";
@@ -49,6 +54,18 @@ function figure(x: Score): string {
   return String(x.total);
 }
 
+/* The confirmation, in one sentence a judge can read at arm's length
+   without going back up the card to check what they pressed. Michael
+   asked for it on the 15th: "Saved 2:41" told him a request had
+   finished, not that this team was done. */
+function savedLine(team: string, score: Score, at: string): string {
+  if (score.recused) return "Saved. You sat this one out.";
+  if (score.lines === null) return "Saved. Gate failed, not scored.";
+  const total = score.total ?? scoreTotal(score.lines);
+  const clock = clockTime(at);
+  return clock ? `Saved. ${team}, ${total} of 40, ${clock}.` : `Saved. ${team}, ${total} of 40.`;
+}
+
 export default function ScoreCard({
   submission,
   rubric,
@@ -62,6 +79,7 @@ export default function ScoreCard({
   onSave,
   onSendUnsent,
   onKeepSaved,
+  onChanged,
 }: {
   submission: Submission;
   rubric: Rubric | null;
@@ -77,6 +95,9 @@ export default function ScoreCard({
   onSave: (score: SaveInput) => Score | null;
   onSendUnsent: () => Score | null;
   onKeepSaved: () => void;
+  /* Reported with the team key, because the page holds one answer and
+     the card it belongs to can be swapped out from under it. */
+  onChanged: (teamKey: string, changed: boolean) => void;
 }) {
   const s = submission;
   const [lines, setLines] = useState<(number | null)[]>(() => score?.lines ?? [null, null, null, null]);
@@ -128,6 +149,14 @@ export default function ScoreCard({
       !sameGates(gates, score.gates) ||
       JSON.stringify(lines) !== JSON.stringify(score.lines ?? [null, null, null, null])
     : lines.some((n) => n !== null) || trimmed > 0 || gateFailed || recused;
+
+  /* The page cannot see the fields, so the card says whether they
+     differ from what is stored. That is the whole of what holds the
+     stepper: a save in flight, a retry and an unsent draft are all
+     things the page already knows about. */
+  useEffect(() => {
+    onChanged(s.teamKey, changed);
+  }, [changed, onChanged, s.teamKey]);
 
   const criteria = rubric?.items ?? null;
 
@@ -207,10 +236,10 @@ export default function ScoreCard({
   } else if (heldQuietly) {
     statusText = "Not sent. Kept on this device. Save sends it.";
     statusClass = "label !text-goldink";
-  } else if (state.kind === "saved") {
-    statusText = `Saved ${clockTime(state.at)}`;
+  } else if (state.kind === "saved" && score) {
+    statusText = savedLine(s.team, score, state.at);
   } else if (score) {
-    statusText = `Saved ${clockTime(score.savedAt)}`;
+    statusText = savedLine(s.team, score, score.savedAt);
   }
 
   return (

@@ -408,6 +408,11 @@ export function useScores(judgeId: string | null, token: string | null, closed: 
      judge's unsent work, waiting for them to say which score they meant. */
   const [unsent, setUnsent] = useState<Record<string, Score>>({});
   const [loadError, setLoadError] = useState<string | null>(null);
+  /* False until the one GET has been answered (or failed). The stepper
+     waits for it: "the first unscored team" is not a question that can
+     be answered against an empty map, and a judge who lands on team one
+     and is then moved under their thumb has lost their place. */
+  const [loaded, setLoaded] = useState(false);
   const [unauthorized, setUnauthorized] = useState(false);
   const timers = useRef<Record<string, number>>({});
   /* One entry per team: the latest save that has not been acknowledged.
@@ -485,6 +490,7 @@ export function useScores(judgeId: string | null, token: string | null, closed: 
     setStates({});
     setUnsent({});
     setLoadError(null);
+    setLoaded(false);
     for (const key of Object.keys(timers.current)) window.clearInterval(timers.current[key]);
     timers.current = {};
     pending.current = {};
@@ -517,6 +523,8 @@ export function useScores(judgeId: string | null, token: string | null, closed: 
         pending.current[score.teamKey] = score;
         void attemptRef.current?.(score.teamKey);
       },
+    }).then(() => {
+      if (!dead()) setLoaded(true);
     });
 
     return () => {
@@ -592,5 +600,5 @@ export function useScores(judgeId: string | null, token: string | null, closed: 
     [judgeId, promptDeps],
   );
 
-  return { scores, states, unsent, loadError, unauthorized, save, sendUnsent, keepSaved };
+  return { scores, states, unsent, loaded, loadError, unauthorized, save, sendUnsent, keepSaved };
 }

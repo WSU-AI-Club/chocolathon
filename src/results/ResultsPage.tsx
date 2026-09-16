@@ -363,9 +363,15 @@ function TrackTable({
               <th className="label py-2 pr-2">Prompt</th>
               <th className="label py-2 pr-2">Mean</th>
               <th className="label py-2 pr-2">Judges</th>
-              <th className="label py-2 pr-2">L1</th>
-              <th className="label py-2 pr-2">L2</th>
-              <th className="label py-2 pr-2">Median</th>
+              <th className="label whitespace-nowrap py-2 pr-2" title="Tie-break: mean score on rubric line 1">
+                Line 1
+              </th>
+              <th className="label whitespace-nowrap py-2 pr-2" title="Tie-break: mean score on rubric line 2">
+                Line 2
+              </th>
+              <th className="label py-2 pr-2" title="Tie-break: median judge total">
+                Median
+              </th>
               <th className="label py-2 pr-2">Flags</th>
             </tr>
           </thead>

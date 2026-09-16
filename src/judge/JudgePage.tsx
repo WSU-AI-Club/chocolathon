@@ -8,10 +8,26 @@
    device on first open and stripped from the address bar, so a judge
    who reloads or shares a screenshot does not leak it.
 
-   Then: pick your name once, work the queue Michael dealt you, watch
-   each video inside the card, score four lines, write the feedback the
-   team will read, Save. Saves that fail are kept on the device and
-   retried; nothing is ever lost quietly (see useScores.ts).
+   Then: pick your name once, and work one team at a time. Michael read
+   the live page on the 15th and asked for a stepper instead of a stack:
+   the strip of pills says where the judge is in the hand they were
+   dealt, one card is mounted under it, and Back and Next move between
+   them. One card mounted means one video loading, which is the whole
+   point on a phone on a conference wifi; nine embeds racing each other
+   was the version he saw.
+
+   The stepper will not let a judge walk away from work that is not
+   stored. Next is dark until this team has a score on the server (a
+   recusal and a failed gate are scores), and while the card differs
+   from what is stored, or a save is in the air, or this device is
+   holding a draft it never sent, Back, Next and every pill are held
+   with one sentence saying why. Closed judging drops all of it: there
+   is nothing left to save and the whole track is there to read.
+
+   Saves that fail are kept on the device and retried; nothing is ever
+   lost quietly (see useScores.ts). Where the judge is, and whether they
+   may leave, are decided in stepper.ts, where both can be tested
+   without a browser.
 
    Three reads, all no-store: /api/judging (the published submissions),
    /api/judging-config (judges, assignments, the closed switch), and
@@ -21,12 +37,25 @@
    score. Only the last one is optional.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Block, HubData } from "../competitor/types";
-import { scoreTotal, type JudgingConfig, type Score, type Track } from "../judging/types";
+import type { JudgingConfig, Score, Track } from "../judging/types";
 import type { Judging, Submission } from "./mapRows";
 import ScoreCard from "./ScoreCard";
+import {
+  backPosition,
+  canAdvance,
+  canGoBack,
+  enterOthers,
+  firstUnscored,
+  lockLine,
+  markFor,
+  navLocked,
+  nextPosition,
+  type NavReason,
+  type Position,
+} from "./stepper";
 import { useScores, type SaveInput, type SaveState } from "./useScores";
 import "../chocolathon.css";
 
@@ -198,7 +227,7 @@ export default function JudgePage() {
   const closedYet: boolean | null = load.done ? (load.config?.closed ?? false) : null;
   const closed = closedYet === true;
 
-  const { scores, states, unsent, loadError, unauthorized, save, sendUnsent, keepSaved } = useScores(
+  const { scores, states, unsent, loaded, loadError, unauthorized, save, sendUnsent, keepSaved } = useScores(
     judge,
     token,
     closedYet,
@@ -261,7 +290,104 @@ export default function JudgePage() {
   const promptTitle = (id: string) => load.hub?.prompts.find((p) => p.id === id)?.title ?? "";
 
   const scoredCount = mine.filter((s) => scores[s.teamKey]).length;
-  const firstUnscored = mine.find((s) => !scores[s.teamKey])?.teamKey ?? null;
+
+  /* ── the stepper ──────────────────────────────────────────────────
+     Where the judge is, what the card on the screen has said about
+     itself, and one counter, so a move puts the new card under the
+     header instead of leaving the judge halfway down the old one. */
+  const [pos, setPos] = useState<Position>({ phase: "assigned", index: 0, ended: false });
+  const [edited, setEdited] = useState<{ key: string; on: boolean }>({ key: "", on: false });
+  const placedFor = useRef<string | null>(null);
+  const [navAt, setNavAt] = useState(0);
+  const cardTop = useRef<HTMLDivElement>(null);
+
+  const onChanged = useCallback((teamKey: string, on: boolean) => {
+    setEdited((prev) => (prev.key === teamKey && prev.on === on ? prev : { key: teamKey, on }));
+  }, []);
+
+  /* Landing. Once per judge and track, and only once the scores are in:
+     "the first unscored team" against an empty map is always team one,
+     and a judge moved off their card a second after they arrived has
+     lost their place. */
+  useEffect(() => {
+    if (!judge || !load.done || !loaded) return;
+    const k = `${judge}|${track}`;
+    if (placedFor.current === k) return;
+    placedFor.current = k;
+    setPos({
+      phase: "assigned",
+      index: firstUnscored(
+        mine.map((s) => s.teamKey),
+        scores,
+      ),
+      ended: mine.length === 0,
+    });
+    setEdited({ key: "", on: false });
+  }, [judge, track, load.done, loaded, mine, scores]);
+
+  const list = pos.phase === "assigned" ? mine : others;
+  const index = Math.min(pos.index, Math.max(0, list.length - 1));
+  const showEnd = pos.ended || list.length === 0;
+  const current = showEnd ? null : (list[index] ?? null);
+  const currentKey = current?.teamKey ?? "";
+  const here: Position = { phase: pos.phase, index, ended: showEnd };
+
+  const cardState = useCallback(
+    (teamKey: string): SaveState =>
+      noKey[teamKey] ? { kind: "refused", message: NO_TEAM_KEY } : (states[teamKey] ?? { kind: "idle" }),
+    [noKey, states],
+  );
+
+  const st = cardState(currentKey);
+  /* An unsent draft is a question the judge has not answered yet
+     (ScoreCard's Send / Keep block), and an unanswered question is
+     unsaved work. A refusal is not: there is nothing a judge can do
+     about a score the server will not take, so it holds nobody here. */
+  const reason: NavReason = closed || !current
+    ? null
+    : edited.key === currentKey && edited.on
+      ? "edits"
+      : st.kind === "saving"
+        ? "saving"
+        : st.kind === "retrying"
+          ? "retrying"
+          : unsent[currentKey]
+            ? "prompt"
+            : null;
+
+  const locked = navLocked(closed, reason);
+  const saved = Boolean(scores[currentKey]);
+  const nextOk = canAdvance(closed, reason, saved);
+  const backOk = !locked && canGoBack(here, mine.length, others.length);
+
+  const move = (next: Position) => {
+    setPos(next);
+    setNavAt((n) => n + 1);
+  };
+  const goNext = () => {
+    if (!nextOk) return;
+    move(nextPosition(here, mine.length, others.length));
+  };
+  const goBack = () => {
+    if (!backOk) return;
+    move(backPosition(here, mine.length, others.length));
+  };
+  const goTo = (i: number) => {
+    if (locked) return;
+    move({ phase: pos.phase, index: i, ended: false });
+  };
+  const goOthers = () => {
+    const next = enterOthers(others.length);
+    if (next) move(next);
+  };
+  const goAssigned = () => {
+    move({ phase: "assigned", index: Math.max(0, mine.length - 1), ended: mine.length > 0 });
+  };
+
+  useEffect(() => {
+    if (!navAt) return;
+    cardTop.current?.scrollIntoView({ block: "start" });
+  }, [navAt]);
 
   /* A submissions blob published before teamKey existed gives the cards
      a key this page invented. The server keys scores by the published
@@ -297,13 +423,6 @@ export default function JudgePage() {
     [missingKey, sendUnsent],
   );
 
-  const cardState = (teamKey: string): SaveState =>
-    noKey[teamKey] ? { kind: "refused", message: NO_TEAM_KEY } : (states[teamKey] ?? { kind: "idle" });
-
-  const jump = (teamKey: string) => {
-    document.getElementById(`s-${teamKey}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const switchJudge = () => {
     try {
       localStorage.removeItem(JUDGE_KEY);
@@ -318,6 +437,21 @@ export default function JudgePage() {
     setPanelChanged(false);
     setJudge(id);
   };
+
+  /* The end screen only claims what is true. Stepping through saves
+     every card on the way, but a judge who jumped to the last pill and
+     pressed Next did not, and "All 9 saved" would be the page telling
+     them something it cannot see. */
+  const endLine =
+    pos.phase === "others"
+      ? "That is every team in this track. Thank you."
+      : mine.length === 0
+        ? "No teams are assigned to you in this track."
+        : scoredCount < mine.length
+          ? `${scoredCount} of ${mine.length} assigned teams saved. The rest are in the strip above.`
+          : mine.length === 1
+            ? "Your one assigned team is saved. Thank you."
+            : `All ${mine.length} assigned teams saved. Thank you.`;
 
   /* Nothing renders without the token, on purpose. */
   if (!token || unauthorized || tokenRefused) {
@@ -348,9 +482,10 @@ export default function JudgePage() {
                   role="tab"
                   type="button"
                   aria-selected={track === t}
+                  disabled={locked}
                   onClick={() => setTrack(t)}
                   className={
-                    "label px-4 py-2 transition-colors " +
+                    "label px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 " +
                     (track === t ? "bg-ink !text-white" : "bg-white hover:!text-ink")
                   }
                 >
@@ -412,41 +547,57 @@ export default function JudgePage() {
               </p>
             ) : null}
 
-            <div className="mt-8 border-y border-ink/15">
-              {mine.length === 0 ? (
-                <p className="py-5 text-base leading-relaxed text-ink/80">
-                  No teams are assigned to you in this track yet. Everything in the track is below.
-                </p>
+            {/* ── the progress strip ─────────────────────────────────── */}
+            <nav aria-label="Teams" className="mt-6 border-y border-ink/15 py-3">
+              {pos.phase === "others" ? <p className="label mb-2">Not assigned to you</p> : null}
+              {list.length === 0 ? (
+                <p className="label py-1">Nothing in this track yet.</p>
               ) : (
-                <ul>
-                  {mine.map((s) => {
+                <ul className="flex flex-wrap gap-1.5">
+                  {list.map((s, i) => {
                     const sc: Score | undefined = scores[s.teamKey];
-                    const st = states[s.teamKey];
-                    const amber = Boolean((st && (st.kind === "retrying" || st.kind === "refused")) || unsent[s.teamKey]);
+                    const cs = states[s.teamKey];
+                    /* Amber is "the server has not confirmed this yet",
+                       which a save in flight is too. Without it a team
+                       being retried every ten seconds blinks back to
+                       black for the length of each attempt. */
+                    const amber = Boolean(
+                      (cs && (cs.kind === "saving" || cs.kind === "retrying" || cs.kind === "refused")) ||
+                        noKey[s.teamKey] ||
+                        unsent[s.teamKey],
+                    );
+                    const mark = markFor(sc, amber);
+                    const on = !showEnd && s.teamKey === currentKey;
                     return (
-                      <li key={s.teamKey} className="border-b border-ink/10 last:border-b-0">
+                      <li key={s.teamKey}>
                         <button
                           type="button"
-                          onClick={() => jump(s.teamKey)}
+                          disabled={locked}
+                          aria-current={on ? "true" : undefined}
+                          onClick={() => goTo(i)}
                           className={
-                            "flex w-full items-center justify-between gap-4 px-2 py-3 text-left transition-colors hover:bg-ink/[0.04] " +
-                            (s.teamKey === firstUnscored ? "bg-ink/[0.04]" : "")
+                            "flex max-w-[15rem] items-center gap-2 rounded-sm border px-2.5 py-1.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 " +
+                            (on ? "border-ink bg-ink" : "border-ink/20 bg-white hover:border-ink/50 hover:bg-ink/[0.04]")
                           }
                         >
-                          <span className="min-w-0">
-                            <span className="block truncate text-base font-semibold leading-snug text-ink">
-                              {s.team}
-                            </span>
-                            <span className="label">{s.prompt || s.promptRaw || "No prompt"}</span>
-                          </span>
-                          <span className={"label shrink-0 " + (amber ? "!text-goldink" : "label-strong")}>
-                            {sc?.recused
-                              ? "Recused"
-                              : sc && sc.lines === null
-                                ? "Gate"
-                                : sc
-                                  ? `✓ ${sc.total ?? scoreTotal(sc.lines) ?? ""}`
-                                  : "○"}
+                          <span className={"label truncate " + (on ? "!text-white" : "label-strong")}>{s.team}</span>
+                          {/* Amber survives on the pill the judge is
+                              standing on: the lighter gold reads on
+                              ink, and a save that has not landed is
+                              exactly the thing not to lose. */}
+                          <span
+                            className={
+                              "label shrink-0 tabular-nums " +
+                              (on
+                                ? mark.amber
+                                  ? "!text-gold"
+                                  : "!text-white"
+                                : mark.amber
+                                  ? "!text-goldink"
+                                  : "label-strong")
+                            }
+                          >
+                            {mark.text}
                           </span>
                         </button>
                       </li>
@@ -454,52 +605,86 @@ export default function JudgePage() {
                   })}
                 </ul>
               )}
+            </nav>
+
+            <div ref={cardTop} className="scroll-mt-24">
+              {current ? (
+                <>
+                  <ol className="mt-2">
+                    <ScoreCard
+                      key={current.teamKey}
+                      submission={current}
+                      rubric={rubric}
+                      promptTitle={promptTitle(current.prompt)}
+                      score={scores[current.teamKey]}
+                      state={st}
+                      closed={closed}
+                      judgeId={judge}
+                      assigned={pos.phase === "assigned"}
+                      unsentDraft={unsent[current.teamKey]}
+                      onSave={guardedSave}
+                      onSendUnsent={() => guardedSendUnsent(current.teamKey)}
+                      onKeepSaved={() => keepSaved(current.teamKey)}
+                      onChanged={onChanged}
+                    />
+                  </ol>
+
+                  {/* ── Back, where you are, Next ───────────────────── */}
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                    {/* Dimmed rather than removed when the lock is on:
+                        the control keeps its place, and the sentence
+                        under the row says what it is waiting for. */}
+                    <button
+                      type="button"
+                      className="btn-ghost disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={!backOk}
+                      onClick={goBack}
+                    >
+                      Back
+                    </button>
+                    <span className="label order-last w-full text-center sm:order-none sm:w-auto">
+                      Team {index + 1} of {list.length}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn-cta disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled={!nextOk}
+                      onClick={goNext}
+                    >
+                      Next
+                    </button>
+                  </div>
+                  {/* Always here, so the control row does not jump a line
+                      the moment a judge starts typing. */}
+                  <p className="label mt-3 !text-goldink" style={locked ? undefined : { visibility: "hidden" }}>
+                    {lockLine(reason) || lockLine("edits")}
+                  </p>
+                </>
+              ) : (
+                <section className="mt-10 border-t border-ink/15 pt-10">
+                  <h2 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink">
+                    {endLine}
+                  </h2>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {pos.phase === "assigned" && others.length > 0 ? (
+                      <button type="button" className="btn-ghost" onClick={goOthers}>
+                        Also in your track: {others.length} more, not assigned to you
+                      </button>
+                    ) : null}
+                    {pos.phase === "others" && mine.length > 0 ? (
+                      <button type="button" className="btn-ghost" onClick={goAssigned}>
+                        Back to the teams assigned to you
+                      </button>
+                    ) : null}
+                    {backOk ? (
+                      <button type="button" className="btn-ghost" onClick={goBack}>
+                        Back
+                      </button>
+                    ) : null}
+                  </div>
+                </section>
+              )}
             </div>
-
-            <ol className="mt-4">
-              {mine.map((s) => (
-                <ScoreCard
-                  key={s.teamKey}
-                  submission={s}
-                  rubric={rubric}
-                  promptTitle={promptTitle(s.prompt)}
-                  score={scores[s.teamKey]}
-                  state={cardState(s.teamKey)}
-                  closed={closed}
-                  judgeId={judge}
-                  assigned
-                  unsentDraft={unsent[s.teamKey]}
-                  onSave={guardedSave}
-                  onSendUnsent={() => guardedSendUnsent(s.teamKey)}
-                  onKeepSaved={() => keepSaved(s.teamKey)}
-                />
-              ))}
-            </ol>
-
-            <details className="mt-10 border-t border-ink/15 pt-6">
-              <summary className="label label-strong cursor-pointer">
-                Also in your track, not assigned to you ({others.length})
-              </summary>
-              <ol className="mt-4">
-                {others.map((s) => (
-                  <ScoreCard
-                    key={s.teamKey}
-                    submission={s}
-                    rubric={rubric}
-                    promptTitle={promptTitle(s.prompt)}
-                    score={scores[s.teamKey]}
-                    state={cardState(s.teamKey)}
-                    closed={closed}
-                    judgeId={judge}
-                    assigned={false}
-                    unsentDraft={unsent[s.teamKey]}
-                    onSave={guardedSave}
-                    onSendUnsent={() => guardedSendUnsent(s.teamKey)}
-                    onKeepSaved={() => keepSaved(s.teamKey)}
-                  />
-                ))}
-              </ol>
-            </details>
           </>
         )}
       </main>
