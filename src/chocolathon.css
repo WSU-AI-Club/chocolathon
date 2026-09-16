@@ -114,6 +114,22 @@
     background 200ms ease,
     transform 200ms ease;
 }
+/* A disabled action reads as disabled (2026-09-16). Before this the
+   judge card's Save sat at full amber while the card was still invalid
+   and quietly did nothing on tap. */
+.choco-root .btn-cta:disabled,
+.choco-root .btn-ghost:disabled,
+.choco-root .btn-ghost-sm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.choco-root .btn-cta:disabled:hover,
+.choco-root .btn-ghost:disabled:hover,
+.choco-root .btn-ghost-sm:disabled:hover {
+  transform: none;
+  filter: none;
+}
+
 .choco-root .btn-cta:hover {
   background: #ffd52b;
 }
