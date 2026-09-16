@@ -524,8 +524,17 @@ export const PEOPLE: People = {
       note: "WSU computer science alum.",
       linkedin: "https://www.linkedin.com/in/alexis-diaz-wsu/",
     },
+    {
+      name: "Fareeha Amber Ansari",
+      role: "AI Governance Lead, Cargill",
+      note: "Also speaking at 11:30.",
+      linkedin: "https://www.linkedin.com/in/ansarifa/",
+    },
+    {
+      name: "Jeremy Simon",
+      role: "Web & IT Manager, McCurdy Real Estate & Auction",
+    },
   ],
-  preliminaryNote: "More local AI industry leaders, to be announced.",
   finals: [
     {
       name: "Ben Hesse",
@@ -769,7 +778,7 @@ export const SECTIONS: Section[] = [
         items: [
           "The link opens without a login or an install.",
           "The video is three minutes or under.",
-          "One submission, by one person, in one track.",
+          "One submission per team, by one person, in one track.",
           "The work started after the prompts unlocked.",
           "An entry that fails a gate is not scored, and the team is told which gate.",
         ],
