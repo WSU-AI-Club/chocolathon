@@ -13,7 +13,7 @@
    the reads and writes, not the URL.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Judging } from "../judge/mapRows";
 import { downloadWorkbook } from "../judging/exportXlsx";
@@ -26,6 +26,10 @@ const REFRESH_MS = 30_000;
 
 function fmtTime(d: Date): string {
   return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" });
+}
+/* The stamp inside the stale-data sentence: minutes are enough there. */
+function fmtStamp(d: Date): string {
+  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 function fmt(n: number | null): string {
   return n === null ? "—" : n.toFixed(2);
@@ -41,8 +45,12 @@ export default function ResultsPage() {
   const [config, setConfig] = useState<JudgingConfig | null>(null);
   const [scores, setScores] = useState<Score[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [busyAction, setBusyAction] = useState<string | null>(null);
+  /* loadAll has no dependencies so the 30 second timer never rebuilds it;
+     the last good time has to reach it through a ref. */
+  const updatedAtRef = useRef<Date | null>(null);
 
   useEffect(() => {
     document.title = "Chocolathon — Ranking";
@@ -53,14 +61,25 @@ export default function ResultsPage() {
     return () => tag.remove();
   }, []);
 
+  /* A refresh that fails keeps what is already on the screen. Wiping the
+     table on a 500 made a server problem look like every judge scoring
+     nothing, which is the one lie this page must never tell. */
   const loadAll = useCallback(async (k: string) => {
+    const fail = (what: string) => {
+      const at = updatedAtRef.current;
+      setLoadError(
+        `Could not load the latest scores (${what}).` +
+          (at ? ` Showing the data from ${fmtStamp(at)}.` : ""),
+      );
+    };
+    const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
     try {
       const [jRes, cRes, sRes] = await Promise.all([
-        fetch("/api/judging", { cache: "no-store" }),
-        fetch("/api/judging-config", { cache: "no-store" }),
-        fetch("/api/scores?all=1", { cache: "no-store", headers: { "x-upload-key": k } }),
+        fetch("/api/judging", withKey),
+        fetch("/api/judging-config", withKey),
+        fetch("/api/scores?all=1", withKey),
       ]);
-      if (sRes.status === 401) {
+      if (jRes.status === 401 || cRes.status === 401 || sRes.status === 401) {
         setAuthed(false);
         const body = await sRes.json().catch(() => ({}));
         setAuthError(body?.error ?? "Wrong upload key.");
@@ -68,18 +87,22 @@ export default function ResultsPage() {
       }
       setAuthed(true);
       setAuthError(null);
+      /* 404 on the submissions or the config is not a failure: it is the
+         quiet state before Michael publishes at 2:00. Anything else is. */
+      if (!sRes.ok) return fail(String(sRes.status));
+      if (!jRes.ok && jRes.status !== 404) return fail(String(jRes.status));
+      if (!cRes.ok && cRes.status !== 404) return fail(String(cRes.status));
+      const scoreBody = (await sRes.json().catch(() => null)) as { scores?: Score[] } | null;
+      if (!scoreBody || !Array.isArray(scoreBody.scores)) return fail(String(sRes.status));
+      setScores(scoreBody.scores);
       setJudging(jRes.ok ? ((await jRes.json()) as Judging) : null);
       setConfig(cRes.ok ? ((await cRes.json()) as JudgingConfig) : null);
-      if (sRes.ok) {
-        const body = (await sRes.json()) as { scores: Score[] };
-        setScores(body.scores);
-      } else {
-        setScores([]);
-      }
       setLoadError(null);
-      setUpdatedAt(new Date());
+      const now = new Date();
+      updatedAtRef.current = now;
+      setUpdatedAt(now);
     } catch {
-      setLoadError("Could not reach the server. Check your connection and try again.");
+      fail("no connection");
     }
   }, []);
 
@@ -116,23 +139,26 @@ export default function ResultsPage() {
     setAuthBusy(false);
   }
 
-  async function postConfig(next: JudgingConfig): Promise<boolean> {
+  /* Sends only what changed. The server merges it into the stored config
+     and returns the whole thing, so this page picks up anything the
+     upload page wrote in the meantime instead of overwriting it. */
+  async function postConfig(patch: Partial<JudgingConfig>): Promise<boolean> {
     try {
       const r = await fetch("/api/judging-config", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-upload-key": key.trim() },
-        body: JSON.stringify(next),
+        body: JSON.stringify(patch),
       });
-      const j = await r.json().catch(() => ({}));
+      const j = (await r.json().catch(() => null)) as (JudgingConfig & { error?: string }) | null;
       if (!r.ok) {
-        setLoadError(j?.error ?? `Save failed (${r.status}).`);
+        setSaveError(j?.error ?? `Save failed (${r.status}).`);
         return false;
       }
-      setConfig(next);
-      setLoadError(null);
+      if (j && Array.isArray(j.judges)) setConfig(j);
+      setSaveError(null);
       return true;
     } catch {
-      setLoadError("Could not reach the server. Check your connection and try again.");
+      setSaveError("Could not reach the server. Check your connection and try again.");
       return false;
     }
   }
@@ -140,7 +166,7 @@ export default function ResultsPage() {
   async function toggleClosed() {
     if (!config) return;
     setBusyAction("closed");
-    await postConfig({ ...config, closed: !config.closed });
+    await postConfig({ closed: !config.closed });
     setBusyAction(null);
   }
 
@@ -150,7 +176,7 @@ export default function ResultsPage() {
     const excluded = config.excluded.includes(teamKey)
       ? config.excluded.filter((k) => k !== teamKey)
       : [...config.excluded, teamKey];
-    await postConfig({ ...config, excluded });
+    await postConfig({ excluded });
     setBusyAction(null);
   }
 
@@ -227,11 +253,17 @@ export default function ResultsPage() {
           </p>
         ) : null}
 
+        {saveError ? (
+          <p role="alert" className="mt-4 border-l-2 border-gold pl-4 text-base text-ink">
+            {saveError}
+          </p>
+        ) : null}
+
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <button
             type="button"
             onClick={exportExcel}
-            disabled={!config || !judging}
+            disabled={!config || !judging || !!loadError}
             className="btn-cta disabled:cursor-not-allowed disabled:opacity-40"
           >
             Export Excel
@@ -250,7 +282,9 @@ export default function ResultsPage() {
           </button>
         </div>
         <p className="mt-2 text-sm text-ink/70">
-          Close judging first, then export, so the file matches what picked the finalists.
+          {loadError
+            ? "Export is off while this page is showing older data. Refresh until it loads."
+            : "Close judging first, then export, so the file matches what picked the finalists."}
         </p>
 
         <p className={"label mt-6" + (scoredCount < teamsCount ? " label-alert" : "")}>

@@ -1,6 +1,9 @@
-/* /api/judging — the submissions the judge page shows.
+/* /api/judging - the submissions the judge page shows.
 
    GET   returns the latest published set as JSON (404 if none yet).
+         It needs a key: the set carries team names, student names and
+         email addresses, so the judge token (x-judge-key) or the upload
+         key (x-upload-key) opens it and nothing else does.
    POST  replaces it. Body: the JSON the upload page produced. Header
          x-upload-key must equal UPLOAD_KEY, or the request is refused.
 
@@ -15,6 +18,7 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { get, put } from "@vercel/blob";
+import { requireAnyKey } from "./_auth.js";
 
 const PATHNAME = "judging/submissions.json";
 const MAX_BYTES = 2_000_000;
@@ -23,6 +27,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Cache-Control", "no-store, private");
 
   if (req.method === "GET") {
+    if (!requireAnyKey(req, res)) return;
     try {
       const found = await get(PATHNAME, { access: "private", useCache: false });
       if (!found || !found.stream) return res.status(404).json({ error: "No submissions published yet." });

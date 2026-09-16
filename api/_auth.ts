@@ -16,6 +16,18 @@ export function requireJudgeKey(req: VercelRequest, res: VercelResponse): boolea
   if (header(req, "x-judge-key") !== expected) { res.status(401).json({ error: "This link is not valid. Ask Michael for the judge link." }); return false; }
   return true;
 }
+/* Reads that carry student work: the judges see them with the judge token
+   in their link, Michael with the upload key. Either one opens the door;
+   neither one leaves it open. */
+export function requireAnyKey(req: VercelRequest, res: VercelResponse): boolean {
+  const upload = process.env.UPLOAD_KEY?.trim();
+  const judge = process.env.JUDGE_KEY?.trim();
+  if (!upload && !judge) { res.status(503).json({ error: "Neither UPLOAD_KEY nor JUDGE_KEY is configured." }); return false; }
+  if (judge && header(req, "x-judge-key") === judge) return true;
+  if (upload && header(req, "x-upload-key") === upload) return true;
+  res.status(401).json({ error: "Not allowed." });
+  return false;
+}
 export function noStore(res: VercelResponse): void {
   res.setHeader("Cache-Control", "no-store, private");
 }

@@ -8,11 +8,16 @@
    sends it to /api/judging with the upload key. Nothing else on the site
    changes; the judge page reads the new set on refresh.
 
-   The upload key is asked for once and kept in this browser. The page
-   is unlisted; the key is what actually protects the write.
+   The upload key is asked for once and kept in this browser. It is what
+   protects the write and, since the reads carry team and student names,
+   the reads too: nothing loads until the key field has something in it.
+
+   Every write to the config sends only the fields this page owns, so
+   publishing assignments can no longer revert the close switch or the
+   exclusions the ranking page made a minute earlier.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 import type { HubData } from "../competitor/types";
@@ -33,9 +38,12 @@ type Parsed = {
   optionalMissing: string[];
 };
 
+type LiveStatus = "needs-key" | "loading" | "ready" | "denied" | "error";
+
 /* "Sugar Is Sweet submitted twice; keeping 9:09 PM." — built from the
    loser's team name and the winning row's completion time, since that
-   is the row a duplicate note actually means "kept". */
+   is the row a duplicate note actually means "kept". Used only when the
+   parser did not supply its own reason. */
 function describeDuplicate(loser: Submission, winnerSubmittedAt: string): string {
   const ms = parseFormsTimeForDisplay(winnerSubmittedAt);
   const time = ms === null ? winnerSubmittedAt : new Date(ms).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
@@ -52,13 +60,26 @@ function parseFormsTimeForDisplay(s: string): number | null {
   return Number.isNaN(dt.getTime()) ? null : dt.getTime();
 }
 
+/* The parser flags a team that entered both tracks in its warnings, and
+   every warning is printed above. This is the belt to that braces: if
+   the warning text does not mention it, the row says so itself. */
+function bothTracksNote(s: Submission, warnings: string[]): string | null {
+  const alsoIn = s.alsoIn;
+  if (!alsoIn) return null;
+  const team = s.team || s.teamKey;
+  if (warnings.some((w) => w.includes(team) && /both tracks/i.test(w))) return null;
+  return `${team} is entered in both tracks`;
+}
+
 export default function UploadPage() {
   const [key, setKey] = useState("");
   const [parsed, setParsed] = useState<Parsed | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [publishArmed, setPublishArmed] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [live, setLive] = useState<{ count: number; publishedAt?: string } | null>(null);
+  const [liveStatus, setLiveStatus] = useState<LiveStatus>("needs-key");
   const [dragging, setDragging] = useState(false);
 
   const [config, setConfig] = useState<JudgingConfig | null>(null);
@@ -85,40 +106,56 @@ export default function UploadPage() {
     return () => tag.remove();
   }, []);
 
-  const refreshLive = useCallback(async () => {
-    try {
-      const r = await fetch("/api/judging", { cache: "no-store" });
-      if (!r.ok) {
-        setLive(null);
-        setLiveJudging(null);
-        return;
-      }
-      const j = (await r.json()) as Judging;
-      setLive({ count: j.count, publishedAt: j.publishedAt });
-      setLiveJudging(j);
-    } catch {
+  /* One load for everything behind the key: the published set, the
+     config, the saved score count, and the public judge list that seeds
+     a first run. None of it goes out before the key field has content,
+     because /api/judging and /api/judging-config now refuse a request
+     without one. */
+  const loadLive = useCallback(async (raw: string) => {
+    const k = raw.trim();
+    if (!k) {
+      setLiveStatus("needs-key");
       setLive(null);
       setLiveJudging(null);
+      setConfig(null);
+      setScoreCount(0);
+      return;
     }
-  }, []);
-
-  useEffect(() => {
-    void refreshLive();
-  }, [refreshLive]);
-
-  /* Judges and assignments: config comes from the store, or, on a first
-     run (404), from the preliminary judges on the public hub. */
-  const loadConfigAndPeople = useCallback(async () => {
+    setLiveStatus("loading");
     try {
-      const [cfgRes, hubRes] = await Promise.all([
-        fetch("/api/judging-config", { cache: "no-store" }),
+      const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
+      const [jRes, cRes, sRes, hubRes] = await Promise.all([
+        fetch("/api/judging", withKey),
+        fetch("/api/judging-config", withKey),
+        fetch("/api/scores?all=1", withKey),
         fetch("/api/hub", { cache: "no-store" }),
       ]);
-      const stored = cfgRes.ok ? ((await cfgRes.json()) as JudgingConfig) : null;
-      const hub = hubRes.ok ? ((await hubRes.json()) as HubData) : null;
+
+      if (jRes.status === 401 || cRes.status === 401 || sRes.status === 401) {
+        setLiveStatus("denied");
+        setLive(null);
+        setLiveJudging(null);
+        setConfig(null);
+        setScoreCount(0);
+        return;
+      }
+
+      if (jRes.ok) {
+        const j = (await jRes.json()) as Judging;
+        setLive({ count: j.count, publishedAt: j.publishedAt });
+        setLiveJudging(j);
+      } else {
+        setLive(null);
+        setLiveJudging(null);
+      }
+
+      const stored = cRes.ok ? ((await cRes.json()) as JudgingConfig) : null;
       if (stored) {
         setConfig(stored);
       } else {
+        /* First run: no config yet, so seed the judges from the public
+           hub with every one of them switched off. */
+        const hub = hubRes.ok ? ((await hubRes.json()) as HubData) : null;
         const judges: Judge[] = (hub?.people.preliminary ?? []).map((p) => ({
           id: judgeId(p.name),
           name: p.name,
@@ -126,36 +163,22 @@ export default function UploadPage() {
         }));
         setConfig({ judges, minPerTeam: 2, assignments: {}, excluded: [], closed: false });
       }
-    } catch {
-      setConfig((prev) => prev ?? { judges: [], minPerTeam: 2, assignments: {}, excluded: [], closed: false });
-    }
-  }, []);
 
-  useEffect(() => {
-    void loadConfigAndPeople();
-  }, [loadConfigAndPeople]);
-
-  const refreshScoreCount = useCallback(async (k: string) => {
-    if (!k.trim()) {
-      setScoreCount(0);
-      return;
-    }
-    try {
-      const r = await fetch("/api/scores?all=1", { headers: { "x-upload-key": k.trim() }, cache: "no-store" });
-      if (!r.ok) {
+      if (sRes.ok) {
+        const body = await sRes.json().catch(() => ({}));
+        setScoreCount(Array.isArray(body?.scores) ? body.scores.length : 0);
+      } else {
         setScoreCount(0);
-        return;
       }
-      const j = await r.json();
-      setScoreCount(Array.isArray(j.scores) ? j.scores.length : 0);
+      setLiveStatus("ready");
     } catch {
-      setScoreCount(0);
+      setLiveStatus("error");
     }
   }, []);
 
   useEffect(() => {
-    void refreshScoreCount(key);
-  }, [key, refreshScoreCount]);
+    void loadLive(key);
+  }, [key, loadLive]);
 
   useEffect(() => {
     return () => {
@@ -163,38 +186,62 @@ export default function UploadPage() {
     };
   }, []);
 
-  const publishConfig = useCallback(
-    async (c: JudgingConfig) => {
-      setConfigBusy(true);
-      setConfigError(null);
-      setConfigResult(null);
+  /* Sends only the fields named in the patch. The server merges them
+     into the stored config and returns the whole thing, which becomes
+     this page's copy, so a value another page changed survives. */
+  const postConfig = useCallback(
+    async (patch: Partial<JudgingConfig>): Promise<JudgingConfig | null> => {
       try {
         const r = await fetch("/api/judging-config", {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-upload-key": key.trim() },
-          body: JSON.stringify(c),
+          body: JSON.stringify(patch),
         });
-        const j = await r.json().catch(() => ({}));
+        const j = (await r.json().catch(() => null)) as (JudgingConfig & { error?: string }) | null;
         if (!r.ok) {
-          setConfigError(j?.error ?? `Could not save the assignments (${r.status}).`);
-          return;
+          setConfigError(j?.error ?? `Could not save that (${r.status}).`);
+          return null;
         }
-        setConfig(c);
-        setConfigResult("Assignments published. Judges see them on refresh.");
+        if (!j || !Array.isArray(j.judges)) {
+          setConfigError("The server saved it but sent back something unexpected. Reload the page.");
+          return null;
+        }
+        setConfig(j);
+        return j;
       } catch {
         setConfigError("Could not reach the server. Check your connection and try again.");
-      } finally {
-        setConfigBusy(false);
+        return null;
       }
     },
     [key],
   );
 
+  const publishConfig = useCallback(
+    async (c: JudgingConfig) => {
+      setConfigBusy(true);
+      setConfigError(null);
+      setConfigResult(null);
+      const merged = await postConfig({ judges: c.judges, minPerTeam: c.minPerTeam, assignments: c.assignments });
+      if (merged) setConfigResult("Assignments published. Judges see them on refresh.");
+      setConfigBusy(false);
+    },
+    [postConfig],
+  );
+
+  /* Optimistic, because the switch should move under the finger, but it
+     moves back if the server refused. */
   async function toggleClosed() {
-    if (!config) return;
-    const next = { ...config, closed: !config.closed };
-    setConfig(next);
-    await publishConfig(next);
+    if (!config || configBusy) return;
+    const previous = config;
+    const next = !config.closed;
+    setConfig({ ...config, closed: next });
+    setConfigBusy(true);
+    setConfigError(null);
+    setConfigResult(null);
+    const merged = await postConfig({ closed: next });
+    if (merged) setConfigResult(next ? "Judging is closed. Judges can read, not save." : "Judging is open again.");
+    else setConfig(previous);
+    setConfigBusy(false);
   }
 
   function clearScores() {
@@ -225,6 +272,7 @@ export default function UploadPage() {
   const readFile = useCallback(async (file: File) => {
     setError(null);
     setResult(null);
+    setPublishArmed(false);
     try {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
@@ -279,7 +327,8 @@ export default function UploadPage() {
         setError(j?.error ?? `Publish failed (${r.status}).`);
       } else {
         setResult(`Published ${j.count} submissions. Judges refresh and they are there.`);
-        void refreshLive();
+        setPublishArmed(false);
+        void loadLive(key);
       }
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
@@ -291,6 +340,32 @@ export default function UploadPage() {
   const build = parsed?.judging.submissions.filter((s) => s.track === "build") ?? [];
   const pitch = parsed?.judging.submissions.filter((s) => s.track === "pitch") ?? [];
   const canPublish = !!parsed && parsed.missing.length === 0 && key.trim().length > 0 && !busy;
+
+  /* Teams the judges can see now that this file does not contain. Their
+     scores are keyed by teamKey, so publishing without them leaves those
+     scores attached to a team nobody can open. */
+  const orphans = useMemo(() => {
+    if (!parsed || !liveJudging) return [] as string[];
+    const incoming = new Set(parsed.judging.submissions.map((s) => s.teamKey));
+    for (const d of parsed.dropped) incoming.add(d.teamKey);
+    return liveJudging.submissions
+      .filter((s) => !s.duplicateOf && !incoming.has(s.teamKey))
+      .map((s) => s.team || s.teamKey);
+  }, [parsed, liveJudging]);
+  const orphansMatter = orphans.length > 0 && scoreCount > 0;
+
+  useEffect(() => {
+    if (!orphansMatter) setPublishArmed(false);
+  }, [orphansMatter]);
+
+  function onPublishClick() {
+    if (!canPublish) return;
+    if (orphansMatter && !publishArmed) {
+      setPublishArmed(true);
+      return;
+    }
+    void publish();
+  }
 
   return (
     <div className="choco-root min-h-screen bg-white">
@@ -304,17 +379,36 @@ export default function UploadPage() {
           below, check the preview, publish. The judge page updates on refresh.
         </p>
 
-        <p className="label mt-8">
-          {live
-            ? `Judges currently see ${live.count} submissions` +
-              (live.publishedAt
-                ? `, published ${new Date(live.publishedAt).toLocaleTimeString("en-US", {
-                    hour: "numeric",
-                    minute: "2-digit",
-                    timeZone: "America/Chicago",
-                  })}`
-                : "")
-            : "Judges currently see nothing published"}
+        <label className="mt-8 block max-w-xs">
+          <span className="label">Upload key</span>
+          <input
+            type="password"
+            value={key}
+            onChange={(e) => setKey(e.target.value)}
+            autoComplete="off"
+            className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
+          />
+        </label>
+
+        <p className="label mt-6">
+          {liveStatus === "needs-key"
+            ? "Enter the upload key to load the live set."
+            : liveStatus === "loading"
+              ? "Loading the live set…"
+              : liveStatus === "denied"
+                ? "That upload key is not right."
+                : liveStatus === "error"
+                  ? "Could not reach the server. Check your connection and try again."
+                  : live
+                    ? `Judges currently see ${live.count} submissions` +
+                      (live.publishedAt
+                        ? `, published ${new Date(live.publishedAt).toLocaleTimeString("en-US", {
+                            hour: "numeric",
+                            minute: "2-digit",
+                            timeZone: "America/Chicago",
+                          })}`
+                        : "")
+                    : "Judges currently see nothing published"}
         </p>
 
         <label
@@ -373,7 +467,7 @@ export default function UploadPage() {
                   const winner = parsed.judging.submissions.find((s) => s.n === d.duplicateOf);
                   return (
                     <li key={`${d.team}-${d.n}`}>
-                      {describeDuplicate(d, winner?.submittedAt ?? d.submittedAt)}
+                      {d.duplicateReason ?? describeDuplicate(d, winner?.submittedAt ?? d.submittedAt)}
                     </li>
                   );
                 })}
@@ -388,6 +482,21 @@ export default function UploadPage() {
               </ul>
             ) : null}
 
+            {orphans.length ? (
+              <div
+                className={
+                  "mt-5 border-l-2 pl-4 text-base " +
+                  (orphansMatter ? "border-amber-500 text-amber-700" : "border-ink/20 text-ink/70")
+                }
+              >
+                <p>
+                  These teams are in the live set but not in this file: {orphans.join(", ")}.
+                  {orphansMatter ? " Their scores and assignments would be orphaned." : ""}
+                </p>
+                {publishArmed ? <p className="mt-1">Click Publish anyway to go ahead.</p> : null}
+              </div>
+            ) : null}
+
             {parsed.optionalMissing.length ? (
               <p className="mt-5 text-sm text-ink/50">
                 Not found in this export: {parsed.optionalMissing.join(", ")}.
@@ -395,44 +504,41 @@ export default function UploadPage() {
             ) : null}
 
             <ol className="mt-6 divide-y divide-ink/10 border-y border-ink/10">
-              {parsed.judging.submissions.map((s) => (
-                <li key={s.n} className="grid gap-1 py-3 sm:grid-cols-[3rem_1fr] sm:gap-4">
-                  <span className="label">{s.track === "build" ? "Build" : "Pitch"}</span>
-                  <span className="min-w-0">
-                    <span className="block text-base font-semibold text-ink">
-                      {s.team || <em className="font-normal text-ink/80">no team name</em>}
-                      {s.prompt ? <span className="label ml-3">{s.prompt}</span> : null}
+              {parsed.judging.submissions.map((s) => {
+                const bothTracks = bothTracksNote(s, parsed.warnings);
+                return (
+                  <li key={s.n} className="grid gap-1 py-3 sm:grid-cols-[3rem_1fr] sm:gap-4">
+                    <span className="label">{s.track === "build" ? "Build" : "Pitch"}</span>
+                    <span className="min-w-0">
+                      <span className="block text-base font-semibold text-ink">
+                        {s.team || <em className="font-normal text-ink/80">no team name</em>}
+                        {s.prompt ? <span className="label ml-3">{s.prompt}</span> : null}
+                      </span>
+                      <span className="block truncate text-sm text-ink/80">
+                        {s.sentence || s.product}
+                      </span>
+                      {bothTracks ? (
+                        <span className="block text-sm text-amber-700">{bothTracks}</span>
+                      ) : null}
+                      {!s.product || !s.video ? (
+                        <span className="label label-accent block">missing a link</span>
+                      ) : null}
                     </span>
-                    <span className="block truncate text-sm text-ink/80">
-                      {s.sentence || s.product}
-                    </span>
-                    {!s.product || !s.video ? (
-                      <span className="label label-accent block">missing a link</span>
-                    ) : null}
-                  </span>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ol>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-end">
-              <label className="flex-1">
-                <span className="label">Upload key</span>
-                <input
-                  type="password"
-                  value={key}
-                  onChange={(e) => setKey(e.target.value)}
-                  autoComplete="off"
-                  className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
-                />
-              </label>
               <button
                 type="button"
-                onClick={() => void publish()}
+                onClick={onPublishClick}
                 disabled={!canPublish}
                 className="btn-cta disabled:cursor-not-allowed disabled:opacity-40"
               >
-                {busy ? "Publishing…" : "Publish to the judges"}
+                {busy ? "Publishing…" : publishArmed ? "Publish anyway" : "Publish to the judges"}
               </button>
+              {key.trim() ? null : <span className="label">Enter the upload key above first.</span>}
             </div>
 
             {result ? (
@@ -455,17 +561,6 @@ export default function UploadPage() {
             the file first if it has not gone out yet.
           </p>
 
-          <label className="mt-6 block max-w-xs">
-            <span className="label">Upload key</span>
-            <input
-              type="password"
-              value={key}
-              onChange={(e) => setKey(e.target.value)}
-              autoComplete="off"
-              className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
-            />
-          </label>
-
           {config ? (
             <AssignmentPanel
               judging={liveJudging}
@@ -476,7 +571,15 @@ export default function UploadPage() {
               busy={configBusy}
             />
           ) : (
-            <p className="label mt-6">Loading…</p>
+            <p className="label mt-6">
+              {liveStatus === "needs-key"
+                ? "Enter the upload key to load the live set."
+                : liveStatus === "denied"
+                  ? "That upload key is not right."
+                  : liveStatus === "error"
+                    ? "Could not reach the server. Check your connection and try again."
+                    : "Loading…"}
+            </p>
           )}
 
           {configError ? (

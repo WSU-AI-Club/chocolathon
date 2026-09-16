@@ -40,6 +40,10 @@ export default function AssignmentPanel({
   const [armed, setArmed] = useState(false);
   const [result, setResult] = useState<ReturnType<typeof deal> | null>(null);
   const visible = useMemo(() => (judging?.submissions ?? []).filter((s) => !s.duplicateOf), [judging]);
+  /* Without a live set, deal() has nothing to deal and would write an
+     empty assignments map over a good one. */
+  const canGenerate = judging !== null && visible.length > 0;
+  const hasAssignments = Object.keys(config.assignments).length > 0;
 
   function setTracks(id: string, tracks: JudgeTracks) {
     onChange({ ...config, judges: config.judges.map((j) => (j.id === id ? { ...j, tracks } : j)) });
@@ -53,7 +57,10 @@ export default function AssignmentPanel({
     setNewJudge("");
   }
   function generate() {
-    if (scoreCount > 0 && !armed) {
+    if (!canGenerate) return;
+    /* Any existing hand-edited assignment is worth a second click, scores
+       or no scores: a deal replaces every one of them. */
+    if (hasAssignments && !armed) {
       setArmed(true);
       return;
     }
@@ -129,12 +136,23 @@ export default function AssignmentPanel({
       </label>
 
       <div className="mt-6 flex flex-wrap items-center gap-4">
-        <button type="button" onClick={generate} className="btn-ghost">
+        <button
+          type="button"
+          onClick={generate}
+          disabled={!canGenerate}
+          className="btn-ghost disabled:cursor-not-allowed disabled:opacity-40"
+        >
           Generate
         </button>
-        {armed ? (
+        {!canGenerate ? <span className="label">Load the live set first.</span> : null}
+        {canGenerate && armed ? (
           <span className="label label-accent">
-            Scores exist. Regenerating changes who sees what, never the scores. Click Generate again to confirm.
+            This replaces the current assignments. Click again to confirm.
+          </span>
+        ) : null}
+        {canGenerate && scoreCount > 0 ? (
+          <span className="label">
+            {scoreCount} scores are saved. Regenerating changes who sees what, never the scores.
           </span>
         ) : null}
       </div>
