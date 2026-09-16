@@ -15,7 +15,7 @@
       ]
     },
     {
-      "source": "/(hq|prompts|competitors|judge-c7m2x9|upload-k4n8pq)",
+      "source": "/(hq|prompts|competitors|judge-c7m2x9|upload-k4n8pq|results-m3v8tq)",
       "headers": [
         { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
         { "key": "Cache-Control", "value": "no-store" }

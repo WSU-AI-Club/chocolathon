@@ -98,3 +98,7 @@ export const JUDGE_FORM_URL = "";
 /* The upload page: drop the form export, publish it to the judges. Also
    unlisted; the write itself is protected by UPLOAD_KEY on the server. */
 export const UPLOAD_PATH = "/upload-k4n8pq";
+
+/* The ranking page (2026-09-15): Michael's only, behind the upload key.
+   Unlisted like the judge and upload pages. */
+export const RESULTS_PATH = "/results-m3v8tq";
