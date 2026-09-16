@@ -31,8 +31,11 @@ export function mergeScores(server: Score[], drafts: Score[]): Record<string, Sc
   return out;
 }
 
+/* 409 is "nothing published yet": a judge who opens the page before
+   Michael publishes should keep retrying, because it resolves by itself
+   the moment he does. 400, 401 and 423 are decisions, not weather. */
 export const shouldRetry = (status: number | null) =>
-  status === null || status === 0 || status >= 500 || status === 408 || status === 429;
+  status === null || status === 0 || status >= 500 || status === 408 || status === 409 || status === 429;
 
 export type SaveState =
   | { kind: "idle" }

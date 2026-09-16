@@ -88,12 +88,12 @@ export const SUBMISSION_URL = "https://forms.cloud.microsoft/r/kWpfJhLss4";
 export const SUBMISSIONS_OPEN_AT = new Date("2026-09-19T13:00:00-05:00");
 
 /* ── Judging ─────────────────────────────────────────────────────────
-   The judge page: every submission as a card, fed by
-   public/judging/submissions.json (see pipeline/make-judging.mjs). The
-   path is unlisted rather than gated; share it with the judges only.
-   JUDGE_FORM_URL is the small scoring form; empty hides the buttons. */
+   The judge page: the judge picks their name, works their queue, scores
+   inside the card. Fed by /api/judging (published from the upload page)
+   and gated by the judge token in the link (?k=, env JUDGE_KEY), so the
+   path alone is not enough since 2026-09-15. The Microsoft scoring form
+   (JUDGE_FORM_URL) was retired the same day. */
 export const JUDGE_PATH = "/judge-c7m2x9";
-export const JUDGE_FORM_URL = "";
 
 /* The upload page: drop the form export, publish it to the judges. Also
    unlisted; the write itself is protected by UPLOAD_KEY on the server. */

@@ -18,7 +18,7 @@ describe("useScores helpers", () => {
     expect(merged["build/a"].total).toBe(20);
   });
   it("shouldRetry", () => {
-    expect([null, 0, 500, 502, 408, 429].map(shouldRetry)).toEqual([true, true, true, true, true, true]);
-    expect([200, 400, 401, 404, 409, 423].map(shouldRetry)).toEqual([false, false, false, false, false, false]);
+    expect([null, 0, 500, 502, 408, 409, 429].map(shouldRetry)).toEqual([true, true, true, true, true, true, true]);
+    expect([200, 400, 401, 404, 423].map(shouldRetry)).toEqual([false, false, false, false, false]);
   });
 });
