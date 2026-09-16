@@ -150,9 +150,12 @@ if (exactTrack !== -1) C.track = exactTrack;
    email" question. */
 const exactEmail = header.findIndex((h) => h === "email");
 if (exactEmail !== -1) C.email = exactEmail;
-/* Team: exact title only, never substring. */
+/* Team: exact title first. When a renamed question has no exact "Team
+   Name" title, fall back to the first header that contains "team name"
+   but is not the "if not listed" fallback column. */
 {
-  const i = header.findIndex((h) => normalizeExactHeader(h) === "team name");
+  let i = header.findIndex((h) => normalizeExactHeader(h) === "team name");
+  if (i === -1) i = header.findIndex((h) => h.includes("team name") && !h.includes("not listed"));
   C.team = i === -1 ? null : i;
 }
 {
@@ -182,7 +185,7 @@ const get = (r, k) => (C[k] === null ? "" : (r[C[k]] ?? "").trim());
 const NOT_LISTED_TEXT = "my team is not listed";
 const resolveTeam = (r) => {
   const teamCell = get(r, "team");
-  if (!teamCell || teamCell.toLowerCase() === NOT_LISTED_TEXT) return get(r, "teamFallback");
+  if (!teamCell || teamCell.toLowerCase().includes(NOT_LISTED_TEXT)) return get(r, "teamFallback");
   return teamCell;
 };
 const promptId = (s) => {
@@ -190,16 +193,31 @@ const promptId = (s) => {
   return m ? `${m[1].toUpperCase()}-${m[2]}` : "";
 };
 
+const unnamedWarnings = [];
+
 const allRaw = rows.slice(1).map((r, i) => {
   const trackRaw = get(r, "track").toLowerCase();
   const track = trackRaw.startsWith("pitch") ? "pitch" : "build";
   const promptRaw = track === "build" ? get(r, "buildPrompt") || get(r, "pitchPrompt") : get(r, "pitchPrompt") || get(r, "buildPrompt");
-  const team = resolveTeam(r);
+  const resolvedTeam = resolveTeam(r);
+  const rowNumber = i + 1;
+  /* A blank resolved team name (dropdown "not listed" with the fallback
+     cell also blank) must never collapse two rows into one "" teamKey.
+     Give each such row its own name and slug, keyed by row number. */
+  let team = resolvedTeam;
+  let teamKey;
+  if (!team) {
+    team = `Unnamed team (row ${rowNumber})`;
+    teamKey = `${track}/unnamed-row-${rowNumber}`;
+    unnamedWarnings.push(`Row ${rowNumber} has no team name; the judges will see "${team}". Fix the cell in Excel and re-upload.`);
+  } else {
+    teamKey = `${track}/${slugify(team)}`;
+  }
   const completionRaw = get(r, "time");
   return {
-    n: i + 1,
+    n: rowNumber,
     team,
-    teamKey: `${track}/${slugify(team)}`,
+    teamKey,
     submitter: get(r, "submitter"),
     email: get(r, "email"),
     track,
@@ -259,13 +277,35 @@ if (dropped.length) {
   }
 }
 
-const warnings = [];
+const warnings = [...unnamedWarnings];
 for (const s of submissions) {
   const pw = linkWarning("product link", s.team, s.product);
   if (pw) warnings.push(pw);
   const vw = linkWarning("video link", s.team, s.video);
   if (vw) warnings.push(vw);
 }
+
+/* One track per team: group the visible (post-dedup) submissions by
+   slug alone, ignoring track. A slug present in both tracks gets
+   flagged on both sides and cross-linked via `alsoIn`. */
+const bySlug = new Map();
+for (const s of submissions) {
+  const slug = slugify(s.team);
+  const arr = bySlug.get(slug);
+  if (arr) arr.push(s);
+  else bySlug.set(slug, [s]);
+}
+for (const group of bySlug.values()) {
+  const buildSub = group.find((s) => s.track === "build");
+  const pitchSub = group.find((s) => s.track === "pitch");
+  if (!buildSub || !pitchSub) continue;
+  buildSub.alsoIn = "pitch";
+  pitchSub.alsoIn = "build";
+  warnings.push(
+    `"${buildSub.team}" is entered in both tracks. One track per team: delete one row in Excel and re-upload, or exclude one on the ranking page.`,
+  );
+}
+
 for (const w of warnings) console.error(w);
 
 const out = {

@@ -41,6 +41,7 @@ export function rankTrack(track: Track, submissions: Submission[], scores: Score
       const excluded = config.excluded.includes(s.teamKey);
       if (excluded) flags.push("Excluded");
       if (counted.length < 2) flags.push("Under two judges");
+      if (s.alsoIn) flags.push(`Also entered in the ${s.alsoIn} track`);
       for (const x of mine) {
         if (x.recused) flags.push(`Recused: ${judgeName(x.judgeId)}`);
         for (const [g, passes] of Object.entries(x.gates)) {

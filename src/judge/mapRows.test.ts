@@ -192,6 +192,141 @@ describe("mapRows: optionalMissing", () => {
   });
 });
 
+describe("mapRows: blank team names never collapse into one team", () => {
+  it("gives each blank-team row a distinct 'Unnamed team' name and teamKey", () => {
+    const rowA = [...FORMS_ROW_1_2026_09_15];
+    rowA[5] = ""; // Team Name
+    rowA[6] = ""; // Team name, if not listed.
+    const rowB = [...FORMS_ROW_1_2026_09_15];
+    rowB[0] = "5";
+    rowB[5] = "";
+    rowB[6] = "";
+    rowB[2] = "9/15/26 21:20";
+
+    const { judging, dropped, warnings } = mapRows(FORMS_HEADER_2026_09_15, [rowA, rowB], "responses.csv");
+
+    expect(dropped).toEqual([]);
+    expect(judging.submissions).toHaveLength(2);
+    expect(judging.submissions[0].team).toBe("Unnamed team (row 1)");
+    expect(judging.submissions[1].team).toBe("Unnamed team (row 2)");
+    expect(judging.submissions[0].teamKey).not.toBe(judging.submissions[1].teamKey);
+    expect(warnings).toContain(
+      'Row 1 has no team name; the judges will see "Unnamed team (row 1)". Fix the cell in Excel and re-upload.',
+    );
+    expect(warnings).toContain(
+      'Row 2 has no team name; the judges will see "Unnamed team (row 2)". Fix the cell in Excel and re-upload.',
+    );
+  });
+
+  it("also treats the not-listed placeholder with a blank fallback cell as blank", () => {
+    const row = [...FORMS_ROW_1_2026_09_15];
+    row[5] = "My team is not listed";
+    row[6] = "";
+    const { judging, warnings } = mapRows(FORMS_HEADER_2026_09_15, [row], "x.csv");
+    expect(judging.submissions[0].team).toBe("Unnamed team (row 1)");
+    expect(warnings.some((w) => w.includes("Row 1 has no team name"))).toBe(true);
+  });
+});
+
+describe("mapRows: not-listed matching is brittle no more", () => {
+  it("matches case-insensitively", () => {
+    const row = [...FORMS_ROW_1_2026_09_15];
+    row[5] = "MY TEAM IS NOT LISTED";
+    row[6] = "Chocolate Collective";
+    const { judging } = mapRows(FORMS_HEADER_2026_09_15, [row], "x.csv");
+    expect(judging.submissions[0].team).toBe("Chocolate Collective");
+  });
+
+  it("matches when the cell contains extra text around 'not listed'", () => {
+    const row = [...FORMS_ROW_1_2026_09_15];
+    row[5] = "My team is not listed (see note)";
+    row[6] = "Chocolate Collective";
+    const { judging } = mapRows(FORMS_HEADER_2026_09_15, [row], "x.csv");
+    expect(judging.submissions[0].team).toBe("Chocolate Collective");
+  });
+});
+
+describe("mapRows: duplicateReason", () => {
+  it("explains a same-name collapse with the kept row's number and time", () => {
+    const early = [...FORMS_ROW_2_2026_09_15];
+    const later = [...FORMS_ROW_2_2026_09_15];
+    later[0] = "4";
+    later[2] = "9/15/26 21:15";
+
+    const { judging, dropped } = mapRows(FORMS_HEADER_2026_09_15, [early, later], "responses.csv");
+    expect(dropped).toHaveLength(1);
+    expect(dropped[0].duplicateReason).toBe(
+      `Same team name as row ${judging.submissions[0].n} ("Sugar Is Sweet"); kept the later one (21:15).`,
+    );
+  });
+
+  it("still says 'same team name' when only casing differs", () => {
+    const early = [...FORMS_ROW_2_2026_09_15];
+    early[5] = "SUGAR IS SWEET";
+    const later = [...FORMS_ROW_2_2026_09_15];
+    later[0] = "4";
+    later[2] = "9/15/26 21:15";
+    later[5] = "Sugar Is Sweet";
+
+    const { dropped } = mapRows(FORMS_HEADER_2026_09_15, [early, later], "responses.csv");
+    expect(dropped[0].duplicateReason).toMatch(/^Same team name as row \d+/);
+  });
+
+  it("flags a merge across names that differ by more than case, so a wrong merge is visible", () => {
+    const early = [...FORMS_ROW_2_2026_09_15]; // "Sugar Is Sweet"
+    const later = [...FORMS_ROW_2_2026_09_15];
+    later[0] = "4";
+    later[2] = "9/15/26 21:15";
+    later[5] = "Sugar is Sweet!";
+
+    const { dropped } = mapRows(FORMS_HEADER_2026_09_15, [early, later], "responses.csv");
+    expect(dropped).toHaveLength(1);
+    expect(dropped[0].duplicateReason).toBe('Names differ: "Sugar Is Sweet" and "Sugar is Sweet!"; treated as one team.');
+  });
+});
+
+describe("mapRows: same team entered in both tracks", () => {
+  it("flags both submissions and cross-links the other track", () => {
+    const buildRow = [...FORMS_ROW_1_2026_09_15];
+    buildRow[5] = "Cocoa Ops";
+    const pitchRow = [...FORMS_ROW_2_2026_09_15];
+    pitchRow[0] = "4";
+    pitchRow[5] = "Cocoa Ops";
+
+    const { judging, warnings } = mapRows(FORMS_HEADER_2026_09_15, [buildRow, pitchRow], "responses.csv");
+
+    const build = judging.submissions.find((s) => s.track === "build");
+    const pitch = judging.submissions.find((s) => s.track === "pitch");
+    expect(build?.alsoIn).toBe("pitch");
+    expect(pitch?.alsoIn).toBe("build");
+    expect(warnings).toContain(
+      '"Cocoa Ops" is entered in both tracks. One track per team: delete one row in Excel and re-upload, or exclude one on the ranking page.',
+    );
+  });
+
+  it("does not flag teams that appear in only one track", () => {
+    const { warnings } = mapRows(FORMS_HEADER_2026_09_15, FORMS_ROWS_2026_09_15, "responses.csv");
+    expect(warnings.some((w) => w.includes("is entered in both tracks"))).toBe(false);
+  });
+});
+
+describe("mapRows: team header fallback match", () => {
+  it("falls back to a header that contains 'team name' when there is no exact title", () => {
+    const header = FORMS_HEADER_2026_09_15.map((h) => (h === "Team Name" ? "Please enter your Team Name below" : h));
+    const { judging, missing } = mapRows(header, [FORMS_ROW_1_2026_09_15], "x.csv");
+    expect(missing).toEqual([]);
+    expect(judging.submissions[0].team).toBe("Global Scope");
+  });
+
+  it("never falls back to the 'not listed' column when there is no other team-name header", () => {
+    const idx = FORMS_HEADER_2026_09_15.indexOf("Team Name");
+    const header = FORMS_HEADER_2026_09_15.filter((_, i) => i !== idx);
+    const row = FORMS_ROW_1_2026_09_15.filter((_, i) => i !== idx);
+    const { missing } = mapRows(header, [row], "x.csv");
+    expect(missing).toContain("team");
+  });
+});
+
 describe("mapRows: old sample-responses.csv still maps", () => {
   const csvPath = fileURLToPath(new URL("../../pipeline/sample-responses.csv", import.meta.url));
   const rows = parseCsv(readFileSync(csvPath, "utf8").replace(/^﻿/, ""));

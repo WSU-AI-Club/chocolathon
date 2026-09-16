@@ -88,4 +88,11 @@ describe("rankTrack", () => {
     const rows = rankTrack("build", subs, [score("g", "Beta", [5, 5, 5, 5]), score("d", "Beta", [5, 5, 5, 5])], config, name);
     expect(rows.map((r) => [r.team, r.rank])).toEqual([["Beta", 1], ["Alpha", null]]);
   });
+
+  it("flags a team that is also entered in the other track", () => {
+    const subs = [{ ...sub("Alpha"), alsoIn: "pitch" as const }];
+    const scores = [score("g", "Alpha", [8, 8, 8, 8]), score("d", "Alpha", [8, 8, 8, 8])];
+    const [row] = rankTrack("build", subs, scores, config, name);
+    expect(row.flags).toContain("Also entered in the pitch track");
+  });
 });

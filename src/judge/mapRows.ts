@@ -26,6 +26,13 @@ export type Submission = {
   /* Set only on entries returned in `dropped`: the `n` of the visible
      submission (in `judging.submissions`) that was kept instead. */
   duplicateOf?: number;
+  /* Set only on entries returned in `dropped`: a human-readable
+     explanation of why this row was collapsed into `duplicateOf`, so the
+     upload preview doesn't read like a legitimate double submission. */
+  duplicateReason?: string;
+  /* Set on both submissions when the same team (by slug, ignoring
+     track) appears in both tracks. Names the OTHER track. */
+  alsoIn?: "build" | "pitch";
 };
 
 export type Judging = {
@@ -157,9 +164,15 @@ export function mapRows(header: string[], rows: string[][], source: string): Map
      no column titled exactly "email". */
   const exactEmail = h.findIndex((c) => c === "email");
   if (exactEmail !== -1) idx.email = exactEmail;
-  /* Team: exact title only, never substring (see KEYWORDS comment). */
-  idx.team = h.findIndex((c) => normalizeExactHeader(c) === "team name");
-  idx.team = idx.team === -1 ? null : idx.team;
+  /* Team: exact title first (see KEYWORDS comment). When a renamed
+     question has no exact "Team Name" title, fall back to the first
+     header that contains "team name" but is not the "if not listed"
+     fallback column (which also contains that substring). */
+  let teamIdx = h.findIndex((c) => normalizeExactHeader(c) === "team name");
+  if (teamIdx === -1) {
+    teamIdx = h.findIndex((c) => c.includes("team name") && !c.includes("not listed"));
+  }
+  idx.team = teamIdx === -1 ? null : teamIdx;
   idx.teamFallback = h.findIndex((c) => c.includes("not listed"));
   idx.teamFallback = idx.teamFallback === -1 ? null : idx.teamFallback;
   /* Submitter: fall back to Forms' own sign-in "Name" column when there
@@ -174,7 +187,7 @@ export function mapRows(header: string[], rows: string[][], source: string): Map
   const get = (r: string[], k: string) => (idx[k] === null ? "" : String(r[idx[k] as number] ?? "").trim());
   const resolveTeam = (r: string[]) => {
     const teamCell = get(r, "team");
-    if (!teamCell || teamCell.toLowerCase() === NOT_LISTED_TEXT) {
+    if (!teamCell || teamCell.toLowerCase().includes(NOT_LISTED_TEXT)) {
       return get(r, "teamFallback");
     }
     return teamCell;
@@ -186,6 +199,8 @@ export function mapRows(header: string[], rows: string[][], source: string): Map
 
   type RawSub = Submission & { _rawIndex: number; _completionMs: number | null };
 
+  const unnamedWarnings: string[] = [];
+
   const allRaw: RawSub[] = rows
     .filter((r) => r.some((c) => String(c ?? "").trim() !== ""))
     .map((r, i) => {
@@ -194,12 +209,28 @@ export function mapRows(header: string[], rows: string[][], source: string): Map
         track === "build"
           ? get(r, "buildPrompt") || get(r, "pitchPrompt")
           : get(r, "pitchPrompt") || get(r, "buildPrompt");
-      const team = resolveTeam(r);
+      const resolvedTeam = resolveTeam(r);
+      const rowNumber = i + 1;
+      /* A blank resolved team name (dropdown "not listed" with the
+         fallback cell also blank) must never collapse two rows into
+         one "" teamKey. Give each such row its own name and slug,
+         keyed by row number, and warn so the cell gets fixed. */
+      let team = resolvedTeam;
+      let teamKey: string;
+      if (!team) {
+        team = `Unnamed team (row ${rowNumber})`;
+        teamKey = `${track}/unnamed-row-${rowNumber}`;
+        unnamedWarnings.push(
+          `Row ${rowNumber} has no team name; the judges will see "${team}". Fix the cell in Excel and re-upload.`,
+        );
+      } else {
+        teamKey = `${track}/${slugify(team)}`;
+      }
       const completionRaw = get(r, "time");
       return {
-        n: i + 1,
+        n: rowNumber,
         team,
-        teamKey: `${track}/${slugify(team)}`,
+        teamKey,
         submitter: get(r, "submitter"),
         email: get(r, "email"),
         track,
@@ -231,6 +262,7 @@ export function mapRows(header: string[], rows: string[][], source: string): Map
     else groups.set(s.teamKey, [s]);
   }
   const droppedRaw = new Set<number>();
+  const winnerByTeamKey = new Map<string, RawSub>();
   for (const group of groups.values()) {
     if (group.length < 2) continue;
     let winner = group[0];
@@ -241,6 +273,7 @@ export function mapRows(header: string[], rows: string[][], source: string): Map
         : cur._rawIndex > winner._rawIndex;
       if (curWins) winner = cur;
     }
+    winnerByTeamKey.set(group[0].teamKey, winner);
     for (const s of group) {
       if (s !== winner) droppedRaw.add(s._rawIndex);
     }
@@ -255,16 +288,63 @@ export function mapRows(header: string[], rows: string[][], source: string): Map
   const finalNByTeamKey = new Map<string, number>();
   for (const s of submissions) finalNByTeamKey.set(s.teamKey, s.n);
 
+  /* Case-only differences ("SUGAR IS SWEET" vs "Sugar Is Sweet") read as
+     the same name; anything else — even a stray "!" — gets called out
+     so a wrong merge is visible instead of reading as a clean re-save. */
+  const namesMatchIgnoringCase = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
+  /* "M/D/YY H:mm[:ss]" -> "H:mm" for the duplicate-reason note. Falls
+     back to the raw string if it doesn't look like a Forms timestamp. */
+  const timeOnly = (raw: string): string => {
+    const m = raw.trim().match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*$/);
+    return m ? `${m[1]}:${m[2]}` : raw.trim();
+  };
+  const duplicateReason = (loser: RawSub, winner: RawSub, winnerFinalN: number | undefined): string => {
+    if (namesMatchIgnoringCase(loser.team, winner.team)) {
+      return `Same team name as row ${winnerFinalN} ("${winner.team}"); kept the later one (${timeOnly(winner.submittedAt)}).`;
+    }
+    return `Names differ: "${loser.team}" and "${winner.team}"; treated as one team.`;
+  };
+
   const dropped: Submission[] = allRaw
     .filter((s) => droppedRaw.has(s._rawIndex))
-    .map((s, i) => ({ ...strip(s), n: i + 1, duplicateOf: finalNByTeamKey.get(s.teamKey) }));
+    .map((s, i) => {
+      const winner = winnerByTeamKey.get(s.teamKey)!;
+      const winnerFinalN = finalNByTeamKey.get(s.teamKey);
+      return {
+        ...strip(s),
+        n: i + 1,
+        duplicateOf: winnerFinalN,
+        duplicateReason: duplicateReason(s, winner, winnerFinalN),
+      };
+    });
 
-  const warnings: string[] = [];
+  const warnings: string[] = [...unnamedWarnings];
   for (const s of submissions) {
     const pw = linkWarning("product link", s.team, s.product);
     if (pw) warnings.push(pw);
     const vw = linkWarning("video link", s.team, s.video);
     if (vw) warnings.push(vw);
+  }
+
+  /* One track per team: group the visible (post-dedup) submissions by
+     slug alone, ignoring track. A slug present in both tracks gets
+     flagged on both sides and cross-linked via `alsoIn`. */
+  const bySlug = new Map<string, Submission[]>();
+  for (const s of submissions) {
+    const slug = slugify(s.team);
+    const arr = bySlug.get(slug);
+    if (arr) arr.push(s);
+    else bySlug.set(slug, [s]);
+  }
+  for (const group of bySlug.values()) {
+    const buildSub = group.find((s) => s.track === "build");
+    const pitchSub = group.find((s) => s.track === "pitch");
+    if (!buildSub || !pitchSub) continue;
+    buildSub.alsoIn = "pitch";
+    pitchSub.alsoIn = "build";
+    warnings.push(
+      `"${buildSub.team}" is entered in both tracks. One track per team: delete one row in Excel and re-upload, or exclude one on the ranking page.`,
+    );
   }
 
   return {
