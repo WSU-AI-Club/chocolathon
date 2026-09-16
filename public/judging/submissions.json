@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-10T18:24:22.428Z",
+  "generatedAt": "2026-09-16T03:41:26.860Z",
   "source": "sample-responses.csv",
   "sample": true,
   "count": 3,
@@ -7,8 +7,9 @@
     {
       "n": 1,
       "team": "Sample Team Alpha",
+      "teamKey": "build/sample-team-alpha",
       "submitter": "Jordan Sample",
-      "email": "jsample@shockers.wichita.edu",
+      "email": "anonymous",
       "track": "build",
       "prompt": "B-0",
       "promptRaw": "B-0: Rehearsal prompt",
@@ -24,8 +25,9 @@
     {
       "n": 2,
       "team": "Sample Team Beta",
+      "teamKey": "pitch/sample-team-beta",
       "submitter": "Riley Sample",
-      "email": "rsample@shockers.wichita.edu",
+      "email": "anonymous",
       "track": "pitch",
       "prompt": "P-0",
       "promptRaw": "P-0: Rehearsal prompt",
@@ -41,8 +43,9 @@
     {
       "n": 3,
       "team": "Sample Team Gamma",
+      "teamKey": "build/sample-team-gamma",
       "submitter": "Casey Sample",
-      "email": "csample@shockers.wichita.edu",
+      "email": "anonymous",
       "track": "build",
       "prompt": "B-0",
       "promptRaw": "B-0: Rehearsal prompt",
