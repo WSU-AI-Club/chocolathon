@@ -12,11 +12,14 @@
    is unlisted; the key is what actually protects the write.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
+import type { HubData } from "../competitor/types";
 import { JUDGE_PATH } from "../content/links";
 import { mapRows, type Judging, type Submission } from "../judge/mapRows";
+import { judgeId, type Judge, type JudgingConfig } from "../judging/types";
+import AssignmentPanel from "./AssignmentPanel";
 import "../chocolathon.css";
 
 const KEY_STORAGE = "choco-upload-key";
@@ -58,6 +61,16 @@ export default function UploadPage() {
   const [live, setLive] = useState<{ count: number; publishedAt?: string } | null>(null);
   const [dragging, setDragging] = useState(false);
 
+  const [config, setConfig] = useState<JudgingConfig | null>(null);
+  const [configBusy, setConfigBusy] = useState(false);
+  const [configResult, setConfigResult] = useState<string | null>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [scoreCount, setScoreCount] = useState(0);
+  const [liveJudging, setLiveJudging] = useState<Judging | null>(null);
+  const [clearArmed, setClearArmed] = useState(false);
+  const [clearResult, setClearResult] = useState<string | null>(null);
+  const clearTimer = useRef<number | null>(null);
+
   useEffect(() => {
     document.title = "Chocolathon — Publish submissions";
     const tag = document.createElement("meta");
@@ -77,18 +90,137 @@ export default function UploadPage() {
       const r = await fetch("/api/judging", { cache: "no-store" });
       if (!r.ok) {
         setLive(null);
+        setLiveJudging(null);
         return;
       }
       const j = (await r.json()) as Judging;
       setLive({ count: j.count, publishedAt: j.publishedAt });
+      setLiveJudging(j);
     } catch {
       setLive(null);
+      setLiveJudging(null);
     }
   }, []);
 
   useEffect(() => {
     void refreshLive();
   }, [refreshLive]);
+
+  /* Judges and assignments: config comes from the store, or, on a first
+     run (404), from the preliminary judges on the public hub. */
+  const loadConfigAndPeople = useCallback(async () => {
+    try {
+      const [cfgRes, hubRes] = await Promise.all([
+        fetch("/api/judging-config", { cache: "no-store" }),
+        fetch("/api/hub", { cache: "no-store" }),
+      ]);
+      const stored = cfgRes.ok ? ((await cfgRes.json()) as JudgingConfig) : null;
+      const hub = hubRes.ok ? ((await hubRes.json()) as HubData) : null;
+      if (stored) {
+        setConfig(stored);
+      } else {
+        const judges: Judge[] = (hub?.people.preliminary ?? []).map((p) => ({
+          id: judgeId(p.name),
+          name: p.name,
+          tracks: "off",
+        }));
+        setConfig({ judges, minPerTeam: 2, assignments: {}, excluded: [], closed: false });
+      }
+    } catch {
+      setConfig((prev) => prev ?? { judges: [], minPerTeam: 2, assignments: {}, excluded: [], closed: false });
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadConfigAndPeople();
+  }, [loadConfigAndPeople]);
+
+  const refreshScoreCount = useCallback(async (k: string) => {
+    if (!k.trim()) {
+      setScoreCount(0);
+      return;
+    }
+    try {
+      const r = await fetch("/api/scores?all=1", { headers: { "x-upload-key": k.trim() }, cache: "no-store" });
+      if (!r.ok) {
+        setScoreCount(0);
+        return;
+      }
+      const j = await r.json();
+      setScoreCount(Array.isArray(j.scores) ? j.scores.length : 0);
+    } catch {
+      setScoreCount(0);
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshScoreCount(key);
+  }, [key, refreshScoreCount]);
+
+  useEffect(() => {
+    return () => {
+      if (clearTimer.current) window.clearTimeout(clearTimer.current);
+    };
+  }, []);
+
+  const publishConfig = useCallback(
+    async (c: JudgingConfig) => {
+      setConfigBusy(true);
+      setConfigError(null);
+      setConfigResult(null);
+      try {
+        const r = await fetch("/api/judging-config", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-upload-key": key.trim() },
+          body: JSON.stringify(c),
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          setConfigError(j?.error ?? `Could not save the assignments (${r.status}).`);
+          return;
+        }
+        setConfig(c);
+        setConfigResult("Assignments published. Judges see them on refresh.");
+      } catch {
+        setConfigError("Could not reach the server. Check your connection and try again.");
+      } finally {
+        setConfigBusy(false);
+      }
+    },
+    [key],
+  );
+
+  async function toggleClosed() {
+    if (!config) return;
+    const next = { ...config, closed: !config.closed };
+    setConfig(next);
+    await publishConfig(next);
+  }
+
+  function clearScores() {
+    if (!clearArmed) {
+      setClearArmed(true);
+      setClearResult(null);
+      clearTimer.current = window.setTimeout(() => setClearArmed(false), 5000);
+      return;
+    }
+    if (clearTimer.current) window.clearTimeout(clearTimer.current);
+    setClearArmed(false);
+    void (async () => {
+      try {
+        const r = await fetch("/api/scores", { method: "DELETE", headers: { "x-upload-key": key.trim() } });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) {
+          setClearResult(j?.error ?? `Could not clear scores (${r.status}).`);
+          return;
+        }
+        setClearResult(`Deleted ${j.deleted} scores.`);
+        setScoreCount(0);
+      } catch {
+        setClearResult("Could not reach the server. Check your connection and try again.");
+      }
+    })();
+  }
 
   const readFile = useCallback(async (file: File) => {
     setError(null);
@@ -313,6 +445,77 @@ export default function UploadPage() {
             ) : null}
           </section>
         ) : null}
+
+        <section className="mt-12 border-t border-ink/15 pt-8">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-ink">
+            Assign the judges.
+          </h2>
+          <p className="mt-3 max-w-xl text-base text-ink/80">
+            This reads the submissions judges currently see, not the file above. Publish
+            the file first if it has not gone out yet.
+          </p>
+
+          <label className="mt-6 block max-w-xs">
+            <span className="label">Upload key</span>
+            <input
+              type="password"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              autoComplete="off"
+              className="mt-2 w-full border-0 border-b-2 border-ink/20 bg-transparent px-0 py-2 text-base text-ink outline-none focus:border-gold"
+            />
+          </label>
+
+          {config ? (
+            <AssignmentPanel
+              judging={liveJudging}
+              config={config}
+              scoreCount={scoreCount}
+              onChange={setConfig}
+              publish={publishConfig}
+              busy={configBusy}
+            />
+          ) : (
+            <p className="label mt-6">Loading…</p>
+          )}
+
+          {configError ? (
+            <p role="alert" className="mt-6 border-l-2 border-gold pl-4 text-base text-ink">
+              {configError}
+            </p>
+          ) : null}
+          {configResult ? (
+            <p className="mt-6 border-l-2 border-gold pl-4 text-base text-ink">{configResult}</p>
+          ) : null}
+        </section>
+
+        <section className="mt-12 border-t border-ink/15 pt-8">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
+            Close judging.
+          </h2>
+          <button
+            type="button"
+            onClick={() => void toggleClosed()}
+            disabled={!config || configBusy}
+            className="btn-ghost mt-4 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {config?.closed ? "Reopen judging" : "Close judging"}
+          </button>
+          <p className="label mt-3">
+            Closed: judges can read, not save. Export from the ranking page.
+          </p>
+        </section>
+
+        <section className="mt-12 border-t border-ink/15 pb-8 pt-8">
+          <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
+            Clear all scores.
+          </h2>
+          <button type="button" onClick={clearScores} className="btn-ghost mt-4">
+            {clearArmed ? `Click again to delete ${scoreCount} scores` : "Clear every score"}
+          </button>
+          <p className="label mt-3">Only for rehearsal. This deletes every saved score.</p>
+          {clearResult ? <p className="mt-3 text-base text-ink">{clearResult}</p> : null}
+        </section>
       </main>
     </div>
   );
