@@ -1,13 +1,20 @@
 import { describe, expect, it } from "vitest";
 import {
   draftKey,
+  keepSavedScore,
+  loadScores,
   mergeScores,
   nextPending,
+  planLoad,
   postPending,
+  sendUnsentDraft,
   shouldRetry,
   stampOf,
+  type LoadDeps,
   type PostReply,
+  type PromptDeps,
   type SaveDeps,
+  type SaveInput,
   type SaveState,
 } from "./useScores";
 import type { Score } from "../judging/types";
@@ -26,21 +33,26 @@ describe("useScores helpers", () => {
     expect(merged["build/b"].total).toBe(20);
     expect(merged["build/c"]).toBeDefined();
   });
-  /* A draft only survives a save that was never acknowledged, so it is
-     this device's unsent work. Nothing on the server can be a later
-     version of it, whatever the stamps say. */
-  it("mergeScores lets a draft win even when the server stamp looks newer", () => {
+  /* The card shows what is stored. A draft for a team the server
+     already holds a score for is unsent work, not a later version of
+     that score: it is kept (planLoad) and offered, never shown in place
+     of the saved one. */
+  it("mergeScores shows the server copy when the device also has a draft", () => {
     const server = s("build/a", "2026-09-19T19:10:00Z", 20);
     const draft = s("build/a", "2026-09-19T19:05:00Z", 24);
-    expect(mergeScores([server], [draft])["build/a"].total).toBe(24);
+    expect(mergeScores([server], [draft])["build/a"].total).toBe(20);
   });
-  /* The scenario that cost a real correction: the server copy came from
-     a phone whose clock runs seven minutes fast. Comparing that stamp
-     with this laptop's would hide the judge's own unsent typing. */
+  /* And it decides that on existence, not on a clock. The server copy
+     here came from a phone running seven minutes fast; the rule is the
+     same either way, so no comparison can go wrong. */
   it("mergeScores never compares a draft with another device's clock", () => {
     const fromFastPhone = s("build/a", "2026-09-19T19:12:00Z", 20, { savedAt: "2026-09-19T19:05:02Z" });
     const myDraft = s("build/a", "2026-09-19T19:06:00Z", 31);
-    expect(mergeScores([fromFastPhone], [myDraft])["build/a"].total).toBe(31);
+    expect(mergeScores([fromFastPhone], [myDraft])["build/a"].total).toBe(20);
+  });
+  it("mergeScores shows a draft for a team the server has nothing for", () => {
+    const draft = s("build/a", "2026-09-19T19:05:00Z", 24);
+    expect(mergeScores([], [draft])["build/a"].total).toBe(24);
   });
   it("stampOf falls back to savedAt for a score written before clientSavedAt existed", () => {
     const old = { ...s("build/a", "2026-09-19T19:05:00Z", 24), clientSavedAt: undefined } as Score;
@@ -242,6 +254,226 @@ describe("postPending: a judge switch throws the answer away", () => {
     expect(h.cleared).toEqual([]);
     expect(h.stopped).toEqual([]);
     expect(h.started).toEqual([]);
+  });
+});
+
+/* ── the load path: an unsent draft never overwrites a saved score ───
+   The residual the device sim below could not see: device 1 has a draft
+   it never sent, device 2 re-scores the same team and lands, and device
+   1 then reloads. The server takes the arrival, by design, so a draft
+   posted on load would replace the newer score with the older one and
+   then say "Saved". It is held and offered to the judge instead. */
+const HELD = s(KEY, "2026-09-19T19:10:00.000Z", 12, { comment: "Scored on the laptop, offline." });
+const SAVED = s(KEY, "2026-09-19T19:28:00.000Z", 36, {
+  comment: "Re-scored from the phone later.",
+  lines: [9, 9, 9, 9],
+  savedAt: "2026-09-19T19:30:00.000Z",
+});
+
+type Answer = { status: number; body: unknown } | "network";
+
+function loadHarness(answer: Answer, drafts: Score[], closed = false, sink?: (score: Score) => void) {
+  const posted: Score[] = [];
+  const cleared: string[] = [];
+  let scores: Record<string, Score> = {};
+  let unsent: Record<string, Score> = {};
+  let states: Record<string, SaveState> = {};
+  let loadError: string | null = null;
+  let unauthorized = false;
+
+  const deps: LoadDeps = {
+    judgeId: "g",
+    token: "judge-token",
+    closed,
+    drafts,
+    fetcher: async () => {
+      if (answer === "network") throw new Error("offline");
+      return {
+        status: answer.status,
+        ok: answer.status >= 200 && answer.status < 300,
+        json: async () => answer.body,
+      };
+    },
+    dead: () => false,
+    setScores: (x) => { scores = x; },
+    setUnsent: (x) => { unsent = x; },
+    setStates: (x) => { states = x; },
+    setLoadError: (m) => { loadError = m; },
+    onUnauthorized: () => { unauthorized = true; },
+    clearDraft: (key) => { cleared.push(key); },
+    post: (score) => { posted.push(score); sink?.(score); },
+  };
+
+  return {
+    deps, posted, cleared,
+    get scores() { return scores; },
+    get unsent() { return unsent; },
+    get states() { return states; },
+    get loadError() { return loadError; },
+    get unauthorized() { return unauthorized; },
+  };
+}
+
+describe("planLoad: what each draft on the device is for", () => {
+  it("holds a draft the server already has a score for, and shows the saved one", () => {
+    const plan = planLoad([SAVED], [HELD], false);
+    expect(plan.post).toEqual([]);
+    expect(plan.held).toEqual([HELD]);
+    expect(plan.scores[KEY].total).toBe(36);
+  });
+  it("posts a draft for a team the server has nothing for", () => {
+    const plan = planLoad([], [HELD], false);
+    expect(plan.post).toEqual([HELD]);
+    expect(plan.held).toEqual([]);
+    expect(plan.scores[KEY].total).toBe(12);
+  });
+  /* A POST into closed judging comes back 423, and the judge would be
+     shown a red sentence about a score they cannot resend. Ask nothing. */
+  it("posts nothing while judging is closed", () => {
+    const plan = planLoad([], [HELD], true);
+    expect(plan.post).toEqual([]);
+    expect(plan.held).toEqual([HELD]);
+  });
+  /* Empty and unknown are different answers, and only one of them means
+     there is nothing to overwrite. */
+  it("holds everything when the read failed", () => {
+    const plan = planLoad(null, [HELD], false);
+    expect(plan.post).toEqual([]);
+    expect(plan.held).toEqual([HELD]);
+    expect(plan.scores[KEY].total).toBe(12);
+  });
+  /* The POST landed; only its answer was lost. Nothing is owed. */
+  it("finishes a draft whose own stamp is the one the server holds", () => {
+    const landed = { ...HELD, savedAt: "2026-09-19T19:10:04.000Z" };
+    const plan = planLoad([landed], [HELD], false);
+    expect(plan.done).toEqual([HELD]);
+    expect(plan.held).toEqual([]);
+    expect(plan.post).toEqual([]);
+  });
+  it("leaves a team with no draft on the server copy", () => {
+    const plan = planLoad([SAVED], [], false);
+    expect(plan.scores[KEY].total).toBe(36);
+    expect(plan.post).toEqual([]);
+    expect(plan.held).toEqual([]);
+  });
+});
+
+describe("loadScores: the reload that used to replace the newer score", () => {
+  it("posts nothing and offers the draft when the server has a score", async () => {
+    const L = loadHarness({ status: 200, body: { scores: [SAVED] } }, [HELD]);
+    await loadScores(L.deps);
+
+    expect(L.posted).toEqual([]);
+    expect(L.unsent[KEY].total).toBe(12);
+    expect(L.scores[KEY].total).toBe(36);
+    expect(L.states[KEY]).toBeUndefined(); // no "retrying": nothing is being retried
+    expect(L.cleared).toEqual([]); // the draft is still the judge's only copy of it
+  });
+
+  it("posts the draft when the server has no score for that team", async () => {
+    const L = loadHarness({ status: 200, body: { scores: [] } }, [HELD]);
+    await loadScores(L.deps);
+
+    expect(L.posted.map((x) => x.total)).toEqual([12]);
+    expect(L.unsent).toEqual({});
+    expect(L.states[KEY].kind).toBe("retrying");
+  });
+
+  it("posts nothing while judging is closed, and keeps the draft", async () => {
+    const L = loadHarness({ status: 200, body: { scores: [] } }, [HELD], true);
+    await loadScores(L.deps);
+
+    expect(L.posted).toEqual([]);
+    expect(L.unsent[KEY].total).toBe(12);
+    expect(L.cleared).toEqual([]);
+    expect(L.scores[KEY].total).toBe(12);
+  });
+
+  it("posts nothing when the read failed, because empty is not what it heard", async () => {
+    const L = loadHarness("network", [HELD]);
+    await loadScores(L.deps);
+
+    expect(L.posted).toEqual([]);
+    expect(L.unsent[KEY].total).toBe(12);
+    expect(L.loadError).toContain("Could not reach the server");
+  });
+
+  it("clears a draft the server answers with the draft's own stamp", async () => {
+    const landed = { ...HELD, savedAt: "2026-09-19T19:10:04.000Z" };
+    const L = loadHarness({ status: 200, body: { scores: [landed] } }, [HELD]);
+    await loadScores(L.deps);
+
+    expect(L.cleared).toEqual([KEY]);
+    expect(L.posted).toEqual([]);
+    expect(L.unsent).toEqual({});
+  });
+
+  /* The retry timer belongs to a save that failed. A held draft has not
+     failed and is not being retried: it waits for the judge. A Save on
+     the same card is a save like any other, timer included. */
+  it("starts no timer on the load path, and a fresh Save on the same card still retries", async () => {
+    const h = harness(() => "network");
+    const L = loadHarness({ status: 200, body: { scores: [SAVED] } }, [HELD], false, (score) => {
+      h.pending[score.teamKey] = score;
+      void postPending(h.deps, score.teamKey);
+    });
+    await loadScores(L.deps);
+    expect(h.sent).toEqual([]);
+    expect(h.started).toEqual([]);
+
+    h.pending[KEY] = s(KEY, "2026-09-19T19:40:00.000Z", 28);
+    await h.run(KEY);
+    expect(h.sent.map((x) => x.total)).toEqual([28]);
+    expect(h.started).toEqual([KEY]);
+  });
+});
+
+describe("the two answers to the prompt", () => {
+  function prompt(h: ReturnType<typeof harness>) {
+    const forgotten: string[] = [];
+    const deleted: string[] = [];
+    const stamp = "2026-09-19T19:45:00.000Z";
+    const deps: PromptDeps = {
+      save: (input: SaveInput): Score => {
+        const score: Score = { ...input, clientSavedAt: stamp, savedAt: stamp };
+        h.pending[score.teamKey] = score;
+        return score;
+      },
+      clearDraft: (key) => { deleted.push(key); },
+      forget: (key) => { forgotten.push(key); },
+    };
+    return { deps, forgotten, deleted, stamp };
+  }
+
+  /* Send is an ordinary Save: a new stamp, a new draft, and a POST that
+     arrives after the saved copy — which is the only reason it wins. */
+  it("Send the unsent one posts the held draft, then clears it on the answer", async () => {
+    const h = harness((body) => echo(body));
+    const p = prompt(h);
+
+    const sent = sendUnsentDraft(p.deps, HELD);
+    await h.run(KEY);
+
+    expect(sent?.total).toBe(12);
+    expect(sent?.clientSavedAt).toBe(p.stamp); // not the draft's old stamp
+    expect(h.sent.map((x) => x.total)).toEqual([12]);
+    expect(h.sent[0].comment).toBe("Scored on the laptop, offline.");
+    expect(h.cleared).toEqual([KEY]);
+    expect(p.forgotten).toEqual([KEY]); // the prompt is gone
+    expect(p.deleted).toEqual([]); // and nothing was deleted behind the judge
+  });
+
+  it("Keep the saved one deletes the draft and posts nothing", async () => {
+    const h = harness(() => { throw new Error("nothing may be posted"); });
+    const p = prompt(h);
+
+    keepSavedScore(p.deps, KEY);
+    await h.drain();
+
+    expect(h.sent).toEqual([]);
+    expect(p.deleted).toEqual([KEY]);
+    expect(p.forgotten).toEqual([KEY]);
+    expect(h.pending[KEY]).toBeUndefined();
   });
 });
 

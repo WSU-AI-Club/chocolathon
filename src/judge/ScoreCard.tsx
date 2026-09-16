@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Block } from "../competitor/types";
 import { GATE_LABELS, type Gates, type Score } from "../judging/types";
 import type { Submission } from "./mapRows";
-import type { SaveInput, SaveState } from "./useScores";
+import { stampOf, type SaveInput, type SaveState } from "./useScores";
 import VideoEmbed from "./VideoEmbed";
 
 type Rubric = Extract<Block, { kind: "rubric" }>;
@@ -40,6 +40,15 @@ function sameGates(a: Gates, b: Gates): boolean {
   return GATE_KEYS.every((g) => a[g] === b[g]);
 }
 
+/* What a score amounts to in one word, for the sentence that compares
+   two of them. A recusal and a failed gate carry no total, and "total
+   null" is not something to show a judge at 7:30 on a Saturday. */
+function figure(x: Score): string {
+  if (x.recused) return "a recusal";
+  if (x.total === null) return "a failed gate";
+  return String(x.total);
+}
+
 export default function ScoreCard({
   submission,
   rubric,
@@ -49,7 +58,10 @@ export default function ScoreCard({
   closed,
   judgeId,
   assigned,
+  unsentDraft,
   onSave,
+  onSendUnsent,
+  onKeepSaved,
 }: {
   submission: Submission;
   rubric: Rubric | null;
@@ -59,7 +71,12 @@ export default function ScoreCard({
   closed: boolean;
   judgeId: string;
   assigned: boolean;
+  /* A score this device saved and never got to send. It is not posted
+     on load any more (useScores), so the card is where it surfaces. */
+  unsentDraft: Score | undefined;
   onSave: (score: SaveInput) => Score | null;
+  onSendUnsent: () => Score | null;
+  onKeepSaved: () => void;
 }) {
   const s = submission;
   const [lines, setLines] = useState<(number | null)[]>(() => score?.lines ?? [null, null, null, null]);
@@ -144,12 +161,38 @@ export default function ScoreCard({
     send({ recused: true, gates: ALL_GATES_PASS, lines: null, total: null, comment: "" });
   };
 
+  /* The prompt: this device is holding a score it never sent, AND the
+     card is showing a different one the server already has. Stamps
+     decide nothing here — they only say whether the two are the same
+     payload. Judging closed is not a question to ask: neither answer
+     can be acted on, so the status line says what is being kept and the
+     draft is left alone. */
+  const conflict = !closed && unsentDraft && score && stampOf(score) !== stampOf(unsentDraft) ? unsentDraft : null;
+  /* Held for another reason (the read failed), so the card is showing
+     the draft itself. Nothing to compare, but "Saved 7:10" would be a
+     lie: it was never sent. Save sends it. */
+  const heldQuietly = Boolean(!closed && unsentDraft && !conflict);
+
+  const sendUnsent = () => {
+    const d = unsentDraft;
+    if (!d) return;
+    setLines(d.lines ?? [null, null, null, null]);
+    setComment(d.comment);
+    setGates(d.gates);
+    setRecused(d.recused);
+    setDirty(false);
+    const sent = onSendUnsent();
+    sentAt.current = sent?.clientSavedAt ?? null;
+  };
+
   /* One line beside Save, in priority order: what the server is doing
      now beats what the judge changed, which beats what was saved. */
   let statusText = "";
   let statusClass = "label";
   if (closed) {
-    statusText = "Judging is closed.";
+    statusText = unsentDraft
+      ? "Judging is closed. Your unsent score is kept on this device."
+      : "Judging is closed.";
   } else if (state.kind === "saving") {
     statusText = "Saving…";
   } else if (state.kind === "retrying") {
@@ -160,6 +203,9 @@ export default function ScoreCard({
     statusClass = "label label-alert";
   } else if (changed && score) {
     statusText = "Changed, not saved";
+    statusClass = "label !text-goldink";
+  } else if (heldQuietly) {
+    statusText = "Not sent. Kept on this device. Save sends it.";
     statusClass = "label !text-goldink";
   } else if (state.kind === "saved") {
     statusText = `Saved ${clockTime(state.at)}`;
@@ -342,6 +388,25 @@ export default function ScoreCard({
           </button>
         )}
       </div>
+
+      {/* ── an unsent score from this device ───────────────────────── */}
+      {conflict && score ? (
+        <div className="mt-6 max-w-2xl">
+          <p className="label label-alert">
+            {`This device has an unsent score for this team (${
+              conflict.recused || conflict.total === null ? figure(conflict) : `total ${conflict.total}`
+            }, from ${clockTime(stampOf(conflict))}). The saved score is ${figure(score)} from ${clockTime(score.savedAt)}.`}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <button type="button" className="btn-ghost-sm" onClick={sendUnsent}>
+              Send the unsent one
+            </button>
+            <button type="button" className="btn-ghost-sm" onClick={onKeepSaved}>
+              Keep the saved one
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* ── save ───────────────────────────────────────────────────── */}
       <div className="mt-6 flex flex-wrap items-center gap-4">

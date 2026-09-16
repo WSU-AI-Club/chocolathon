@@ -192,7 +192,17 @@ export default function JudgePage() {
     };
   }, [token]);
 
-  const { scores, states, loadError, unauthorized, save } = useScores(judge, token);
+  /* Null until the judge list lands. useScores must not post a draft
+     before it knows whether judging is closed, and no card is on the
+     screen until then either, so waiting costs nothing. */
+  const closedYet: boolean | null = load.done ? (load.config?.closed ?? false) : null;
+  const closed = closedYet === true;
+
+  const { scores, states, unsent, loadError, unauthorized, save, sendUnsent, keepSaved } = useScores(
+    judge,
+    token,
+    closedYet,
+  );
 
   /* The panel is one list Michael publishes. A judge whose name is no
      longer on it (a rename, a swap on the morning of) would otherwise
@@ -209,7 +219,6 @@ export default function JudgePage() {
     setPanelChanged(true);
   }, [load.config, judge]);
 
-  const closed = load.config?.closed ?? false;
   const judges = load.config?.judges ?? [];
   const me = judges.find((x) => x.id === judge) ?? null;
 
@@ -272,6 +281,20 @@ export default function JudgePage() {
       return save(input);
     },
     [missingKey, save],
+  );
+
+  /* "Send the unsent one" goes out through the same gate as Save: a
+     team whose key the page cannot save is a team whose draft cannot
+     land either, and a doomed POST would say so in red. */
+  const guardedSendUnsent = useCallback(
+    (teamKey: string): Score | null => {
+      if (missingKey.has(teamKey)) {
+        setNoKey((prev) => ({ ...prev, [teamKey]: true }));
+        return null;
+      }
+      return sendUnsent(teamKey);
+    },
+    [missingKey, sendUnsent],
   );
 
   const cardState = (teamKey: string): SaveState =>
@@ -399,7 +422,7 @@ export default function JudgePage() {
                   {mine.map((s) => {
                     const sc: Score | undefined = scores[s.teamKey];
                     const st = states[s.teamKey];
-                    const amber = st && (st.kind === "retrying" || st.kind === "refused");
+                    const amber = Boolean((st && (st.kind === "retrying" || st.kind === "refused")) || unsent[s.teamKey]);
                     return (
                       <li key={s.teamKey} className="border-b border-ink/10 last:border-b-0">
                         <button
@@ -445,7 +468,10 @@ export default function JudgePage() {
                   closed={closed}
                   judgeId={judge}
                   assigned
+                  unsentDraft={unsent[s.teamKey]}
                   onSave={guardedSave}
+                  onSendUnsent={() => guardedSendUnsent(s.teamKey)}
+                  onKeepSaved={() => keepSaved(s.teamKey)}
                 />
               ))}
             </ol>
@@ -466,7 +492,10 @@ export default function JudgePage() {
                     closed={closed}
                     judgeId={judge}
                     assigned={false}
+                    unsentDraft={unsent[s.teamKey]}
                     onSave={guardedSave}
+                    onSendUnsent={() => guardedSendUnsent(s.teamKey)}
+                    onKeepSaved={() => keepSaved(s.teamKey)}
                   />
                 ))}
               </ol>

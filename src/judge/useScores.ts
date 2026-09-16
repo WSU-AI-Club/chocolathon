@@ -29,9 +29,17 @@
    network back — is the test at the bottom of useScores.test.ts.
 
    On load, a draft in storage is by definition unsent (drafts are
-   cleared only by the acknowledgement of the payload they hold), so it
-   wins over the server copy for that team and is posted at once. Every
-   team without a draft takes the server copy as it stands.
+   cleared only by the acknowledgement of the payload they hold). It is
+   posted at once when the server holds nothing for that team: there is
+   nothing it can overwrite. When the server DOES hold a score, posting
+   it would be this device deciding a race it cannot see — the judge may
+   have re-scored that team from another device an hour later, and the
+   server takes the arrival, so the old draft would win by being late.
+   So the draft is kept, the card shows the saved score, and the judge is
+   asked which one they meant (ScoreCard's prompt). Same answer while
+   judging is closed, and when the read itself failed: a server we could
+   not read is not a server we know is empty. Every team without a draft
+   takes the server copy as it stands.
 
    The judge can change under all of this: "Not you? Switch" starts a
    new session, and every await here checks that it is still in the
@@ -54,17 +62,46 @@ export type SaveInput = Omit<Score, "savedAt" | "clientSavedAt">;
 export const stampOf = (score: Pick<Score, "clientSavedAt" | "savedAt">): string =>
   score.clientSavedAt || score.savedAt || "";
 
-/* On load: the server copy for every team, then every draft on top of
-   it. A draft only exists while its payload has not been acknowledged,
-   so it is this device's unsent work and there is nothing to compare —
-   comparing stamps here is what let another device's clock hide a
-   judge's own typing. Each of these drafts is posted the moment the
-   page opens. */
+/* On load: the server copy for every team, and a draft only where the
+   server has nothing. A draft is unsent work, so it is never thrown
+   away — but it is not shown in place of a score the server already
+   holds either, because that score may be newer than anything this
+   device knows about. No stamp is compared here: which is newer is
+   exactly the question two devices' clocks cannot answer. What the
+   draft is FOR is planLoad's job. */
 export function mergeScores(server: Score[], drafts: Score[]): Record<string, Score> {
   const out: Record<string, Score> = {};
   for (const s of server) out[s.teamKey] = s;
-  for (const d of drafts) out[d.teamKey] = d;
+  for (const d of drafts) if (!out[d.teamKey]) out[d.teamKey] = d;
   return out;
+}
+
+/* What the page does with each draft it finds on the device.
+
+   post — the server has never seen this team from this judge, so the
+     draft cannot overwrite anything: send it, exactly as before.
+   held — the server has a score for that team, or judging is closed, or
+     the read failed. Nothing is posted; the draft stays in storage and
+     the card offers it to the judge (`unsentDraft`).
+   done — the server's copy carries this draft's own stamp, so the POST
+     did land and only its answer was lost. Nothing is owed: drop it.
+
+   `server` is null when the read failed. Empty and unknown are
+   different answers, and only one of them means "nothing to overwrite". */
+export type LoadPlan = { scores: Record<string, Score>; post: Score[]; held: Score[]; done: Score[] };
+
+export function planLoad(server: Score[] | null, drafts: Score[], closed: boolean): LoadPlan {
+  const list = server ?? [];
+  const saved: Record<string, Score> = {};
+  for (const s of list) saved[s.teamKey] = s;
+  const plan: LoadPlan = { scores: mergeScores(list, drafts), post: [], held: [], done: [] };
+  for (const d of drafts) {
+    const mine = saved[d.teamKey];
+    if (mine && stampOf(mine) === stampOf(d)) plan.done.push(d);
+    else if (closed || server === null || mine) plan.held.push(d);
+    else plan.post.push(d);
+  }
+  return plan;
 }
 
 /* After an answer: what still has to be posted, or null when this save
@@ -100,6 +137,8 @@ export type SaveState =
 const RETRY_MS = 10_000;
 const RETRY_LINE = "Not saved. Kept on this device, retrying…";
 const REFUSED_LINE = "The server refused this score. Tell Michael.";
+const READ_FAILED = "Could not read your saved scores. Anything you save now is kept on this device and sent again.";
+const OFFLINE_LINE = "Could not reach the server. Anything you save now is kept on this device and sent again.";
 
 /* localStorage throws in a locked-down browser; a judge with cookies
    blocked still gets a working page, just without the safety net. */
@@ -262,9 +301,112 @@ export async function postPending(deps: SaveDeps, teamKey: string): Promise<void
   deps.setState(teamKey, { kind: "refused", message: payload?.error ?? REFUSED_LINE });
 }
 
-export function useScores(judgeId: string | null, token: string | null) {
+/* ── the load, out of the hook for the same reason ───────────────────
+   One GET, then planLoad decides what each draft is for. Nothing here
+   starts a timer: a held draft is not a failed save, and the only thing
+   that moves it now is the judge answering the prompt. */
+type GetLike = (
+  input: string,
+  init: { cache: "no-store"; headers: Record<string, string> },
+) => Promise<{ status: number; ok: boolean; json: () => Promise<unknown> }>;
+
+export type LoadDeps = {
+  judgeId: string;
+  token: string;
+  /* From the judge list. A draft is never posted before this is known,
+     because a POST into closed judging is refused and the judge would
+     be shown a red sentence about a score they cannot resend. */
+  closed: boolean;
+  drafts: Score[];
+  fetcher: GetLike;
+  dead: () => boolean;
+  setScores: (scores: Record<string, Score>) => void;
+  setUnsent: (unsent: Record<string, Score>) => void;
+  setStates: (states: Record<string, SaveState>) => void;
+  setLoadError: (message: string) => void;
+  onUnauthorized: () => void;
+  clearDraft: (teamKey: string) => void;
+  post: (score: Score) => void;
+};
+
+export async function loadScores(deps: LoadDeps): Promise<void> {
+  /* null, not [], while the answer is unknown: see planLoad. */
+  let server: Score[] | null = null;
+  try {
+    const res = await deps.fetcher(`/api/scores?judge=${encodeURIComponent(deps.judgeId)}`, {
+      cache: "no-store",
+      headers: { "x-judge-key": deps.token },
+    });
+    if (deps.dead()) return;
+    if (res.status === 401) {
+      deps.onUnauthorized();
+    } else if (res.ok) {
+      const body = (await res.json()) as { scores?: Score[] };
+      if (deps.dead()) return;
+      server = Array.isArray(body.scores) ? body.scores : [];
+    } else {
+      deps.setLoadError(READ_FAILED);
+    }
+  } catch {
+    if (deps.dead()) return;
+    deps.setLoadError(OFFLINE_LINE);
+  }
+  if (deps.dead()) return;
+
+  const plan = planLoad(server, deps.drafts, deps.closed);
+  deps.setScores(plan.scores);
+  /* The POST landed and only the answer was lost. Storage is the only
+     place that still thinks something is owed. */
+  for (const d of plan.done) deps.clearDraft(d.teamKey);
+  if (plan.held.length) deps.setUnsent(Object.fromEntries(plan.held.map((d) => [d.teamKey, d])));
+  if (plan.post.length) {
+    deps.setStates(Object.fromEntries(plan.post.map((d) => [d.teamKey, { kind: "retrying", message: RETRY_LINE } as SaveState])));
+    for (const d of plan.post) deps.post(d);
+  }
+}
+
+/* ── the two answers to the prompt ───────────────────────────────────
+   Send hands the held draft back to the ordinary save path: a new
+   stamp, a new draft, a POST that arrives after the saved copy and
+   therefore replaces it — the same rule as any other Save, which is why
+   this is not a second way to write a score. Keep deletes the draft;
+   the card is already showing the server's copy, so there is nothing
+   else to adopt. Neither one can run by itself: a judge chose. */
+export type PromptDeps = {
+  save: (input: SaveInput) => Score | null;
+  clearDraft: (teamKey: string) => void;
+  forget: (teamKey: string) => void;
+};
+
+const unsentInput = (d: Score): SaveInput => ({
+  judgeId: d.judgeId,
+  teamKey: d.teamKey,
+  track: d.track,
+  gates: d.gates,
+  recused: d.recused,
+  lines: d.lines,
+  total: d.total,
+  comment: d.comment,
+});
+
+export function sendUnsentDraft(deps: PromptDeps, draft: Score): Score | null {
+  deps.forget(draft.teamKey);
+  return deps.save(unsentInput(draft));
+}
+
+export function keepSavedScore(deps: PromptDeps, teamKey: string): void {
+  deps.clearDraft(teamKey);
+  deps.forget(teamKey);
+}
+
+/* `closed` is null until the judge list lands. The page shows no cards
+   until then, and nothing is posted on a guess. */
+export function useScores(judgeId: string | null, token: string | null, closed: boolean | null) {
   const [scores, setScores] = useState<Record<string, Score>>({});
   const [states, setStates] = useState<Record<string, SaveState>>({});
+  /* Drafts this device is holding rather than posting: one per team, the
+     judge's unsent work, waiting for them to say which score they meant. */
+  const [unsent, setUnsent] = useState<Record<string, Score>>({});
   const [loadError, setLoadError] = useState<string | null>(null);
   const [unauthorized, setUnauthorized] = useState(false);
   const timers = useRef<Record<string, number>>({});
@@ -333,64 +475,54 @@ export function useScores(judgeId: string | null, token: string | null) {
 
   attemptRef.current = attempt;
 
-  /* Load once per judge, in a new session. Drafts are unsent work, so
-     they win over the server copy and are retried the moment the page
-     opens. */
+  /* Load once per judge, in a new session. A draft is posted only where
+     the server holds nothing for that team (planLoad); everything else
+     it finds is held for the judge to answer. */
   useEffect(() => {
     session.current += 1;
     const mySession = session.current;
     setScores({});
     setStates({});
+    setUnsent({});
     setLoadError(null);
     for (const key of Object.keys(timers.current)) window.clearInterval(timers.current[key]);
     timers.current = {};
     pending.current = {};
     inFlight.current = {};
-    if (!judgeId || !token) return;
+    if (!judgeId || !token || closed === null) return;
 
     let cancelled = false;
     /* Cancelled, or the judge changed under the request. Either way the
        answer is about a page that is no longer on the screen. */
     const dead = () => cancelled || session.current !== mySession;
-    (async () => {
-      const drafts = readDrafts(judgeId);
-      let server: Score[] = [];
-      try {
-        const res = await fetch(`/api/scores?judge=${encodeURIComponent(judgeId)}`, {
-          cache: "no-store",
-          headers: { "x-judge-key": token },
-        });
-        if (dead()) return;
-        if (res.status === 401) {
-          setUnauthorized(true);
-        } else if (res.ok) {
-          const body = (await res.json()) as { scores?: Score[] };
-          if (dead()) return;
-          server = Array.isArray(body.scores) ? body.scores : [];
-        } else {
-          setLoadError("Could not read your saved scores. Anything you save now is kept on this device and sent again.");
-        }
-      } catch {
-        if (dead()) return;
-        setLoadError("Could not reach the server. Anything you save now is kept on this device and sent again.");
-      }
-      if (dead()) return;
+    const drafts = readDrafts(judgeId);
+    /* Held or posted, a draft is still the newest stamp this device has
+       written for that team, so the next Save has to clear it. */
+    for (const d of drafts) lastStamp.current[d.teamKey] = stampOf(d);
 
-      setScores(mergeScores(server, drafts));
-      if (drafts.length) {
-        setStates(Object.fromEntries(drafts.map((d) => [d.teamKey, { kind: "retrying", message: RETRY_LINE } as SaveState])));
-        for (const d of drafts) {
-          pending.current[d.teamKey] = d;
-          lastStamp.current[d.teamKey] = stampOf(d);
-          void attemptRef.current?.(d.teamKey);
-        }
-      }
-    })();
+    void loadScores({
+      judgeId,
+      token,
+      closed,
+      drafts,
+      fetcher: (input, init) => fetch(input, init),
+      dead,
+      setScores,
+      setUnsent,
+      setStates,
+      setLoadError,
+      onUnauthorized: () => setUnauthorized(true),
+      clearDraft: (teamKey) => clearDraft(judgeId, teamKey),
+      post: (score) => {
+        pending.current[score.teamKey] = score;
+        void attemptRef.current?.(score.teamKey);
+      },
+    });
 
     return () => {
       cancelled = true;
     };
-  }, [judgeId, token]);
+  }, [judgeId, token, closed]);
 
   /* Timers outlive a card unmount on purpose (a judge scrolling away
      must not stop a retry), but never the page. */
@@ -402,12 +534,25 @@ export function useScores(judgeId: string | null, token: string | null) {
     [],
   );
 
+  /* A held draft is gone the moment there is a newer payload for that
+     team, whichever button produced it: the prompt is about work that
+     has not been sent, and this one is being sent now. */
+  const forget = useCallback((teamKey: string) => {
+    setUnsent((prev) => {
+      if (!prev[teamKey]) return prev;
+      const next = { ...prev };
+      delete next[teamKey];
+      return next;
+    });
+  }, []);
+
   /* Returns the score it stamped and sent, so the card knows which
      acknowledgement is its own. */
   const save = useCallback(
     (input: SaveInput): Score => {
       const stamp = stampFor(input.teamKey);
       const score: Score = { ...input, clientSavedAt: stamp, savedAt: stamp };
+      forget(score.teamKey);
       writeDraft(score);
       pending.current[score.teamKey] = score;
       /* Optimistic: the queue shows the total straight away and paints it
@@ -416,8 +561,36 @@ export function useScores(judgeId: string | null, token: string | null) {
       void attempt(score.teamKey);
       return score;
     },
-    [attempt, stampFor],
+    [attempt, forget, stampFor],
   );
 
-  return { scores, states, loadError, unauthorized, save };
+  const promptDeps = useCallback(
+    (): PromptDeps => ({
+      save,
+      clearDraft: (teamKey) => clearDraft(judgeId ?? "", teamKey),
+      forget,
+    }),
+    [forget, judgeId, save],
+  );
+
+  /* "Send the unsent one". Returns the score it sent, like save. */
+  const sendUnsent = useCallback(
+    (teamKey: string): Score | null => {
+      const draft = unsent[teamKey];
+      if (!draft) return null;
+      return sendUnsentDraft(promptDeps(), draft);
+    },
+    [promptDeps, unsent],
+  );
+
+  /* "Keep the saved one". */
+  const keepSaved = useCallback(
+    (teamKey: string): void => {
+      if (!judgeId) return;
+      keepSavedScore(promptDeps(), teamKey);
+    },
+    [judgeId, promptDeps],
+  );
+
+  return { scores, states, unsent, loadError, unauthorized, save, sendUnsent, keepSaved };
 }
