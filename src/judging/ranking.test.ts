@@ -95,4 +95,29 @@ describe("rankTrack", () => {
     const [row] = rankTrack("build", subs, scores, config, name);
     expect(row.flags).toContain("Also entered in the pitch track");
   });
+
+  it("flags a counted score whose submission was resubmitted later, naming the judge", () => {
+    // savedAt 2026-09-19T19:00:00Z = 14:00 America/Chicago (CDT, UTC-5).
+    // A 15:00 Chicago completion time is 20:00Z, later than the save.
+    const subs = [{ ...sub("Alpha"), submittedAt: "9/19/26 15:00" }];
+    const scores = [score("g", "Alpha", [8, 8, 8, 8]), score("d", "Alpha", [8, 8, 8, 8])];
+    const [row] = rankTrack("build", subs, scores, config, name);
+    expect(row.flags).toContain("Resubmitted after Grant Johnson scored it");
+    expect(row.flags).toContain("Resubmitted after Dane Laughlin scored it");
+  });
+
+  it("does not flag a counted score whose submission was completed earlier", () => {
+    // 13:00 Chicago = 18:00Z, earlier than the 19:00Z save.
+    const subs = [{ ...sub("Alpha"), submittedAt: "9/19/26 13:00" }];
+    const scores = [score("g", "Alpha", [8, 8, 8, 8]), score("d", "Alpha", [8, 8, 8, 8])];
+    const [row] = rankTrack("build", subs, scores, config, name);
+    expect(row.flags.some((f) => f.startsWith("Resubmitted after"))).toBe(false);
+  });
+
+  it("does not flag when submittedAt does not parse", () => {
+    const subs = [{ ...sub("Alpha"), submittedAt: "not a date" }];
+    const scores = [score("g", "Alpha", [8, 8, 8, 8]), score("d", "Alpha", [8, 8, 8, 8])];
+    const [row] = rankTrack("build", subs, scores, config, name);
+    expect(row.flags.some((f) => f.startsWith("Resubmitted after"))).toBe(false);
+  });
 });

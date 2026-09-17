@@ -6,6 +6,38 @@
 import type { Submission } from "../judge/mapRows";
 import { GATE_LABELS, type JudgingConfig, type Score, type Track } from "./types";
 
+/* Forms writes the completion time as "M/D/YY H:mm[:ss]", 24-hour, with
+   no timezone: it's whatever the responder's clock said, which for this
+   event is America/Chicago. Returns the UTC epoch ms of that wall-clock
+   moment in Chicago, or null if the string doesn't parse, so it can be
+   compared against a score's ISO `savedAt` regardless of the timezone
+   this code happens to run in. */
+function chicagoOffsetMinutes(utcMs: number): number {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hourCycle: "h23",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  });
+  const parts = dtf.formatToParts(new Date(utcMs));
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? "0");
+  const asIfUtc = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+  return (asIfUtc - utcMs) / 60000;
+}
+
+function parseChicagoFormsDate(s: string): number | null {
+  const m = s.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!m) return null;
+  const [, mo, d, y, h, mi, sec] = m;
+  let year = parseInt(y, 10);
+  if (year < 100) year += 2000;
+  const guessUtc = Date.UTC(year, parseInt(mo, 10) - 1, parseInt(d, 10), parseInt(h, 10), parseInt(mi, 10), sec ? parseInt(sec, 10) : 0);
+  const offset1 = chicagoOffsetMinutes(guessUtc);
+  const utc = guessUtc - offset1 * 60000;
+  const offset2 = chicagoOffsetMinutes(utc);
+  return offset2 !== offset1 ? guessUtc - offset2 * 60000 : utc;
+}
+
 export type TeamRow = {
   teamKey: string; team: string; track: Track; prompt: string;
   scores: Score[]; counted: Score[]; judgeCount: number;
@@ -46,6 +78,15 @@ export function rankTrack(track: Track, submissions: Submission[], scores: Score
         if (x.recused) flags.push(`Recused: ${judgeName(x.judgeId)}`);
         for (const [g, passes] of Object.entries(x.gates)) {
           if (!passes) flags.push(`Gate failed: ${GATE_LABELS[g as keyof typeof GATE_LABELS]} (${judgeName(x.judgeId)})`);
+        }
+      }
+      const submittedMs = parseChicagoFormsDate(s.submittedAt);
+      if (submittedMs !== null) {
+        for (const x of counted) {
+          const savedMs = Date.parse(x.savedAt);
+          if (!Number.isNaN(savedMs) && submittedMs > savedMs) {
+            flags.push(`Resubmitted after ${judgeName(x.judgeId)} scored it`);
+          }
         }
       }
       return {

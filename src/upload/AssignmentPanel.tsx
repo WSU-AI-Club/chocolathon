@@ -56,6 +56,7 @@ export default function AssignmentPanel({
 }) {
   const [newJudge, setNewJudge] = useState("");
   const [armed, setArmed] = useState(false);
+  const [armedFull, setArmedFull] = useState(false);
   const [result, setResult] = useState<ReturnType<typeof deal> | null>(null);
   const visible = useMemo(() => (judging?.submissions ?? []).filter((s) => !s.duplicateOf), [judging]);
   /* Without a live set, deal() has nothing to deal and would write an
@@ -78,15 +79,37 @@ export default function AssignmentPanel({
   }
   function generate() {
     if (!canGenerate) return;
-    /* Any existing hand-edited assignment is worth a second click, scores
-       or no scores: a deal replaces every one of them. */
+    /* Incremental: keeps every team's current judges and only deals the
+       new or under-minimum ones. Still worth a second click, since it
+       changes assignments Michael may have hand-edited. */
     if (hasAssignments && !armed) {
       setArmed(true);
+      setArmedFull(false);
+      return;
+    }
+    const d = deal({
+      submissions: visible,
+      judges: config.judges,
+      minPerTeam: config.minPerTeam,
+      excluded: config.excluded,
+      existing: config.assignments,
+    });
+    setResult(d);
+    setArmed(false);
+    onChange({ ...config, assignments: d.assignments });
+  }
+  function redealAll() {
+    if (!canGenerate) return;
+    /* Full re-deal: throws away every existing assignment, hand-edited
+       or not. */
+    if (hasAssignments && !armedFull) {
+      setArmedFull(true);
+      setArmed(false);
       return;
     }
     const d = deal({ submissions: visible, judges: config.judges, minPerTeam: config.minPerTeam, excluded: config.excluded });
     setResult(d);
-    setArmed(false);
+    setArmedFull(false);
     onChange({ ...config, assignments: d.assignments });
   }
   function setTeamJudges(teamKey: string, ids: string[]) {
@@ -176,11 +199,22 @@ export default function AssignmentPanel({
         >
           Generate
         </button>
+        <button
+          type="button"
+          onClick={redealAll}
+          disabled={!canGenerate}
+          className="btn-ghost-sm disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Re-deal everything
+        </button>
         {!canGenerate && !busy ? <span className="label">Load the live set first.</span> : null}
         {canGenerate && armed ? (
           <span className="label label-accent">
-            This replaces the current assignments. Click again to confirm.
+            This keeps every team's current judges and deals only the new ones. Click again to confirm.
           </span>
+        ) : null}
+        {canGenerate && armedFull ? (
+          <span className="label label-accent">This replaces every assignment. Click again to confirm.</span>
         ) : null}
         {canGenerate && scoreCount > 0 ? (
           <span className="label">
