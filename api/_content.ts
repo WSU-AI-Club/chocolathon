@@ -556,7 +556,7 @@ export const PEOPLE: People = {
     },
     {
       name: "Tim Woodburn",
-      role: "Cocoa Dolce",
+      role: "Vice President of Operations, Cocoa Dolce",
       photo: "/chocolathon/people/tim-woodburn.webp",
     },
     {
