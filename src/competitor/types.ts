@@ -50,6 +50,7 @@ export type Person = {
   role: string;
   note?: string;
   linkedin?: string;
+  photo?: string;
   session?: { time: string; title: string };
 };
 

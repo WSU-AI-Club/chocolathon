@@ -476,6 +476,7 @@ export type Person = {
   role: string; // title and organisation, as they want it printed
   note?: string; // one short line, optional
   linkedin?: string; // profile URL, supplied by the person or verified by Michael
+  photo?: string; // /chocolathon/people/<slug>.webp, a 256px circle cut from the LinkedIn photo (2026-09-18)
   session?: { time: string; title: string }; // speakers only
 };
 
@@ -493,12 +494,14 @@ export const PEOPLE: People = {
       name: "Cody Herrin",
       role: "Continuous Improvement and Innovation Manager, Capital III",
       linkedin: "https://www.linkedin.com/in/codyherrin/",
+      photo: "/chocolathon/people/cody-herrin.webp",
       session: { time: "10:00 AM", title: "AI in Manufacturing: Databricks at Capital III" },
     },
     {
       name: "Fareeha Amber Ansari",
       role: "AI Governance Lead, Cargill",
       linkedin: "https://www.linkedin.com/in/ansarifa/",
+      photo: "/chocolathon/people/fareeha-amber-ansari.webp",
       session: { time: "11:30 AM", title: "Open Source, Open Weights, Open Questions" },
     },
     {
@@ -506,6 +509,7 @@ export const PEOPLE: People = {
       role: "Founder and CEO, Unified",
       linkedin: "https://www.linkedin.com/in/ramsey-jamoul-423682b8/",
       note: "Unified runs the National AI Prompt Championship.",
+      photo: "/chocolathon/people/ramsey-jamoul.webp",
       session: { time: "2:30 PM", title: "Orchestrating AI" },
     },
   ],
@@ -514,24 +518,28 @@ export const PEOPLE: People = {
       name: "Grant Johnson",
       role: "Creator of Chatterbox: Language Learning",
       linkedin: "https://www.linkedin.com/in/grant-johnson15/",
+      photo: "/chocolathon/people/grant-johnson.webp",
     },
     {
       name: "Dane Laughlin",
       role: "Industries Lead, Squint",
       note: "WSU alum.",
       linkedin: "https://www.linkedin.com/in/danelaughlin/",
+      photo: "/chocolathon/people/dane-laughlin.webp",
     },
     {
       name: "Alexis Diaz",
       role: "Software Engineer, Koch Ag & Energy Solutions",
       note: "WSU computer science alum.",
       linkedin: "https://www.linkedin.com/in/alexis-diaz-wsu/",
+      photo: "/chocolathon/people/alexis-diaz.webp",
     },
     {
       name: "Fareeha Amber Ansari",
       role: "AI Governance Lead, Cargill",
       note: "Also speaking at 11:30.",
       linkedin: "https://www.linkedin.com/in/ansarifa/",
+      photo: "/chocolathon/people/fareeha-amber-ansari.webp",
     },
     {
       name: "Jeremy Simon",
@@ -544,11 +552,18 @@ export const PEOPLE: People = {
       role: "Chief Operating Officer, Cocoa Dolce",
       note: "Judging with his leadership team.",
       linkedin: "https://www.linkedin.com/in/benjamin-hesse-420a551b/",
+      photo: "/chocolathon/people/ben-hesse.webp",
+    },
+    {
+      name: "Tim Woodburn",
+      role: "Cocoa Dolce",
+      photo: "/chocolathon/people/tim-woodburn.webp",
     },
     {
       name: "Darrah Walker",
       role: "ERP and Demand Planning Specialist, Cocoa Dolce",
       linkedin: "https://www.linkedin.com/in/darrah-walker-617187262/",
+      photo: "/chocolathon/people/darrah-walker.webp",
     },
   ],
 };

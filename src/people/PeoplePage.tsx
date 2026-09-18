@@ -5,7 +5,9 @@
    name and title arrives from /api/hub (`people`), the same source the
    HQ bar's People button leads here, so a judge is never named two different
    ways. Same palette and type as the rest of the site; ruled rows, no
-   cards; no photography until real headshots exist.
+   cards. Headshots since 2026-09-18: a circle cut from each LinkedIn
+   photo, 72px, hairline ring; a person without one gets their initials
+   in the display face so every row keeps the same shape.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from "react";
@@ -226,9 +228,37 @@ function Panel({
    as one list of people. The mark is the link (44px touch target,
    labelled for screen readers); the name itself stays plain text so
    the row does not read as one big link. */
+function Portrait({ person }: { person: Person }) {
+  const initials = person.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("");
+  return person.photo ? (
+    <img
+      src={person.photo}
+      alt=""
+      width={72}
+      height={72}
+      loading="lazy"
+      className="h-[72px] w-[72px] shrink-0 rounded-full object-cover ring-1 ring-ink/10"
+    />
+  ) : (
+    <span
+      aria-hidden="true"
+      className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full bg-ink/[0.05] font-display text-2xl font-semibold text-ink/70 ring-1 ring-ink/10"
+    >
+      {initials}
+    </span>
+  );
+}
+
 function PersonLine({ person, className = "" }: { person: Person; className?: string }) {
   return (
-    <div className={className}>
+    <div className={`flex items-center gap-5 ${className}`}>
+      <Portrait person={person} />
+      <div className="min-w-0">
       <p className="flex items-center gap-1 text-lg font-semibold leading-snug text-ink">
         {person.name}
         {person.linkedin ? (
@@ -247,6 +277,7 @@ function PersonLine({ person, className = "" }: { person: Person; className?: st
       {person.note ? (
         <p className="mt-1 text-sm leading-relaxed text-ink/80">{person.note}</p>
       ) : null}
+      </div>
     </div>
   );
 }
