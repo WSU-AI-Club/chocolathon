@@ -80,12 +80,13 @@ export const PROMPTS_RELEASE_AT = new Date("2026-09-14T02:30:00.000Z");
 
 /* ── Submissions ─────────────────────────────────────────────────────
    The finale-day Microsoft Form. The submissions button is locked until
-   1:00 PM on Saturday, September 19, Wichita time, then links here. The
-   form enforces its own 1:00–2:00 window (moved from 2:15 on 2026-09-10) in its own settings. Leave the
+   9:00 AM on Saturday, September 19, Wichita time, then links here (moved
+   from 1:00 PM on 2026-09-17 so nobody loses a half-typed form at 1:59). The
+   form enforces its own 9:00–2:00 window in its own settings. Leave the
    URL empty and the button stays locked with "Link coming" even after
    the instant — a missing URL can never ship a dead amber button. */
 export const SUBMISSION_URL = "https://forms.cloud.microsoft/r/kWpfJhLss4";
-export const SUBMISSIONS_OPEN_AT = new Date("2026-09-19T13:00:00-05:00");
+export const SUBMISSIONS_OPEN_AT = new Date("2026-09-19T09:00:00-05:00");
 
 /* ── Judging ─────────────────────────────────────────────────────────
    The judge page: the judge picks their name, works their queue, scores

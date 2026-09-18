@@ -3,7 +3,7 @@
 
    Two uses (2026-09-06): the prompts button (locked until midnight
    September 14, then the amber link into HQ) and the submissions button
-   (locked until 1:00 PM on September 19, then the amber link to the
+   (locked until 9:00 AM on September 19, then the amber link to the
    Microsoft Form). Same look for both so a visitor learns the pattern
    once: dashed, a drawn lock, the live countdown inside, disabled for
    real; then amber.

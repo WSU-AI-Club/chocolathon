@@ -433,6 +433,7 @@ export const PROMPTS_INTRO =
 
 export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: boolean }[] = [
   { time: "8:30 AM", what: "Doors open and check-in starts. Coffee, pastries, Cocoa Dolce chocolates." },
+  { time: "9:00 AM", what: "Submissions open. Submit any time before 2:00; early is fine.", flag: true },
   { time: "9:15 AM", what: "Opening ceremony" },
   { time: "9:30 AM", what: "Networking. Teams work and refine." },
   {
@@ -446,13 +447,15 @@ export const RUN_OF_DAY: { time: string; what: string; who?: string; flag?: bool
     who: "Fareeha Amber Ansari, AI Governance Lead, Cargill",
   },
   { time: "12:30 PM", what: "Lunch, by Jimmy John’s" },
-  { time: "1:00 PM", what: "Submissions open", flag: true },
+  { time: "1:30 PM", what: "Preliminary judging begins, on the submissions already in." },
   { time: "2:00 PM", what: "Submissions close. Hard cutoff.", flag: true },
   {
     time: "2:30 PM",
     what: "Session 3: Orchestrating AI, during preliminary judging",
     who: "Ramsey Jamoul, Founder and CEO, Unified",
   },
+  { time: "3:15 PM", what: "Preliminary judging closes." },
+  { time: "3:30 PM", what: "Finalists announced in the auditorium. Everyone there.", flag: true },
   { time: "3:45 PM", what: "Final presentations, to 4:30. Open to the public.", flag: true },
   { time: "4:45 PM", what: "Winners announced" },
   { time: "5:00 PM", what: "Pictures and wrap" },
@@ -541,6 +544,11 @@ export const PEOPLE: People = {
       role: "Chief Operating Officer, Cocoa Dolce",
       note: "Judging with his leadership team.",
       linkedin: "https://www.linkedin.com/in/benjamin-hesse-420a551b/",
+    },
+    {
+      name: "Darrah Walker",
+      role: "ERP and Demand Planning Specialist, Cocoa Dolce",
+      linkedin: "https://www.linkedin.com/in/darrah-walker-617187262/",
     },
   ],
 };
@@ -819,8 +827,9 @@ export const SECTIONS: Section[] = [
     nav: "Submissions",
     title: "Submitting.",
     intro:
-      "Saturday, September 19, 1:00 to 2:00 PM, through a Microsoft Form. The button " +
-      "below unlocks at 1:00. Have everything on this list ready before then.",
+      "Saturday, September 19, 9:00 AM to 2:00 PM, through a Microsoft Form. The button " +
+      "below unlocks at 9:00. Submit early if you are done; if you need to change something, " +
+      "submit again before 2:00 and your latest submission counts.",
     blocks: [
       {
         kind: "list",
@@ -844,7 +853,7 @@ export const SECTIONS: Section[] = [
           "Links must open without a login or an install. Test them in a private window first.",
           "Unlisted video is fine. Private is not.",
           "One submission per team, by one person.",
-          "2:00 PM is a hard cutoff. Judging starts the moment the form closes.",
+          "2:00 PM is a hard cutoff. Preliminary judging runs 1:30 to 3:15 on what is in, and the finalists are announced in the auditorium at 3:30.",
           "Building hardware? Your product link is a page that proves it: an unedited video of the device doing the real task, photos, and the software side if there is one. Bring the device on the 19th.",
         ],
       },
