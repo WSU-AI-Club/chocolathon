@@ -311,13 +311,14 @@ export default function ScoreCard({
                   on a slider, on the same ten-column grid, so each word
                   belongs to the number above it. The 10 is in full ink;
                   it is the one that should be hard to give. On a phone
-                  the buttons wrap to two rows of five and the anchors
-                  fall back to a stacked list with their marks. */}
+                  the buttons wrap to two full-width rows of five, 44px
+                  tall for a thumb, and the anchors fall back to a
+                  stacked list with their marks. */}
               <div className="mt-3">
                 {/* Fixed 2.5rem tracks: the grid's width comes from the
                     buttons, never from the caption text, which wraps
                     inside its span. */}
-                <div className="grid w-max grid-cols-[repeat(5,2.5rem)] gap-1.5 sm:grid-cols-[repeat(10,2.5rem)]">
+                <div className="grid w-full grid-cols-5 gap-2 sm:w-max sm:grid-cols-[repeat(10,2.5rem)] sm:gap-1.5">
                 {TEN.map((n) => {
                   const on = lines[i] === n;
                   return (
@@ -332,7 +333,7 @@ export default function ScoreCard({
                         setLines((prev) => prev.map((v, k) => (k === i ? n : v)));
                       }}
                       className={
-                        "label inline-flex h-10 w-10 items-center justify-center rounded-sm border tabular-nums transition-colors disabled:cursor-not-allowed " +
+                        "label inline-flex h-11 w-full items-center justify-center rounded-sm border tabular-nums transition-colors disabled:cursor-not-allowed sm:h-10 sm:w-10 " +
                         (on
                           ? "border-ink bg-ink !text-white"
                           : "border-ink/25 bg-white hover:border-ink/60 hover:bg-ink/[0.04]")
@@ -436,7 +437,7 @@ export default function ScoreCard({
             </button>
           </div>
         ) : (
-          <button type="button" className="btn-ghost-sm" disabled={closed} onClick={recuse}>
+          <button type="button" className="btn-ghost-sm !min-h-[44px] sm:!min-h-0" disabled={closed} onClick={recuse}>
             I know this team, skip it
           </button>
         )}

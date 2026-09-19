@@ -496,7 +496,7 @@ export default function JudgePage() {
             <button
               type="button"
               onClick={switchJudge}
-              className="label underline underline-offset-4"
+              className="label -my-3 inline-flex min-h-[44px] items-center underline underline-offset-4"
               style={judge ? undefined : { visibility: "hidden" }}
             >
               Not you? Switch
@@ -576,7 +576,7 @@ export default function JudgePage() {
                           aria-current={on ? "true" : undefined}
                           onClick={() => goTo(i)}
                           className={
-                            "flex max-w-[15rem] items-center gap-2 rounded-sm border px-2.5 py-1.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 " +
+                            "flex min-h-[44px] max-w-[15rem] items-center gap-2 rounded-sm border px-3 py-1.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:px-2.5 " +
                             (on ? "border-ink bg-ink" : "border-ink/20 bg-white hover:border-ink/50 hover:bg-ink/[0.04]")
                           }
                         >

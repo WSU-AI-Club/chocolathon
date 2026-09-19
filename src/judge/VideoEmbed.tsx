@@ -32,7 +32,7 @@ export default function VideoEmbed({ url, team }: { url: string; team: string })
 
       {url ? (
         <p className="mt-3">
-          <a href={url} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm">
+          <a href={url} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm !min-h-[44px] sm:!min-h-0">
             Open the video in a new tab
           </a>
         </p>
