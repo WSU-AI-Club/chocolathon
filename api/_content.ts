@@ -544,6 +544,7 @@ export const PEOPLE: People = {
     {
       name: "Jeremy Simon",
       role: "Web & IT Manager, McCurdy Real Estate & Auction",
+      photo: "/chocolathon/people/jeremy-simon.webp",
     },
   ],
   finals: [
