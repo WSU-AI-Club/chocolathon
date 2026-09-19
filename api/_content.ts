@@ -771,6 +771,7 @@ export const SECTIONS: Section[] = [
         ],
       },
       {
+        kind: "rubric",
         label: "Pitch Track",
         items: [
           {
@@ -939,12 +940,14 @@ export const RESULTS: Results = {
       track: "build",
       winner: { team: "", prompt: "", line: "", demo: "", video: "" },
       second: { team: "", prompt: "", line: "", demo: "", video: "" },
+      third: { team: "", prompt: "", line: "", demo: "", video: "" },
       finalists: [],
     },
     {
       track: "pitch",
       winner: { team: "", prompt: "", line: "", demo: "", video: "" },
       second: { team: "", prompt: "", line: "", demo: "", video: "" },
+      third: { team: "", prompt: "", line: "", demo: "", video: "" },
       finalists: [],
     },
   ],
