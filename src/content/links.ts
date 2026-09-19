@@ -72,6 +72,10 @@ export const PROMPTS_HREF = `${HQ_PATH}#prompts`;
    from /api/hub so HQ and this page never disagree. */
 export const PEOPLE_PATH = "/people";
 
+/* The team page (2026-09-18): the AI Club leadership behind the event,
+   from src/content/team.ts. Public, and it stays up after the 19th. */
+export const TEAM_PATH = "/team";
+
 /* The client's copy of the server clock in api/_release.ts: 9:30 PM on
    September 13, Wichita time (moved up from midnight on 2026-09-13).
    Decides what the prompts BUTTON looks like; the server decides what

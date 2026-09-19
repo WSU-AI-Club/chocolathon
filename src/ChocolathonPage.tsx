@@ -10,7 +10,7 @@
 
    Structure (reset 2026-09-06): the story film (or its mobile
    fallback), the Competition HQ band, the Barton School block, the
-   footer. The Tracks, Schedule, and Judges sections that used to stack
+   DTMedia block, the team (2026-09-18), the footer. The Tracks, Schedule, and Judges sections that used to stack
    here moved into Competition HQ so every fact lives in one place.
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -21,6 +21,7 @@ import Masthead from "./content/Masthead";
 import HqSection from "./content/HqSection";
 import BackedBySection from "./content/BackedBySection";
 import CoveredBySection from "./content/CoveredBySection";
+import TeamSection from "./content/TeamSection";
 import FooterSection from "./content/FooterSection";
 import MobileStory from "./content/MobileStory";
 import "./chocolathon.css";
@@ -57,6 +58,7 @@ export default function ChocolathonPage() {
       <HqSection />
       <BackedBySection />
       <CoveredBySection />
+      <TeamSection />
       <FooterSection />
     </div>
   );

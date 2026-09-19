@@ -13,7 +13,7 @@
 import { useEffect, useState } from "react";
 
 import { LinkedInIcon } from "../content/icons";
-import { HQ_PATH, REGISTER_URL, registrationOpen } from "../content/links";
+import { HQ_PATH, REGISTER_URL, TEAM_PATH, registrationOpen } from "../content/links";
 import type { HubData, Person } from "../competitor/types";
 import "../chocolathon.css";
 
@@ -70,6 +70,9 @@ function Bar() {
         <nav className="flex items-center gap-2 sm:gap-3">
           <a href="/" className="hq-link">
             Event page
+          </a>
+          <a href={TEAM_PATH} className="hq-link">
+            Team
           </a>
           <a href={HQ_PATH} className="hq-link">
             <span className="sm:hidden">HQ</span>
