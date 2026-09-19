@@ -305,28 +305,19 @@ export default function ScoreCard({
                 <span className="w-5 shrink-0 text-goldink">{i + 1}</span>
                 <span>{c ? c.name : fallback}</span>
               </legend>
-              {/* The anchors sit over the buttons as a scale (2026-09-19):
-                  1 at the left end, 5 in the middle, 10 at the right, the
-                  same width as the ten buttons, so the judge reads the
-                  ladder in the direction they will press it. The 10 is
-                  in full ink; it is the one that should be hard to give. */}
-              {c ? (
-                <div className="mt-3 grid max-w-[454px] grid-cols-3 gap-x-3 text-xs leading-snug">
-                  <p className="text-left text-ink/70">
-                    <span className="label block !text-[11px] tabular-nums">1</span>
-                    {c.low}
-                  </p>
-                  <p className="text-center text-ink/70">
-                    <span className="label block !text-[11px] tabular-nums">5</span>
-                    {c.mid}
-                  </p>
-                  <p className="text-right font-medium text-ink">
-                    <span className="label label-strong block !text-[11px] tabular-nums">10</span>
-                    {c.high}
-                  </p>
-                </div>
-              ) : null}
-              <div className="mt-2.5 flex max-w-[454px] flex-wrap gap-1.5">
+              {/* The scale carries its own meaning (2026-09-19, second
+                  pass): the ten buttons are one row, and the 1, 5, and 10
+                  anchors sit directly under those buttons like the labels
+                  on a slider, on the same ten-column grid, so each word
+                  belongs to the number above it. The 10 is in full ink;
+                  it is the one that should be hard to give. On a phone
+                  the buttons wrap to two rows of five and the anchors
+                  fall back to a stacked list with their marks. */}
+              <div className="mt-3">
+                {/* Fixed 2.5rem tracks: the grid's width comes from the
+                    buttons, never from the caption text, which wraps
+                    inside its span. */}
+                <div className="grid w-max grid-cols-[repeat(5,2.5rem)] gap-1.5 sm:grid-cols-[repeat(10,2.5rem)]">
                 {TEN.map((n) => {
                   const on = lines[i] === n;
                   return (
@@ -351,6 +342,24 @@ export default function ScoreCard({
                     </button>
                   );
                 })}
+                </div>
+                {c ? (
+                  <>
+                    <div className="mt-2 hidden w-max grid-cols-[repeat(10,2.5rem)] gap-1.5 text-xs leading-snug sm:grid">
+                      <p className="col-span-3 text-left text-ink/70">{c.low}</p>
+                      <p className="col-span-3 text-center text-ink/70">{c.mid}</p>
+                      <p className="col-span-4 text-right font-medium text-ink">{c.high}</p>
+                    </div>
+                    <dl className="mt-3 space-y-1 text-xs leading-snug sm:hidden">
+                      {([["1", c.low, "text-ink/70"], ["5", c.mid, "text-ink/70"], ["10", c.high, "font-medium text-ink"]] as const).map(([mark, text, tone]) => (
+                        <div key={mark} className={`flex gap-2 ${tone}`}>
+                          <dt className="label w-5 shrink-0 pt-px text-right !text-[11px] tabular-nums">{mark}</dt>
+                          <dd>{text}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </>
+                ) : null}
               </div>
             </fieldset>
           );
