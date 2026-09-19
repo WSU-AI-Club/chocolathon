@@ -195,7 +195,17 @@ export default function ResultsPage() {
     setBusyAction(null);
   }
 
-  const judgeName = useCallback((id: string) => config?.judges.find((j) => j.id === id)?.name ?? id, [config]);
+  /* Judges are letters on this page (Michael, 2026-09-19): one letter per
+     judge for the whole event, in the order of the judging config, so the
+     screen can be shown to anyone and a harsh judge is still visible across
+     teams. Names stay in the config and on the "All scores" export sheet. */
+  const judgeName = useCallback(
+    (id: string) => {
+      const i = config?.judges.findIndex((j) => j.id === id) ?? -1;
+      return i >= 0 ? `Judge ${String.fromCharCode(65 + i)}` : "Judge";
+    },
+    [config],
+  );
 
   const buildRows = useMemo(
     () => (judging && config ? rankTrack("build", judging.submissions, scores, config, judgeName) : []),
