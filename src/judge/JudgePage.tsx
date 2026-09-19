@@ -61,7 +61,8 @@ import "../chocolathon.css";
 
 type Rubric = Extract<Block, { kind: "rubric" }>;
 
-const BAD_LINK = "This link is not valid. Ask Michael for the judge link.";
+const BAD_LINK =
+  "This link is not valid. Open the judge link from Michael's message again, in this browser; if it still says this, text Michael and he will send it again.";
 const PANEL_CHANGED = "Pick your name again; the panel changed.";
 const NO_TEAM_KEY = "This set was published before team keys existed. Ask Michael to publish again.";
 const SAMPLE_LINE = "These are sample rows. The real export replaces them at 2:00 on the 19th.";
@@ -148,12 +149,13 @@ export default function JudgePage() {
     return () => tag.remove();
   }, []);
 
-  /* Take the token out of the address bar; it is on the device now. */
-  useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("k")) {
-      window.history.replaceState(null, "", window.location.pathname + window.location.hash);
-    }
-  }, []);
+  /* The token STAYS in the address bar (2026-09-19). Until today the page
+     stripped it after reading it, which broke the two things judges do
+     with a link on the day: "open in Safari/Chrome" from a mail app's
+     built-in browser, and copying the address to another device. Both
+     handed over the stripped path, and the new browser had no token in
+     storage, so it saw "This link is not valid". A token in the bar is
+     a smaller risk than a judge who cannot open their queue. */
 
   useEffect(() => {
     if (!token) return;
