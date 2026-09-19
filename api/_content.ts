@@ -739,60 +739,63 @@ export const SECTIONS: Section[] = [
       {
         kind: "rubric",
         label: "Build Track",
+        /* Anchors sharpened 2026-09-19 (judging day, Michael's call): the
+           lines are unchanged since they went public on 09-11; each
+           anchor now gives its line one job so the four stop reading as
+           "does it work" twice, and a 10 describes something rare. */
         items: [
           {
             name: "It runs.",
             low: "Nothing to click.",
-            mid: "The main path runs, parts stubbed.",
-            high: "End to end, on your link.",
+            mid: "The main path runs; parts are stubbed or faked.",
+            high: "Every path a judge tries works, on the link, with real data.",
           },
           {
             name: "They could operate it.",
-            low: "Needs you standing next to it.",
-            mid: "Works with a walkthrough.",
-            high: "Staff could use it Monday.",
+            low: "Needs the team standing next to it.",
+            mid: "Works after a walkthrough.",
+            high: "A Cocoa Dolce staffer could use it Monday with no one from the team on the phone.",
           },
           {
             name: "It answers the prompt.",
-            low: "Generic, with a chocolate label.",
-            mid: "Solves the task, with gaps.",
-            high: "Built for how they actually work.",
+            low: "A generic tool with a chocolate label.",
+            mid: "Solves the task as written.",
+            high: "Built around how Cocoa Dolce actually works: their products, seasons, store and online flow, and the constraint in the prompt.",
           },
           {
             name: "Honest about limits.",
             low: "Claims more than it does.",
-            mid: "Some limits named.",
-            high: "Says where it breaks, and the fix.",
+            mid: "Names some limits.",
+            high: "Says exactly where it breaks, what the fix costs, and what they would build next.",
           },
         ],
       },
       {
-        kind: "rubric",
         label: "Pitch Track",
         items: [
           {
             name: "The recommendation is specific.",
             low: "A theme.",
-            mid: "A direction.",
-            high: "What to do, by when, at what cost.",
+            mid: "A direction, with steps.",
+            high: "What to do, who does it, by when, at what cost, and what to stop doing.",
           },
           {
             name: "The evidence holds up.",
             low: "Unsourced numbers.",
-            mid: "Sourced, but thin.",
-            high: "Sourced, checkable, right.",
+            mid: "Sourced, but thin or about chocolate in general.",
+            high: "Sourced, checkable, and about Cocoa Dolce's own situation: their prices, catalogue, customers, seasons.",
           },
           {
             name: "The payoff is sized.",
             low: "No number.",
             mid: "A number with no basis.",
-            high: "What it is worth, and how you got there.",
+            high: "A range with the assumptions shown, and what changes if an assumption is wrong.",
           },
           {
             name: "The artifact makes it real.",
             low: "Slides only.",
             mid: "A mock-up of the idea.",
-            high: "Something they could react to as real.",
+            high: "Something Cocoa Dolce could put in front of a customer or staff and get a reaction.",
           },
         ],
       },
