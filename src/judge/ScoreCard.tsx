@@ -305,13 +305,28 @@ export default function ScoreCard({
                 <span className="w-5 shrink-0 text-goldink">{i + 1}</span>
                 <span>{c ? c.name : fallback}</span>
               </legend>
+              {/* The anchors sit over the buttons as a scale (2026-09-19):
+                  1 at the left end, 5 in the middle, 10 at the right, the
+                  same width as the ten buttons, so the judge reads the
+                  ladder in the direction they will press it. The 10 is
+                  in full ink; it is the one that should be hard to give. */}
               {c ? (
-                <p className="mt-2 max-w-2xl text-sm leading-snug text-ink/80">
-                  <span className="font-semibold">1</span> {c.low} <span className="font-semibold">· 5</span> {c.mid}{" "}
-                  <span className="font-semibold">· 10</span> {c.high}
-                </p>
+                <div className="mt-3 grid max-w-[454px] grid-cols-3 gap-x-3 text-xs leading-snug">
+                  <p className="text-left text-ink/70">
+                    <span className="label block !text-[11px] tabular-nums">1</span>
+                    {c.low}
+                  </p>
+                  <p className="text-center text-ink/70">
+                    <span className="label block !text-[11px] tabular-nums">5</span>
+                    {c.mid}
+                  </p>
+                  <p className="text-right font-medium text-ink">
+                    <span className="label label-strong block !text-[11px] tabular-nums">10</span>
+                    {c.high}
+                  </p>
+                </div>
               ) : null}
-              <div className="mt-3 flex flex-wrap gap-1.5">
+              <div className="mt-2.5 flex max-w-[454px] flex-wrap gap-1.5">
                 {TEN.map((n) => {
                   const on = lines[i] === n;
                   return (

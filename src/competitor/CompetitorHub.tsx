@@ -15,9 +15,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PEOPLE_PATH, REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
-import RubricPair from "./RubricPair";
 import RubricView from "./RubricView";
-import type { Block, HubData, Prompt, ResultEntry, Section } from "./types";
+import type { Block, GalleryEntry, HubData, Prompt, ResultEntry, Section } from "./types";
 
 /* The people page is its own route, not an HQ section; its button sits
    where the Judges section used to, after Schedule (2026-09-13). */
@@ -185,6 +184,7 @@ function ResultsSection({ data }: { data: HubData }) {
             <div className="mt-6 space-y-8">
               <ResultCard place="Winner" entry={t.winner} title={title} big />
               <ResultCard place="Second place" entry={t.second} title={title} />
+              <ResultCard place="Third place" entry={t.third} title={title} />
             </div>
             {t.finalists.length ? (
               <p className="mt-6 text-base leading-relaxed text-ink/80">
@@ -196,7 +196,85 @@ function ResultsSection({ data }: { data: HubData }) {
           </div>
         ))}
       </div>
+      <Gallery title={title} />
     </section>
+  );
+}
+
+/* Every submission, the way a hackathon gallery lists them: team, the
+   prompt, the team's own sentence, and their links. Fetched from
+   /api/gallery, which serves nothing until the results are published
+   and never the submitter's name or email. Grouped by track, in team
+   order; a fetch that fails shows nothing rather than a broken list. */
+function Gallery({ title }: { title: (id: string) => string }) {
+  const [entries, setEntries] = useState<GalleryEntry[] | null>(null);
+  useEffect(() => {
+    fetch("/api/gallery", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setEntries(Array.isArray(d?.entries) ? d.entries : []))
+      .catch(() => setEntries([]));
+  }, []);
+  if (!entries || entries.length === 0) return null;
+  const tracks: Array<{ key: "build" | "pitch"; label: string }> = [
+    { key: "build", label: "Build Track" },
+    { key: "pitch", label: "Pitch Track" },
+  ];
+  return (
+    <div className="mt-16 border-t border-ink/15 pt-7">
+      <h2 className="font-display text-3xl font-semibold tracking-tight text-ink">
+        Every submission.
+      </h2>
+      <p className="mt-3 max-w-xl text-base leading-relaxed text-ink/80">
+        Everything the teams turned in on the day, in their own words, with
+        their links.
+      </p>
+      {tracks.map((t) => {
+        const rows = entries.filter((e) => e.track === t.key);
+        if (!rows.length) return null;
+        return (
+          <div key={t.key} className="mt-10">
+            <p className="label label-accent">
+              {t.label} · {rows.length} {rows.length === 1 ? "team" : "teams"}
+            </p>
+            <ul className="mt-4 border-b border-ink/10 sm:grid sm:grid-cols-2 sm:gap-x-10">
+              {rows.map((e) => (
+                <li key={`${e.track}-${e.team}`} className="border-t border-ink/10 py-5">
+                  <p className="text-lg font-semibold leading-snug text-ink">{e.team}</p>
+                  {e.prompt ? (
+                    <p className="label mt-1">
+                      {e.prompt}
+                      {title(e.prompt) ? ` · ${title(e.prompt)}` : ""}
+                    </p>
+                  ) : null}
+                  {e.sentence ? (
+                    <p className="mt-2 text-base leading-relaxed text-ink/80">{e.sentence}</p>
+                  ) : null}
+                  <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                    <GalleryLink href={e.product} label="Project" />
+                    <GalleryLink href={e.video} label="Video" />
+                    <GalleryLink href={e.repo} label="Source" />
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function GalleryLink({ href, label }: { href?: string; label: string }) {
+  if (!href) return null;
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-ink underline decoration-gold underline-offset-4 hover:decoration-ink"
+    >
+      {label}
+    </a>
   );
 }
 
@@ -447,19 +525,15 @@ function SectionBlock({ section, data }: { section: Section; data: HubData }) {
       {/* The run of day is the schedule section's body. */}
       {section.id === "schedule" ? <RunOfDay rows={data.runOfDay} /> : null}
 
-      {/* Rubrics sit side by side (Build | Pitch) above everything else
-          in their section, rendered as one row-aligned grid so the two
-          tracks' numbers face each other; on a phone they stack. */}
+      {/* The rubrics stack (Build, then Pitch) above everything else in
+          their section, each a table read left to right along the
+          scale (2026-09-19; the side-by-side pair of 09-10 retired). */}
       {rubrics.length ? (
-        phone ? (
-          <div className="mt-9 grid gap-12">
-            {rubrics.map((r) => (
-              <RubricView key={r.label} rubric={r} />
-            ))}
-          </div>
-        ) : (
-          <RubricPair rubrics={rubrics} />
-        )
+        <div className="mt-9 grid gap-12">
+          {rubrics.map((r) => (
+            <RubricView key={r.label} rubric={r} />
+          ))}
+        </div>
       ) : null}
 
       {/* Prose blocks fold behind their label on a phone (the label

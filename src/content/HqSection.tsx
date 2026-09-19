@@ -13,8 +13,6 @@
    line, in a two-column grid, ruled not boxed.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState } from "react";
-
 import { HQ_PATH, PEOPLE_PATH } from "./links";
 import PromptsButton from "./PromptsButton";
 
@@ -64,22 +62,10 @@ const ENTRIES: Array<{ id: string; title: string; line: string; href?: string }>
   },
 ];
 
-/* One switch lives in api/_content.ts (`RESULTS.published`); the band
-   asks the server for it so the landing page and HQ flip together. A
-   failed fetch means no Results row, never a broken one. */
-function useResultsPublished(): boolean {
-  const [published, setPublished] = useState(false);
-  useEffect(() => {
-    fetch("/api/hub", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setPublished(!!d?.results?.published))
-      .catch(() => setPublished(false));
-  }, []);
-  return published;
-}
-
+/* The Results row this band used to grow (2026-09-06) is gone: since
+   2026-09-19 the winners have their own section directly above, with
+   the button to the full list on HQ. */
 export default function HqSection() {
-  const resultsPublished = useResultsPublished();
   return (
     <section id="hq" className="border-t border-ink/10 bg-white px-5 py-16 sm:py-24">
       <div className="mx-auto max-w-4xl">
@@ -93,26 +79,9 @@ export default function HqSection() {
           </p>
         </div>
 
-        {resultsPublished ? (
-          <div className="mt-12 flex flex-col gap-5 border-t border-ink/15 py-8 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink">
-                The results
-              </h3>
-              <p className="mt-2 text-base leading-relaxed text-ink/80">
-                Who won, who placed, and what they built.
-              </p>
-            </div>
-            <a className="btn-cta shrink-0" href={`${HQ_PATH}#results`}>
-              See the results
-              <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        ) : null}
-
         {/* The prompts entry is the one that changes state, so it gets the
             full-width row and the button itself. */}
-        <div className={(resultsPublished ? "" : "mt-10 sm:mt-12 ") + "flex flex-col gap-5 border-t border-ink/15 py-6 sm:flex-row sm:items-center sm:justify-between sm:py-8"}>
+        <div className="mt-10 flex flex-col gap-5 border-t border-ink/15 py-6 sm:mt-12 sm:flex-row sm:items-center sm:justify-between sm:py-8">
           <div>
             <h3 className="font-display text-3xl font-semibold leading-tight tracking-tight text-ink">
               The prompts

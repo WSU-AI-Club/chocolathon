@@ -74,7 +74,20 @@ export type TrackResult = {
   track: "build" | "pitch";
   winner: ResultEntry;
   second: ResultEntry;
+  third: ResultEntry;
   finalists: string[];
+};
+
+/* One row of the public submissions list (/api/gallery, 2026-09-19):
+   the team's own public fields and nothing about who submitted. */
+export type GalleryEntry = {
+  team: string;
+  track: "build" | "pitch";
+  prompt: string;
+  sentence: string;
+  product?: string;
+  video?: string;
+  repo?: string;
 };
 
 export type Results = {
