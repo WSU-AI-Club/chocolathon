@@ -17,6 +17,7 @@ import { PEOPLE_PATH, REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
 import RubricView from "./RubricView";
 import type { Block, GalleryEntry, HubData, Prompt, ResultEntry, Section } from "./types";
+import { toHref } from "./urls";
 
 /* The people page is its own route, not an HQ section; its button sits
    where the Judges section used to, after Schedule (2026-09-13). */
@@ -264,7 +265,10 @@ function Gallery({ title }: { title: (id: string) => string }) {
   );
 }
 
-function GalleryLink({ href, label }: { href?: string; label: string }) {
+/* The stored value is whatever the team typed; toHref makes it a link
+   or nothing (2026-09-19). */
+function GalleryLink({ href: raw, label }: { href?: string; label: string }) {
+  const href = toHref(raw);
   if (!href) return null;
   return (
     <a

@@ -23,6 +23,7 @@ import { GATE_LABELS, scoreTotal, type Gates, type Score } from "../judging/type
 import type { Submission } from "./mapRows";
 import { stampOf, type SaveInput, type SaveState } from "./useScores";
 import VideoEmbed from "./VideoEmbed";
+import { toHref } from "../competitor/urls";
 
 type Rubric = Extract<Block, { kind: "rubric" }>;
 
@@ -257,22 +258,24 @@ export default function ScoreCard({
       )}
       {s.sentence ? <p className="mt-4 max-w-2xl text-lg leading-relaxed text-ink">{s.sentence}</p> : null}
 
-      <VideoEmbed url={s.video} team={s.team} />
+      {/* Links go through toHref (2026-09-19): a bare domain or a link
+          typed inside prose used to land as a path under our own site. */}
+      <VideoEmbed url={toHref(s.video) ?? ""} team={s.team} />
 
       <div className="mt-5 flex flex-wrap gap-3">
-        {s.product ? (
+        {toHref(s.product) ? (
           <a
-            href={s.product}
+            href={toHref(s.product)}
             target="_blank"
             rel="noopener noreferrer"
-            className={s.video ? "btn-cta" : "btn-ghost"}
+            className={toHref(s.video) ? "btn-cta" : "btn-ghost"}
           >
             Open the demo
             <span aria-hidden="true">→</span>
           </a>
         ) : null}
-        {s.repo ? (
-          <a href={s.repo} target="_blank" rel="noopener noreferrer" className="btn-ghost">
+        {toHref(s.repo) ? (
+          <a href={toHref(s.repo)} target="_blank" rel="noopener noreferrer" className="btn-ghost">
             Source
           </a>
         ) : null}
