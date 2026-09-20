@@ -930,24 +930,76 @@ export type Results = {
   tracks: TrackResult[];
 };
 
+/* Published 2026-09-19 evening. Placings are the Cocoa Dolce leadership's
+   call from the live finals (Michael, 5:10 PM); team names exactly as the
+   teams registered them; each line is cut from the team's own submission
+   sentence; links are the team's own, normalised. */
 export const RESULTS: Results = {
-  published: false,
+  published: true,
   intro:
-    "Twenty-odd teams, eight prompts, one Saturday at Woolsey Hall. Here is who " +
-    "the Cocoa Dolce leadership picked, and what they built.",
+    "Seventeen teams, eight prompts, one Saturday at Woolsey Hall. Here is who " +
+    "the Cocoa Dolce leadership picked, and what everyone built.",
   tracks: [
     {
       track: "build",
-      winner: { team: "", prompt: "", line: "", demo: "", video: "" },
-      second: { team: "", prompt: "", line: "", demo: "", video: "" },
-      third: { team: "", prompt: "", line: "", demo: "", video: "" },
+      winner: {
+        team: "Dulce de Leche",
+        prompt: "B-1",
+        line:
+          "AI Chocolation: a web app on the counter iPad that names the flavor in every " +
+          "cell of an open box, so a wrong piece is caught before it is bagged.",
+        demo: "https://ai-chocolation.vercel.app/",
+        video: "https://youtu.be/5hxE79yrGEc",
+      },
+      second: {
+        team: "Emily Robota",
+        prompt: "B-4",
+        line:
+          "The AI Visibility Studio audits how visible Cocoa Dolce is to chatbots across " +
+          "six categories, then generates the content, schema, and citation plan to close each gap.",
+        demo: "https://cocoa-dolce-visibility.lovable.app",
+        video: "https://youtube.com/watch?v=heuRWnN647s",
+      },
+      third: {
+        team: "SugarCult",
+        prompt: "B-1",
+        line:
+          "Choco Counter: a tap-to-add tool at checkout that records which chocolates go " +
+          "into each box, with a photo of every finished box saved alongside.",
+        demo: "https://choco-counter-chi.vercel.app/",
+        video: "https://www.youtube.com/watch?v=haoIhtYAtUc",
+      },
       finalists: [],
     },
     {
       track: "pitch",
-      winner: { team: "", prompt: "", line: "", demo: "", video: "" },
-      second: { team: "", prompt: "", line: "", demo: "", video: "" },
-      third: { team: "", prompt: "", line: "", demo: "", video: "" },
+      winner: {
+        team: "Solo PM",
+        prompt: "P-1",
+        line:
+          "A Mold Cleaning ROI Calculator that models replacing manual mold scrubbing with " +
+          "an industrial ultrasonic cleaner, in the numbers finance leadership needs.",
+        demo: "https://mold-cleaning-solution-alinahianreza.lovable.app",
+        video: "https://www.loom.com/share/99049a2c353948c88ad96c0a2b51d6ad",
+      },
+      second: {
+        team: "DECA Diamonds",
+        prompt: "P-4",
+        line:
+          "A new acquisition channel: a part-time intern running TikTok and Reels, plus a " +
+          "golden-ticket factory-tour giveaway, to turn people already posting about Cocoa Dolce into customers.",
+        demo: "https://canva.link/z8a41r2rk134ffz",
+        video: "https://youtube.com/shorts/ThJk_-n7xwg",
+      },
+      third: {
+        team: "One Bean Army",
+        prompt: "P-2",
+        line:
+          "Cocoa Dolce Sessions: paid tastings at $65 in the downtown lounge and $85 on " +
+          "site, bookable through a live site with real-time pricing.",
+        demo: "https://cocoa-session.lovable.app/",
+        video: "https://youtu.be/RUucJwLx0Ek",
+      },
       finalists: [],
     },
   ],

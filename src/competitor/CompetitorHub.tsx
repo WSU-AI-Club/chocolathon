@@ -197,7 +197,7 @@ function ResultsSection({ data }: { data: HubData }) {
           </div>
         ))}
       </div>
-      <Gallery title={title} />
+      <Gallery title={title} results={r} />
     </section>
   );
 }
@@ -205,9 +205,13 @@ function ResultsSection({ data }: { data: HubData }) {
 /* Every submission, the way a hackathon gallery lists them: team, the
    prompt, the team's own sentence, and their links. Fetched from
    /api/gallery, which serves nothing until the results are published
-   and never the submitter's name or email. Grouped by track, in team
-   order; a fetch that fails shows nothing rather than a broken list. */
-function Gallery({ title }: { title: (id: string) => string }) {
+   and never the submitter's name or email. One column (2026-09-19
+   evening): a fixed left rail with the team and prompt, the sentence
+   and links on the right, so seventeen entries of very different
+   length line up on one rule. The three placed teams in each track come
+   first, marked with their place and a gold rule; the rest follow in
+   team order. A fetch that fails shows nothing rather than a broken list. */
+function Gallery({ title, results }: { title: (id: string) => string; results: HubData["results"] }) {
   const [entries, setEntries] = useState<GalleryEntry[] | null>(null);
   useEffect(() => {
     fetch("/api/gallery", { cache: "no-store" })
@@ -216,6 +220,17 @@ function Gallery({ title }: { title: (id: string) => string }) {
       .catch(() => setEntries([]));
   }, []);
   if (!entries || entries.length === 0) return null;
+
+  const placeOf = (track: "build" | "pitch", team: string): { n: number; label: string } | null => {
+    const t = results.tracks.find((x) => x.track === track);
+    if (!t) return null;
+    const key = team.trim().toLowerCase();
+    if (t.winner.team.trim().toLowerCase() === key) return { n: 1, label: "Winner" };
+    if (t.second.team.trim().toLowerCase() === key) return { n: 2, label: "Second place" };
+    if (t.third.team.trim().toLowerCase() === key) return { n: 3, label: "Third place" };
+    return null;
+  };
+
   const tracks: Array<{ key: "build" | "pitch"; label: string }> = [
     { key: "build", label: "Build Track" },
     { key: "pitch", label: "Pitch Track" },
@@ -227,34 +242,50 @@ function Gallery({ title }: { title: (id: string) => string }) {
       </h2>
       <p className="mt-3 max-w-xl text-base leading-relaxed text-ink/80">
         Everything the teams turned in on the day, in their own words, with
-        their links.
+        their links. Winners first, then everyone else in team order.
       </p>
       {tracks.map((t) => {
-        const rows = entries.filter((e) => e.track === t.key);
+        const rows = entries
+          .filter((e) => e.track === t.key)
+          .map((e) => ({ e, place: placeOf(t.key, e.team) }))
+          .sort((a, b) => (a.place?.n ?? 9) - (b.place?.n ?? 9) || a.e.team.localeCompare(b.e.team));
         if (!rows.length) return null;
         return (
           <div key={t.key} className="mt-10">
             <p className="label label-accent">
               {t.label} · {rows.length} {rows.length === 1 ? "team" : "teams"}
             </p>
-            <ul className="mt-4 border-b border-ink/10 sm:grid sm:grid-cols-2 sm:gap-x-10">
-              {rows.map((e) => (
-                <li key={`${e.track}-${e.team}`} className="border-t border-ink/10 py-5">
-                  <p className="text-lg font-semibold leading-snug text-ink">{e.team}</p>
-                  {e.prompt ? (
-                    <p className="label mt-1">
-                      {e.prompt}
-                      {title(e.prompt) ? ` · ${title(e.prompt)}` : ""}
+            <ul className="mt-4 border-b border-ink/10">
+              {rows.map(({ e, place }) => (
+                <li
+                  key={`${e.track}-${e.team}`}
+                  className={
+                    "grid gap-x-8 gap-y-2 border-t border-ink/10 py-5 sm:grid-cols-[11rem_1fr]" +
+                    (place ? " border-l-2 border-l-gold pl-4" : " sm:pl-[calc(1rem+2px)]")
+                  }
+                >
+                  <div className="min-w-0">
+                    {place ? <p className="label label-accent">{place.label}</p> : null}
+                    <p className={"font-semibold leading-snug text-ink " + (place ? "mt-1 font-display text-2xl tracking-tight" : "text-lg")}>
+                      {e.team}
                     </p>
-                  ) : null}
-                  {e.sentence ? (
-                    <p className="mt-2 text-base leading-relaxed text-ink/80">{e.sentence}</p>
-                  ) : null}
-                  <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                    <GalleryLink href={e.product} label="Project" />
-                    <GalleryLink href={e.video} label="Video" />
-                    <GalleryLink href={e.repo} label="Source" />
-                  </p>
+                    {e.prompt ? (
+                      <p className="label mt-1">
+                        {e.prompt}
+                        {title(e.prompt) ? ` · ${title(e.prompt)}` : ""}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="min-w-0">
+                    {e.sentence ? (
+                      <p className="text-base leading-relaxed text-ink/80">{e.sentence}</p>
+                    ) : null}
+                    <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                      <GalleryLink href={e.product} label="Project" />
+                      <GalleryLink href={e.video} label="Video" />
+                      <GalleryLink href={e.repo} label="Source" />
+                    </p>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -265,8 +296,6 @@ function Gallery({ title }: { title: (id: string) => string }) {
   );
 }
 
-/* The stored value is whatever the team typed; toHref makes it a link
-   or nothing (2026-09-19). */
 function GalleryLink({ href: raw, label }: { href?: string; label: string }) {
   const href = toHref(raw);
   if (!href) return null;
