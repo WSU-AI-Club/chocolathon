@@ -937,8 +937,9 @@ export type Results = {
 export const RESULTS: Results = {
   published: true,
   intro:
-    "Seventeen teams, eight prompts, one Saturday at Woolsey Hall. Here is who " +
-    "the Cocoa Dolce leadership picked, and what everyone built.",
+    "Seventeen teams, eight prompts, one Saturday at Woolsey Hall. $1,200 in " +
+    "scholarships went out at 4:45. Here is who the Cocoa Dolce leadership " +
+    "picked, and what everyone built.",
   tracks: [
     {
       track: "build",
@@ -950,6 +951,8 @@ export const RESULTS: Results = {
           "cell of an open box, so a wrong piece is caught before it is bagged.",
         demo: "https://ai-chocolation.vercel.app/",
         video: "https://youtu.be/5hxE79yrGEc",
+        prize: "$700 scholarship",
+        prizeNote: "and a big box of Cocoa Dolce chocolates",
       },
       second: {
         team: "Emily Robota",
@@ -959,6 +962,7 @@ export const RESULTS: Results = {
           "six categories, then generates the content, schema, and citation plan to close each gap.",
         demo: "https://cocoa-dolce-visibility.lovable.app",
         video: "https://youtube.com/watch?v=heuRWnN647s",
+        prize: "A big box of Cocoa Dolce chocolates",
       },
       third: {
         team: "SugarCult",
@@ -981,6 +985,8 @@ export const RESULTS: Results = {
           "an industrial ultrasonic cleaner, in the numbers finance leadership needs.",
         demo: "https://mold-cleaning-solution-alinahianreza.lovable.app",
         video: "https://www.loom.com/share/99049a2c353948c88ad96c0a2b51d6ad",
+        prize: "$500 scholarship",
+        prizeNote: "and a big box of Cocoa Dolce chocolates",
       },
       second: {
         team: "DECA Diamonds",
@@ -990,6 +996,7 @@ export const RESULTS: Results = {
           "golden-ticket factory-tour giveaway, to turn people already posting about Cocoa Dolce into customers.",
         demo: "https://canva.link/z8a41r2rk134ffz",
         video: "https://youtube.com/shorts/ThJk_-n7xwg",
+        prize: "A big box of Cocoa Dolce chocolates",
       },
       third: {
         team: "One Bean Army",

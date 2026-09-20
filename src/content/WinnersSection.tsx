@@ -4,16 +4,16 @@
    band, because after the event this is the news. First, second, and
    third in each track, ruled not boxed, and one button to the full
    list of submissions on HQ. Names and lines come from /api/hub, the
-   same source HQ reads, so the two never disagree. */
+   same source HQ reads, so the two never disagree.
+
+   Since 2026-09-20 each place carries its medal — gold, silver, bronze
+   from ../competitor/medals — and the winners carry the scholarship
+   they took home. */
 
 import { HQ_PATH } from "./links";
+import { Medal, PLACES, MEDALS, Prize } from "../competitor/medals";
+import type { Place } from "../competitor/medals";
 import type { Prompt, ResultEntry, Results } from "../competitor/types";
-
-const PLACES: Array<{ key: "winner" | "second" | "third"; label: string }> = [
-  { key: "winner", label: "Winner" },
-  { key: "second", label: "Second place" },
-  { key: "third", label: "Third place" },
-];
 
 export default function WinnersSection({
   results,
@@ -44,7 +44,7 @@ export default function WinnersSection({
               </h3>
               <ol className="mt-4">
                 {PLACES.map((p) => (
-                  <Place key={p.key} label={p.label} entry={t[p.key]} title={title} />
+                  <PlaceRow key={p} place={p} entry={t[p]} title={title} />
                 ))}
               </ol>
             </div>
@@ -62,32 +62,41 @@ export default function WinnersSection({
   );
 }
 
-function Place({
-  label,
+/* The medal sits in its own column so the three rows line up on one
+   edge however long a team name runs. */
+function PlaceRow({
+  place,
   entry,
   title,
 }: {
-  label: string;
+  place: Place;
   entry: ResultEntry;
   title: (id: string) => string;
 }) {
   if (!entry.team) return null;
+  const m = MEDALS[place];
   const promptTitle = title(entry.prompt);
   return (
-    <li className="border-t border-ink/10 py-5">
-      <p className="label label-accent">{label}</p>
-      <p className="mt-1 font-display text-2xl font-semibold leading-tight tracking-tight text-ink">
-        {entry.team}
-      </p>
-      {entry.prompt ? (
-        <p className="label mt-2">
-          {entry.prompt}
-          {promptTitle ? ` · ${promptTitle}` : ""}
+    <li className="grid grid-cols-[2.25rem_1fr] gap-x-4 border-t border-ink/10 py-5">
+      <Medal place={place} className="mt-1" />
+      <div className="min-w-0">
+        <p className={`label ${m.text}`}>
+          {m.metal} · {m.label}
         </p>
-      ) : null}
-      {entry.line ? (
-        <p className="mt-2 text-base leading-relaxed text-ink/80">{entry.line}</p>
-      ) : null}
+        <p className="mt-1 font-display text-2xl font-semibold leading-tight tracking-tight text-ink">
+          {entry.team}
+        </p>
+        {entry.prompt ? (
+          <p className="label mt-2">
+            {entry.prompt}
+            {promptTitle ? ` · ${promptTitle}` : ""}
+          </p>
+        ) : null}
+        <Prize prize={entry.prize} note={entry.prizeNote} className="mt-3" />
+        {entry.line ? (
+          <p className="mt-2 text-base leading-relaxed text-ink/80">{entry.line}</p>
+        ) : null}
+      </div>
     </li>
   );
 }

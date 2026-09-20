@@ -68,6 +68,10 @@ export type ResultEntry = {
   line: string;
   demo?: string;
   video?: string;
+  /* What the place took home (2026-09-20). `prize` is the headline —
+     the scholarship amount — and `prizeNote` the rest of it. */
+  prize?: string;
+  prizeNote?: string;
 };
 
 export type TrackResult = {

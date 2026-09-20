@@ -16,6 +16,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PEOPLE_PATH, REGISTER_URL, registrationOpen } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
 import RubricView from "./RubricView";
+import { Medal, MEDALS, PLACES, Prize } from "./medals";
+import type { Place } from "./medals";
 import type { Block, GalleryEntry, HubData, Prompt, ResultEntry, Section } from "./types";
 import { toHref } from "./urls";
 
@@ -183,9 +185,9 @@ function ResultsSection({ data }: { data: HubData }) {
               {t.track === "build" ? "Build Track" : "Pitch Track"}
             </h2>
             <div className="mt-6 space-y-8">
-              <ResultCard place="Winner" entry={t.winner} title={title} big />
-              <ResultCard place="Second place" entry={t.second} title={title} />
-              <ResultCard place="Third place" entry={t.third} title={title} />
+              {PLACES.map((p) => (
+                <ResultCard key={p} place={p} entry={t[p]} title={title} />
+              ))}
             </div>
             {t.finalists.length ? (
               <p className="mt-6 text-base leading-relaxed text-ink/80">
@@ -221,14 +223,11 @@ function Gallery({ title, results }: { title: (id: string) => string; results: H
   }, []);
   if (!entries || entries.length === 0) return null;
 
-  const placeOf = (track: "build" | "pitch", team: string): { n: number; label: string } | null => {
+  const placeOf = (track: "build" | "pitch", team: string): Place | null => {
     const t = results.tracks.find((x) => x.track === track);
     if (!t) return null;
     const key = team.trim().toLowerCase();
-    if (t.winner.team.trim().toLowerCase() === key) return { n: 1, label: "Winner" };
-    if (t.second.team.trim().toLowerCase() === key) return { n: 2, label: "Second place" };
-    if (t.third.team.trim().toLowerCase() === key) return { n: 3, label: "Third place" };
-    return null;
+    return PLACES.find((p) => t[p].team.trim().toLowerCase() === key) ?? null;
   };
 
   const tracks: Array<{ key: "build" | "pitch"; label: string }> = [
@@ -248,7 +247,11 @@ function Gallery({ title, results }: { title: (id: string) => string; results: H
         const rows = entries
           .filter((e) => e.track === t.key)
           .map((e) => ({ e, place: placeOf(t.key, e.team) }))
-          .sort((a, b) => (a.place?.n ?? 9) - (b.place?.n ?? 9) || a.e.team.localeCompare(b.e.team));
+          .sort(
+            (a, b) =>
+              (a.place ? PLACES.indexOf(a.place) : 9) - (b.place ? PLACES.indexOf(b.place) : 9) ||
+              a.e.team.localeCompare(b.e.team),
+          );
         if (!rows.length) return null;
         return (
           <div key={t.key} className="mt-10">
@@ -261,12 +264,17 @@ function Gallery({ title, results }: { title: (id: string) => string; results: H
                   key={`${e.track}-${e.team}`}
                   className={
                     "grid gap-x-8 gap-y-2 border-t border-ink/10 py-5 sm:grid-cols-[11rem_1fr]" +
-                    (place ? " border-l-2 border-l-gold pl-4" : " sm:pl-[calc(1rem+2px)]")
+                    (place ? ` border-l-2 pl-4 ${MEDALS[place].rule}` : " sm:pl-[calc(1rem+2px)]")
                   }
                 >
                   <div className="min-w-0">
-                    {place ? <p className="label label-accent">{place.label}</p> : null}
-                    <p className={"font-semibold leading-snug text-ink " + (place ? "mt-1 font-display text-2xl tracking-tight" : "text-lg")}>
+                    {place ? (
+                      <p className="flex items-center gap-2">
+                        <Medal place={place} className="!h-7 !w-7 !text-sm" />
+                        <span className={`label ${MEDALS[place].text}`}>{MEDALS[place].metal}</span>
+                      </p>
+                    ) : null}
+                    <p className={"font-semibold leading-snug text-ink " + (place ? "mt-1.5 font-display text-2xl tracking-tight" : "text-lg")}>
                       {e.team}
                     </p>
                     {e.prompt ? (
@@ -315,21 +323,25 @@ function ResultCard({
   place,
   entry,
   title,
-  big = false,
 }: {
-  place: string;
+  place: Place;
   entry: ResultEntry;
   title: (id: string) => string;
-  big?: boolean;
 }) {
   if (!entry.team) return null;
+  const m = MEDALS[place];
   return (
-    <div className="border-l-2 border-gold pl-5">
-      <p className="label label-accent">{place}</p>
+    <div className={`border-l-2 pl-5 ${m.rule}`}>
+      <div className="flex items-center gap-3">
+        <Medal place={place} />
+        <p className={`label ${m.text}`}>
+          {m.metal} · {m.label}
+        </p>
+      </div>
       <p
         className={
-          "mt-1 font-display font-semibold leading-tight tracking-tight text-ink " +
-          (big ? "text-3xl" : "text-2xl")
+          "mt-2 font-display font-semibold leading-tight tracking-tight text-ink " +
+          (place === "winner" ? "text-3xl" : "text-2xl")
         }
       >
         {entry.team}
@@ -340,18 +352,19 @@ function ResultCard({
           {title(entry.prompt) ? ` · ${title(entry.prompt)}` : ""}
         </p>
       ) : null}
+      <Prize prize={entry.prize} note={entry.prizeNote} className="mt-3" />
       {entry.line ? (
         <p className="mt-3 max-w-xl text-base leading-relaxed text-ink/80">{entry.line}</p>
       ) : null}
-      {entry.demo || entry.video ? (
+      {toHref(entry.demo) || toHref(entry.video) ? (
         <div className="mt-4 flex flex-wrap gap-3">
-          {entry.demo ? (
-            <a href={entry.demo} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm">
+          {toHref(entry.demo) ? (
+            <a href={toHref(entry.demo)} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm">
               See the project
             </a>
           ) : null}
-          {entry.video ? (
-            <a href={entry.video} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm">
+          {toHref(entry.video) ? (
+            <a href={toHref(entry.video)} target="_blank" rel="noopener noreferrer" className="btn-ghost-sm">
               Watch the video
             </a>
           ) : null}
