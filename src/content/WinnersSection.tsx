@@ -10,7 +10,7 @@
    from ../competitor/medals — and the winners carry the scholarship
    they took home. */
 
-import { HQ_PATH } from "./links";
+import { HQ_PATH, withBase } from "./links";
 import { Medal, PLACES, MEDALS, Prize } from "../competitor/medals";
 import type { Place } from "../competitor/medals";
 import type { Prompt, ResultEntry, Results } from "../competitor/types";
@@ -52,7 +52,7 @@ export default function WinnersSection({
         </div>
 
         <div className="mt-12 flex justify-center">
-          <a className="btn-cta" href={`${HQ_PATH}#results`}>
+          <a className="btn-cta" href={withBase(HQ_PATH) + "#results"}>
             Every submission
             <span aria-hidden="true">→</span>
           </a>

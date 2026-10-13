@@ -37,6 +37,7 @@
    score. Only the last one is optional.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "../lib/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Block, HubData } from "../competitor/types";
@@ -171,7 +172,7 @@ export default function JudgePage() {
           return null;
         }
       };
-      const [j, c, h] = await Promise.all([get("/api/judging", true), get("/api/judging-config", true), get("/api/hub")]);
+      const [j, c, h] = await Promise.all([get(apiUrl("/api/judging"), true), get(apiUrl("/api/judging-config"), true), get(apiUrl("/api/hub"))]);
       if (cancelled) return;
 
       if ((j && j.status === 401) || (c && c.status === 401)) {

@@ -47,6 +47,7 @@
    last judge's save never lands in the next judge's cards.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "../lib/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { Score } from "../judging/types";
@@ -225,7 +226,7 @@ export async function postPending(deps: SaveDeps, teamKey: string): Promise<void
   let status: number | null = null;
   let payload: PostReply | null = null;
   try {
-    const res = await deps.fetcher("/api/scores", {
+    const res = await deps.fetcher(apiUrl("/api/scores"), {
       method: "POST",
       cache: "no-store",
       headers: { "Content-Type": "application/json", "x-judge-key": deps.token },
@@ -333,7 +334,7 @@ export async function loadScores(deps: LoadDeps): Promise<void> {
   /* null, not [], while the answer is unknown: see planLoad. */
   let server: Score[] | null = null;
   try {
-    const res = await deps.fetcher(`/api/scores?judge=${encodeURIComponent(deps.judgeId)}`, {
+    const res = await deps.fetcher(apiUrl(`/api/scores?judge=${encodeURIComponent(deps.judgeId)}`), {
       cache: "no-store",
       headers: { "x-judge-key": deps.token },
     });

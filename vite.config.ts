@@ -39,7 +39,8 @@ function devApi(): Plugin {
 
     configureServer(server: ViteDevServer) {
       server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next) => {
-        const url = req.url ?? "";
+        /* Also serve the API under the /chocolathon mount point. */
+        const url = (req.url ?? "").replace(/^\/chocolathon(?=\/api\/)/, "");
         if (!url.startsWith("/api/")) return next();
 
         const route = url.split("?")[0].replace(/^\/api\//, "").replace(/\/$/, "");
@@ -101,6 +102,7 @@ function readBody(req: IncomingMessage): Promise<unknown> {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), devApi()],
+  build: { assetsDir: "chocolathon/assets" },
   server: {
     port: 8080,
   },

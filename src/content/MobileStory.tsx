@@ -6,7 +6,7 @@
    payoff on this path, so the ask has to be reachable immediately. It
    hides itself on the date in ./links and the prompts link remains. */
 
-import { HQ_PATH, REGISTER_URL, REGISTRATION_CLOSE_LABEL, registrationOpen } from "./links";
+import { HQ_PATH, REGISTER_URL, REGISTRATION_CLOSE_LABEL, registrationOpen, withBase } from "./links";
 import PromptsButton from "./PromptsButton";
 
 const SPRITES = [
@@ -52,7 +52,7 @@ export default function MobileStory() {
               Register your team
             </a>
           ) : null}
-          <a className="btn-ghost" href={HQ_PATH}>
+          <a className="btn-ghost" href={withBase(HQ_PATH)}>
             Competition HQ
           </a>
         </div>

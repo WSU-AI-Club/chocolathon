@@ -13,6 +13,7 @@
    the reads and writes, not the URL.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "../lib/api";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { Judging } from "../judge/mapRows";
@@ -75,9 +76,9 @@ export default function ResultsPage() {
     const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
     try {
       const [jRes, cRes, sRes] = await Promise.all([
-        fetch("/api/judging", withKey),
-        fetch("/api/judging-config", withKey),
-        fetch("/api/scores?all=1", withKey),
+        fetch(apiUrl("/api/judging"), withKey),
+        fetch(apiUrl("/api/judging-config"), withKey),
+        fetch(apiUrl("/api/scores?all=1"), withKey),
       ]);
       if (jRes.status === 401 || cRes.status === 401 || sRes.status === 401) {
         setAuthed(false);
@@ -159,7 +160,7 @@ export default function ResultsPage() {
      upload page wrote in the meantime instead of overwriting it. */
   async function postConfig(patch: Partial<JudgingConfig>): Promise<boolean> {
     try {
-      const r = await fetch("/api/judging-config", {
+      const r = await fetch(apiUrl("/api/judging-config"), {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-upload-key": key.trim() },
         body: JSON.stringify(patch),

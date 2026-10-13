@@ -10,10 +10,11 @@
    in the display face so every row keeps the same shape.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "../lib/api";
 import { useEffect, useState } from "react";
 
 import { LinkedInIcon } from "../content/icons";
-import { HQ_PATH, REGISTER_URL, TEAM_PATH, registrationOpen } from "../content/links";
+import { HQ_PATH, REGISTER_URL, TEAM_PATH, registrationOpen, withBase } from "../content/links";
 import type { HubData, Person } from "../competitor/types";
 import "../chocolathon.css";
 
@@ -26,7 +27,7 @@ export default function PeoplePage() {
   const [state, setState] = useState<State>({ status: "loading" });
 
   useEffect(() => {
-    fetch("/api/hub", { cache: "no-store" })
+    fetch(apiUrl("/api/hub"), { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((data: HubData) => setState({ status: "ready", data }))
       .catch(() => setState({ status: "error" }));
@@ -64,17 +65,17 @@ function Bar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2.5 sm:px-8">
-        <a href="/" className="label label-strong shrink-0 no-underline">
+        <a href={withBase("/")} className="label label-strong shrink-0 no-underline">
           <span className="hidden sm:inline">Chocolathon · </span>People
         </a>
         <nav className="flex items-center gap-2 sm:gap-3">
-          <a href="/" className="hq-link">
+          <a href={withBase("/")} className="hq-link">
             Event page
           </a>
-          <a href={TEAM_PATH} className="hq-link">
+          <a href={withBase(TEAM_PATH)} className="hq-link">
             Team
           </a>
-          <a href={HQ_PATH} className="hq-link">
+          <a href={withBase(HQ_PATH)} className="hq-link">
             <span className="sm:hidden">HQ</span>
             <span className="hidden sm:inline">Competition HQ</span>
           </a>
@@ -153,7 +154,7 @@ function People({
         </p>
         <p className="mt-3">
           <a
-            href={`${HQ_PATH}#rubric`}
+            href={withBase(HQ_PATH) + "#rubric"}
             className="text-base text-ink underline decoration-gold underline-offset-4 hover:decoration-ink"
           >
             The rubric they score on

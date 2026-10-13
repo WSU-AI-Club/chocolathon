@@ -51,11 +51,12 @@
    body too.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "../lib/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 import type { HubData } from "../competitor/types";
-import { JUDGE_PATH } from "../content/links";
+import { JUDGE_PATH, withBase } from "../content/links";
 import { mapRows, type Judging, type Submission } from "../judge/mapRows";
 import { judgeId, type Judge, type JudgingConfig } from "../judging/types";
 import AssignmentPanel from "./AssignmentPanel";
@@ -195,8 +196,8 @@ export default function UploadPage() {
     try {
       const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
       const [jRes, sRes] = await Promise.all([
-        fetch("/api/judging", withKey),
-        fetch("/api/scores?all=1", withKey),
+        fetch(apiUrl("/api/judging"), withKey),
+        fetch(apiUrl("/api/scores?all=1"), withKey),
       ]);
       if (stale()) return null;
       if (jRes.status === 401 || sRes.status === 401) return { judging: null, scoreCount: 0, status: "denied" };
@@ -248,11 +249,11 @@ export default function UploadPage() {
       const withKey = { cache: "no-store" as const, headers: { "x-upload-key": k } };
       const [set, cRes, hubRes] = await Promise.all([
         fetchLiveSet(k, seq),
-        fetch("/api/judging-config", withKey).then(
+        fetch(apiUrl("/api/judging-config"), withKey).then(
           (r) => r,
           () => null,
         ),
-        fetch("/api/hub", { cache: "no-store" }).then(
+        fetch(apiUrl("/api/hub"), { cache: "no-store" }).then(
           (r) => r,
           () => null,
         ),
@@ -384,7 +385,7 @@ export default function UploadPage() {
       if (!storedRef.current) {
         let check: Response | null = null;
         try {
-          check = await fetch("/api/judging-config", { cache: "no-store", headers: { "x-upload-key": k } });
+          check = await fetch(apiUrl("/api/judging-config"), { cache: "no-store", headers: { "x-upload-key": k } });
         } catch {
           check = null;
         }
@@ -423,7 +424,7 @@ export default function UploadPage() {
           };
 
       try {
-        const r = await fetch("/api/judging-config", {
+        const r = await fetch(apiUrl("/api/judging-config"), {
           method: "POST",
           headers: { "Content-Type": "application/json", "x-upload-key": k },
           body: JSON.stringify(body),
@@ -508,7 +509,7 @@ export default function UploadPage() {
     setClearArmed(false);
     void (async () => {
       try {
-        const r = await fetch("/api/scores", { method: "DELETE", headers: { "x-upload-key": key.trim() } });
+        const r = await fetch(apiUrl("/api/scores"), { method: "DELETE", headers: { "x-upload-key": key.trim() } });
         const j = await r.json().catch(() => ({}));
         if (!r.ok) {
           setClearResult(j?.error ?? `Could not clear scores (${r.status}).`);
@@ -570,7 +571,7 @@ export default function UploadPage() {
       /* fine */
     }
     try {
-      const r = await fetch("/api/judging", {
+      const r = await fetch(apiUrl("/api/judging"), {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-upload-key": key.trim() },
         body: JSON.stringify(parsed.judging),
@@ -832,7 +833,7 @@ export default function UploadPage() {
             {result ? (
               <p className="mt-6 border-l-2 border-gold pl-4 text-base text-ink">
                 {result}{" "}
-                <a href={JUDGE_PATH} target="_blank" rel="noopener noreferrer" className="underline decoration-gold underline-offset-4">
+                <a href={withBase(JUDGE_PATH)} target="_blank" rel="noopener noreferrer" className="underline decoration-gold underline-offset-4">
                   Open the judge page
                 </a>
               </p>

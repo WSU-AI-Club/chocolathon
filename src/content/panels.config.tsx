@@ -20,6 +20,7 @@ import {
   REGISTER_URL,
   REGISTRATION_CLOSE_LABEL,
   registrationOpen,
+  withBase,
 } from "./links";
 import PromptsButton from "./PromptsButton";
 
@@ -274,12 +275,12 @@ const PANELS: Panel[] = [
                 >
                   Register your team
                 </a>
-                <a className="btn-ghost" href={HQ_PATH}>
+                <a className="btn-ghost" href={withBase(HQ_PATH)}>
                   Competition HQ
                 </a>
               </>
             ) : (
-              <a className="btn-cta" href={HQ_PATH}>
+              <a className="btn-cta" href={withBase(HQ_PATH)}>
                 Competition HQ
               </a>
             )}

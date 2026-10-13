@@ -36,6 +36,7 @@ import {
   CLUB_JOIN_URL,
   CLUB_LINKEDIN_URL,
   HQ_PATH,
+  withBase,
 } from "./links";
 
 import { LinkedInIcon } from "./icons";
@@ -169,7 +170,7 @@ export default function FooterSection() {
             the club ask above; the masthead and the HQ band carry the
             louder versions. */}
         <div className="mt-14 border-t border-ink/10 pt-8">
-          <a href={HQ_PATH} className="label no-underline transition-colors hover:text-ink">
+          <a href={withBase(HQ_PATH)} className="label no-underline transition-colors hover:text-ink">
             Competition HQ: prompts, tracks, schedule, rules →
           </a>
         </div>

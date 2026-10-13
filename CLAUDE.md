@@ -1,7 +1,7 @@
 # CLAUDE.md — chocolathon
 
 The Chocolathon site. Vite + React + TypeScript on Vercel.
-Repo: `github.com/wsuaiclub/chocolathon` (private, `main` auto-deploys).
+Repo: `github.com/WSU-AI-Club/chocolathon` (private, `main` auto-deploys).
 
 ## Vault contract — read this first
 
@@ -76,6 +76,11 @@ and pushes the vault on its own (`git add -A`). **Never run git in the vault.**
 `01-projects/Chocolathon/registration-page-prototype/` is a standalone
 HTML/JS/CSS prototype, dead as a build target since the 2026-08-17 decision
 (registration runs on a Microsoft Form). Visual reference only.
+
+**Mount point.** The site is served at both `/` (chocolathon.vercel.app) and `/chocolathon/`
+(proxied from www.wsuaiclub.com/chocolathon since 2026-10). Always call the API through
+`apiUrl()` (`src/lib/api.ts`) and wrap internal hrefs in `withBase()` (`src/content/links.ts`);
+leave the `*_PATH` constants unprefixed, `App.tsx` builds its route regexes from them.
 
 The unguessable routes (`/judge-c7m2x9`, `/upload-k4n8pq`, `/results-m3v8tq`, `/hq`)
 are the soft gate. They carry `X-Robots-Tag: noindex` in `vercel.json` — keep

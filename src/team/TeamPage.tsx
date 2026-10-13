@@ -11,7 +11,7 @@
 import { useEffect } from "react";
 
 import TeamGrid from "../content/TeamGrid";
-import { CLUB_EMAIL, HQ_PATH, PEOPLE_PATH } from "../content/links";
+import { CLUB_EMAIL, HQ_PATH, PEOPLE_PATH, withBase } from "../content/links";
 import "../chocolathon.css";
 
 export default function TeamPage() {
@@ -63,17 +63,17 @@ function Bar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2.5 sm:px-8">
-        <a href="/" className="label label-strong shrink-0 no-underline">
+        <a href={withBase("/")} className="label label-strong shrink-0 no-underline">
           <span className="hidden sm:inline">Chocolathon · </span>The team
         </a>
         <nav className="flex items-center gap-2 sm:gap-3">
-          <a href="/" className="hq-link">
+          <a href={withBase("/")} className="hq-link">
             Event page
           </a>
-          <a href={PEOPLE_PATH} className="hq-link">
+          <a href={withBase(PEOPLE_PATH)} className="hq-link">
             People
           </a>
-          <a href={HQ_PATH} className="hq-link">
+          <a href={withBase(HQ_PATH)} className="hq-link">
             <span className="sm:hidden">HQ</span>
             <span className="hidden sm:inline">Competition HQ</span>
           </a>

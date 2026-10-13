@@ -11,9 +11,10 @@
    the Register CTA. Everything on this page arrives from /api/hub.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "../lib/api";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { PEOPLE_PATH, REGISTER_URL, registrationOpen } from "../content/links";
+import { PEOPLE_PATH, REGISTER_URL, registrationOpen, withBase } from "../content/links";
 import SubmitButton from "../content/SubmitButton";
 import RubricView from "./RubricView";
 import { Medal, MEDALS, PLACES, Prize } from "./medals";
@@ -94,7 +95,7 @@ function HqBar({
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-ink/[0.08] bg-white/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2.5 sm:px-8">
-        <a href="/" className="label label-strong shrink-0 no-underline">
+        <a href={withBase("/")} className="label label-strong shrink-0 no-underline">
           <span className="hidden sm:inline">Chocolathon · </span>HQ
         </a>
 
@@ -108,7 +109,7 @@ function HqBar({
           {items.map((item) => (
             <a
               key={item.id}
-              href={item.href ?? `#${item.id}`}
+              href={item.href ? withBase(item.href) : `#${item.id}`}
               className="hq-link"
               aria-current={active === item.id ? "true" : undefined}
             >
@@ -127,7 +128,7 @@ function HqBar({
             Register
           </a>
         ) : (
-          <a href="/" className="hq-link shrink-0">
+          <a href={withBase("/")} className="hq-link shrink-0">
             Event page
           </a>
         )}
@@ -216,7 +217,7 @@ function ResultsSection({ data }: { data: HubData }) {
 function Gallery({ title, results }: { title: (id: string) => string; results: HubData["results"] }) {
   const [entries, setEntries] = useState<GalleryEntry[] | null>(null);
   useEffect(() => {
-    fetch("/api/gallery", { cache: "no-store" })
+    fetch(apiUrl("/api/gallery"), { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setEntries(Array.isArray(d?.entries) ? d.entries : []))
       .catch(() => setEntries([]));

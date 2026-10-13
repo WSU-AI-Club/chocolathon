@@ -11,6 +11,7 @@
    without touching refresh.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "../lib/api";
 import { useCallback, useEffect, useState } from "react";
 
 import CompetitorHub from "./CompetitorHub";
@@ -27,7 +28,7 @@ export default function CompetitorApp() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/hub", { cache: "no-store" });
+      const res = await fetch(apiUrl("/api/hub"), { cache: "no-store" });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         setState({

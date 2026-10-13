@@ -8,7 +8,7 @@
 
 import { useEffect, useState } from "react";
 
-import { HQ_PATH, REGISTER_URL, registrationOpen } from "./links";
+import { HQ_PATH, REGISTER_URL, registrationOpen, withBase } from "./links";
 
 export default function Masthead({
   deferSurface = false,
@@ -69,7 +69,7 @@ export default function Masthead({
         <div className="flex flex-col items-end gap-1.5">
           <nav className="flex items-center gap-2 sm:gap-3">
             <a
-              href={HQ_PATH}
+              href={withBase(HQ_PATH)}
               className="btn-ghost !min-h-[38px] whitespace-nowrap !bg-white !px-4 !text-xs"
             >
               <span className="sm:hidden">HQ</span>

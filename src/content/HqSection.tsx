@@ -13,7 +13,7 @@
    line, in a two-column grid, ruled not boxed.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { HQ_PATH, PEOPLE_PATH } from "./links";
+import { HQ_PATH, PEOPLE_PATH, withBase } from "./links";
 import PromptsButton from "./PromptsButton";
 
 /* `href` overrides the default HQ anchor; the people page is its own
@@ -102,7 +102,7 @@ export default function HqSection() {
               className={"border-t border-ink/15" + (i === ENTRIES.length - 1 && ENTRIES.length % 2 === 1 ? " sm:col-span-2" : "")}
             >
               <a
-                href={e.href ?? `${HQ_PATH}#${e.id}`}
+                href={e.href ? withBase(e.href) : withBase(HQ_PATH) + "#" + e.id}
                 className="group flex items-start justify-between gap-6 py-5 no-underline sm:py-7"
               >
                 <span className="min-w-0">

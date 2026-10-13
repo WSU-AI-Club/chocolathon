@@ -15,6 +15,7 @@
    here moved into Competition HQ so every fact lives in one place.
    ═══════════════════════════════════════════════════════════════════ */
 
+import { apiUrl } from "./lib/api";
 import { useEffect, useState } from "react";
 import ScrollFilm from "./film/ScrollFilm";
 import Overlay from "./content/Overlay";
@@ -51,7 +52,7 @@ function useFilmCapable() {
 function useHub(): HubData | null {
   const [hub, setHub] = useState<HubData | null>(null);
   useEffect(() => {
-    fetch("/api/hub", { cache: "no-store" })
+    fetch(apiUrl("/api/hub"), { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d: HubData | null) => setHub(d))
       .catch(() => setHub(null));

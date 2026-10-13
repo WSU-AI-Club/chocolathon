@@ -4,7 +4,7 @@
    button through to /team, where the same people have a page of their
    own that stays up after the event. */
 
-import { TEAM_PATH } from "./links";
+import { TEAM_PATH, withBase } from "./links";
 import TeamGrid from "./TeamGrid";
 
 export default function TeamSection() {
@@ -21,7 +21,7 @@ export default function TeamSection() {
         </div>
         <TeamGrid className="mt-12 sm:mt-14" />
         <div className="mt-12 flex justify-center">
-          <a className="btn-ghost !bg-white" href={TEAM_PATH}>
+          <a className="btn-ghost !bg-white" href={withBase(TEAM_PATH)}>
             The Team
             <span aria-hidden="true">→</span>
           </a>

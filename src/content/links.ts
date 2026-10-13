@@ -107,3 +107,16 @@ export const UPLOAD_PATH = "/upload-k4n8pq";
 /* The ranking page (2026-09-15): Michael's only, behind the upload key.
    Unlisted like the judge and upload pages. */
 export const RESULTS_PATH = "/results-m3v8tq";
+
+/* ── Mount point ─────────────────────────────────────────────────────
+   The site is served at both `/` (chocolathon.vercel.app) and
+   `/chocolathon/` (proxied from www.wsuaiclub.com, since 2026-10).
+   Every internal href goes through withBase(); the *_PATH constants
+   above stay unprefixed because App.tsx builds its route regexes from
+   them and those match both forms. */
+export const BASE = "/chocolathon";
+export const withBase = (p: string): string => {
+  if (p === "/" || p === "") return BASE;
+  if (p.startsWith("#")) return BASE + p;
+  return BASE + (p.startsWith("/") ? p : "/" + p);
+};
